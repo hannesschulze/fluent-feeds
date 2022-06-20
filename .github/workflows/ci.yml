@@ -14,4 +14,5 @@ jobs:
       - name: Build
         run: cd FluentFeeds.Shared.Tests; dotnet build --no-restore
       - name: Test
-        run: cd FluentFeeds.Shared.Tests; dotnet test --no-restore --verbosity normal
+        run: cd FluentFeeds.Shared.Tests; dotnet test --no-restore --verbosity normal --collect:"XPlat Code Coverage"
+      - uses: codecov/codecov-action@v2
