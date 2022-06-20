@@ -1,19 +1,16 @@
 ﻿<Window
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	xmlns:local="using:FluentFeeds.WinUI"
+	xmlns:local="using:FluentFeeds.WinUI.Pages"
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-	x:Class="FluentFeeds.WinUI.MainWindow"
+	x:Class="FluentFeeds.WinUI.Pages.MainWindow"
 	mc:Ignorable="d">
 
-	<StackPanel
-		Orientation="Horizontal" 
-		HorizontalAlignment="Center" 
-		VerticalAlignment="Center">
-
-		<Button x:Name="_myButton" Click="MyButton_Click">Click Me</Button>
-
+	<StackPanel Orientation="Horizontal"  HorizontalAlignment="Center" VerticalAlignment="Center">
+		<Button 
+			Command="{x:Bind ViewModel.ClickCommand}" 
+			Content="{x:Bind ViewModel.Label, Mode=OneWay}" /> 
 	</StackPanel>
 
 </Window>

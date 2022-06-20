@@ -1,4 +1,6 @@
-﻿using Microsoft.UI.Xaml;
+﻿using FluentFeeds.Shared.ViewModels;
+using FluentFeeds.WinUI.Pages;
+using Microsoft.UI.Xaml;
 
 namespace FluentFeeds.WinUI;
 
@@ -11,7 +13,7 @@ public partial class App : Application
 
 	protected override void OnLaunched(LaunchActivatedEventArgs args)
 	{
-		_window = new MainWindow();
+		_window = new MainWindow(new MainViewModel());
 		_window.Activate();
 	}
 
