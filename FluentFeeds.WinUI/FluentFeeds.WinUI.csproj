@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
 		<TargetFramework>net6.0-windows10.0.19041.0</TargetFramework>
@@ -12,9 +12,7 @@
 		<EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
 		<PlatformTarget>AnyCPU</PlatformTarget>
 		<Nullable>enable</Nullable>
-		<PackageCertificateThumbprint>6DCAE012765D22FC16133E8D0EE4682575740B09</PackageCertificateThumbprint>
-		<PackageCertificateKeyFile>FluentFeeds.WinUI_TemporaryKey.pfx</PackageCertificateKeyFile>
-		<AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
+		<AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
 	</PropertyGroup>
 
 	<ItemGroup>
