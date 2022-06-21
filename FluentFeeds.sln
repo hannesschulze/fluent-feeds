@@ -9,10 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentFeeds.Shared", "Fluen
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentFeeds.Shared.Tests", "FluentFeeds.Shared.Tests\FluentFeeds.Shared.Tests.csproj", "{EC3B1DB7-0B19-4C7F-8A9F-1F03C8E43C69}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Projektmappenelemente", "Projektmappenelemente", "{D3A8BEF9-8BDB-427C-A582-A64DB3A51283}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E3D5FC70-DA25-4399-81B0-8912870AEE14}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		.github\workflows\ci.yml = .github\workflows\ci.yml
+		README.md = README.md
 	EndProjectSection
 EndProject
 Global
