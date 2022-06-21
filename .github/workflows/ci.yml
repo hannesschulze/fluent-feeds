@@ -1,0 +1,20 @@
+﻿name: CI
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: 6.0.x
+      - name: Install dependencies
+        run: cd FluentFeeds.Shared.Tests; dotnet restore
+      - name: Build
+        run: cd FluentFeeds.Shared.Tests; dotnet build --no-restore
+      - name: Test
+        run: cd FluentFeeds.Shared.Tests; dotnet test --no-restore --verbosity normal --collect:"XPlat Code Coverage"
+      - uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}

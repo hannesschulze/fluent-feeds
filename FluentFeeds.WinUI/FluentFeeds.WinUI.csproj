@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
 		<TargetFramework>net6.0-windows10.0.19041.0</TargetFramework>
@@ -12,19 +12,46 @@
 		<EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
 		<PlatformTarget>AnyCPU</PlatformTarget>
 		<Nullable>enable</Nullable>
-		<PackageCertificateThumbprint>6DCAE012765D22FC16133E8D0EE4682575740B09</PackageCertificateThumbprint>
-		<PackageCertificateKeyFile>FluentFeeds.WinUI_TemporaryKey.pfx</PackageCertificateKeyFile>
-		<AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
+		<AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
 	</PropertyGroup>
-
+	
 	<ItemGroup>
+		<Content Include="Assets\Large310x310Logo.scale-100.png" />
+		<Content Include="Assets\Large310x310Logo.scale-200.png" />
+		<Content Include="Assets\Large310x310Logo.scale-400.png" />
+		<Content Include="Assets\Small71x71Logo.scale-100.png" />
+		<Content Include="Assets\Small71x71Logo.scale-200.png" />
+		<Content Include="Assets\Small71x71Logo.scale-400.png" />
+		<Content Include="Assets\SplashScreen.scale-100.png" />
 		<Content Include="Assets\SplashScreen.scale-200.png" />
-		<Content Include="Assets\LockScreenLogo.scale-200.png" />
+		<Content Include="Assets\SplashScreen.scale-400.png" />
+		<Content Include="Assets\Square150x150Logo.scale-100.png" />
 		<Content Include="Assets\Square150x150Logo.scale-200.png" />
+		<Content Include="Assets\Square150x150Logo.scale-400.png" />
+		<Content Include="Assets\Square44x44Logo.scale-100.png" />
 		<Content Include="Assets\Square44x44Logo.scale-200.png" />
+		<Content Include="Assets\Square44x44Logo.scale-400.png" />
+		<Content Include="Assets\Square44x44Logo.targetsize-16.png" />
+		<Content Include="Assets\Square44x44Logo.targetsize-16_altform-lightunplated.png" />
+		<Content Include="Assets\Square44x44Logo.targetsize-16_altform-unplated.png" />
+		<Content Include="Assets\Square44x44Logo.targetsize-24.png" />
+		<Content Include="Assets\Square44x44Logo.targetsize-24_altform-lightunplated.png" />
 		<Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
-		<Content Include="Assets\StoreLogo.png" />
+		<Content Include="Assets\Square44x44Logo.targetsize-32.png" />
+		<Content Include="Assets\Square44x44Logo.targetsize-32_altform-lightunplated.png" />
+		<Content Include="Assets\Square44x44Logo.targetsize-32_altform-unplated.png" />
+		<Content Include="Assets\Square44x44Logo.targetsize-48.png" />
+		<Content Include="Assets\Square44x44Logo.targetsize-48_altform-lightunplated.png" />
+		<Content Include="Assets\Square44x44Logo.targetsize-48_altform-unplated.png" />
+		<Content Include="Assets\Square44x44Logo.targetsize-256.png" />
+		<Content Include="Assets\Square44x44Logo.targetsize-256_altform-lightunplated.png" />
+		<Content Include="Assets\Square44x44Logo.targetsize-256_altform-unplated.png" />
+		<Content Include="Assets\StoreLogo.scale-100.png" />
+		<Content Include="Assets\StoreLogo.scale-200.png" />
+		<Content Include="Assets\StoreLogo.scale-400.png" />
+		<Content Include="Assets\Wide310x150Logo.scale-100.png" />
 		<Content Include="Assets\Wide310x150Logo.scale-200.png" />
+		<Content Include="Assets\Wide310x150Logo.scale-400.png" />
 	</ItemGroup>
 
 	<ItemGroup>
