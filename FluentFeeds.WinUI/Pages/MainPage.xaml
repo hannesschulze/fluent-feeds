@@ -1,0 +1,181 @@
+﻿<Page
+    x:Class="FluentFeeds.WinUI.Pages.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:FluentFeeds.WinUI.Pages"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:viewmodels="using:FluentFeeds.Shared.ViewModels" 
+	d:DataContext="{d:DesignInstance Type=viewmodels:MainViewModel}"
+	mc:Ignorable="d">
+
+	<Grid>
+		<VisualStateManager.VisualStateGroups>
+			<VisualStateGroup>
+				<!-- 
+					When there is enough space to show the compact navigation bar and the full search field, show the 
+					title (ensuring that the search field is never bigger than its max width).
+				-->
+				<VisualState>
+					<VisualState.StateTriggers>
+						<AdaptiveTrigger MinWindowWidth="{x:Bind MinWidthForTitleVisible}" />
+					</VisualState.StateTriggers>
+					<VisualState.Setters>
+						<Setter Target="_titleBarTitle.Visibility" Value="Visible" />
+						<Setter Target="_titleBarAreaLeftColumn.Width" Value="{x:Bind NavigationExpandedGridLength}" />
+					</VisualState.Setters>
+				</VisualState>
+				
+				<!--
+					When there is enough space to show the expanded navigation bar and the full search field, fill the
+					remaining space between the search field and the caption buttons.
+				-->
+				<VisualState>
+					<VisualState.StateTriggers>
+						<AdaptiveTrigger MinWindowWidth="{x:Bind MinWidthForSearchSpacing}" />
+					</VisualState.StateTriggers>
+					<VisualState.Setters>
+						<Setter Target="_titleBarTitle.Visibility" Value="Visible" />
+						<Setter Target="_titleBarAreaLeftColumn.Width" Value="{x:Bind NavigationExpandedGridLength}" />
+						<Setter Target="_titleBarAreaCenterColumn.Width" Value="{x:Bind SearchFieldMaxGridLength}" />
+						<Setter Target="_titleBarAreaRightColumn.Width" Value="*" />
+					</VisualState.Setters>
+				</VisualState>
+				
+				<!--
+					When there is enough space to center the search bar, ensure that the spacing on both sides is 
+					equal.
+				-->
+				<VisualState>
+					<VisualState.StateTriggers>
+						<AdaptiveTrigger MinWindowWidth="{x:Bind MinWidthForCenterSearch}" />
+					</VisualState.StateTriggers>
+					<VisualState.Setters>
+						<Setter Target="_titleBarTitle.Visibility" Value="Visible" />
+						<Setter Target="_titleBarAreaLeftColumn.Width" Value="*" />
+						<Setter Target="_titleBarAreaCenterColumn.Width" Value="{x:Bind SearchFieldMaxGridLength}" />
+						<Setter Target="_titleBarAreaRightColumn.Width" Value="*" />
+					</VisualState.Setters>
+				</VisualState>
+			</VisualStateGroup>
+		</VisualStateManager.VisualStateGroups>
+
+		<!-- 
+			The title bar is shown above the navigation view but is inset to the width of the compact navigation bar.
+			The SizeChanged event is handled for each grid column so any possible layout change gets propagated to the
+			title bar helper.
+		-->
+		<Grid
+			x:Name="_titleBar"
+			Canvas.ZIndex="1"
+			VerticalAlignment="Top"
+			Height="{x:Bind TitleBarHeight}">
+
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition x:Name="_titleBarAreaLeftColumn" Width="{x:Bind NavigationCompactGridLength}" />
+				<ColumnDefinition x:Name="_titleBarAreaCenterColumn" Width="*" />
+				<ColumnDefinition x:Name="_titleBarAreaRightColumn" Width="{x:Bind CaptionButtonsGridLength}" />
+			</Grid.ColumnDefinitions>
+
+			<StackPanel
+				x:Name="_titleBarAreaLeft"
+				Grid.Column="0"
+				Orientation="Horizontal"
+				SizeChanged="HandleDragRegionSizeChanged"
+				Margin="{x:Bind TitleBarAreaLeftMargin}">
+				
+				<!-- Inner title container, position is animated when the navigation bar is expanded/collapsed. -->
+				<StackPanel
+					x:Name="_titleBarTitle"
+					Orientation="Horizontal"
+					Visibility="Collapsed">
+
+					<StackPanel.Transitions>
+						<TransitionCollection>
+							<RepositionThemeTransition/>
+						</TransitionCollection>
+					</StackPanel.Transitions>
+
+					<Image
+						Source="/Assets/Square44x44Logo.png"
+						Width="16" 
+						Height="16"
+						VerticalAlignment="Center" />
+
+					<TextBlock 
+						Text="{x:Bind WindowTitle}" 
+						Style="{StaticResource CaptionTextBlockStyle}"
+						Margin="12,0,0,0"
+						VerticalAlignment="Center" />
+
+				</StackPanel>
+
+			</StackPanel>
+
+			<AutoSuggestBox 
+				Grid.Column="1" 
+				QueryIcon="Find"
+                PlaceholderText="Search"
+				Height="32"
+				Margin="8,0"
+                VerticalAlignment="Center" 
+				BorderThickness="1"
+				SizeChanged="HandleDragRegionSizeChanged">
+				
+				<!-- Remove underline. -->
+				<AutoSuggestBox.Resources>
+					<StaticResource x:Key="TextControlBorderBrush" ResourceKey="ControlElevationBorderBrush" />
+					<StaticResource x:Key="TextControlBorderBrushPointerOver" ResourceKey="ControlElevationBorderBrush" />
+				</AutoSuggestBox.Resources>
+				
+			</AutoSuggestBox>
+
+			<StackPanel
+				x:Name="_titleBarAreaRight"
+				Grid.Column="2"
+				SizeChanged="HandleDragRegionSizeChanged" />
+
+		</Grid>
+
+		<NavigationView
+			x:Name="_navigationView"
+			Canvas.ZIndex="0"
+			IsTabStop="False"
+			IsTitleBarAutoPaddingEnabled="False"
+			CompactModeThresholdWidth="-1"
+			CompactPaneLength="{x:Bind NavigationCompactWidth}"
+			OpenPaneLength="{x:Bind NavigationExpandedWidth}">
+
+			<!-- Remove built-in layer for navigation view content. -->
+			<NavigationView.Resources>
+				<Thickness x:Key="NavigationViewContentGridBorderThickness">0</Thickness>
+				<SolidColorBrush x:Key="NavigationViewContentBackground" Color="Transparent" />
+			</NavigationView.Resources>
+
+			<NavigationView.MenuItems>
+				<NavigationViewItem Content="Home" Icon="Home" ToolTipService.ToolTip="Home" Tag="SamplePage1"/>
+				<NavigationViewItem Content="Account" Icon="Contact" ToolTipService.ToolTip="Account" Tag="SamplePage2">
+					<NavigationViewItem.MenuItems>
+						<NavigationViewItem Content="Mail" Icon="Mail" ToolTipService.ToolTip="Mail" Tag="SamplePage3"/>
+						<NavigationViewItem Content="Calendar" Icon="Calendar" ToolTipService.ToolTip="Calendar" Tag="SamplePage4"/>
+					</NavigationViewItem.MenuItems>
+				</NavigationViewItem>
+				<NavigationViewItem Content="Document options" Icon="Page2" ToolTipService.ToolTip="Document options" SelectsOnInvoked="False">
+					<NavigationViewItem.MenuItems>
+						<NavigationViewItem Content="Create new" Icon="NewFolder" ToolTipService.ToolTip="Create new" Tag="SamplePage5">
+							<NavigationViewItem.MenuItems>
+								<NavigationViewItem Content="Create new" Icon="NewFolder" ToolTipService.ToolTip="Create new" Tag="SamplePage5"/>
+								<NavigationViewItem Content="Upload file" Icon="OpenLocal" ToolTipService.ToolTip="Upload file" Tag="SamplePage6"/>
+							</NavigationViewItem.MenuItems>
+						</NavigationViewItem>
+						<NavigationViewItem Content="Upload file" Icon="OpenLocal" ToolTipService.ToolTip="Upload file" Tag="SamplePage6"/>
+					</NavigationViewItem.MenuItems>
+				</NavigationViewItem>
+			</NavigationView.MenuItems>
+
+			<Frame x:Name="contentFrame8" />
+
+		</NavigationView>
+	</Grid>
+
+</Page>
