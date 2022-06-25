@@ -1,9 +1,12 @@
 ﻿using System;
+using System.ComponentModel;
 using System.IO;
 using FluentFeeds.Shared.ViewModels;
 using FluentFeeds.WinUI.Helpers;
+using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Animation;
 using Windows.ApplicationModel;
 
 namespace FluentFeeds.WinUI.Pages;
@@ -17,14 +20,16 @@ public sealed partial class MainPage : Page
 	private double NavigationExpandedWidth => 260;
 	private double NavigationCompactWidth => 48;
 	private double NavigationCompactTitleInset => 20;
+	private double MinWidthForTitleVisible => NavigationCompactWidth + CaptionButtonsWidth + SearchFieldMaxWidth;
+	private double MinWidthForSearchSpacing => NavigationExpandedWidth + CaptionButtonsWidth + SearchFieldMaxWidth;
+	private double MinWidthForCenterSearch => NavigationExpandedWidth * 2 + SearchFieldMaxWidth;
 	private GridLength SearchFieldMaxGridLength => new(SearchFieldMaxWidth);
 	private GridLength NavigationCompactGridLength => new(NavigationCompactWidth);
 	private GridLength NavigationExpandedGridLength => new(NavigationExpandedWidth);
 	private GridLength CaptionButtonsGridLength => new(CaptionButtonsWidth);
-	private double MinWidthForTitleVisible => NavigationCompactWidth + CaptionButtonsWidth + SearchFieldMaxWidth;
-	private double MinWidthForSearchSpacing => NavigationExpandedWidth + CaptionButtonsWidth + SearchFieldMaxWidth;
-	private double MinWidthForCenterSearch => NavigationExpandedWidth * 2 + SearchFieldMaxWidth;
-	private Thickness TitleBarAreaLeftMargin => new(NavigationCompactWidth, 0, 0, 0);
+	private GridLength TitleBarHeightGridLength => new(TitleBarHeight);
+	private Thickness TitleBarAreaLeftMargin => new(left: NavigationCompactWidth, 0, 0, 0);
+	private Thickness ContentFrameMargin => new(0, top: TitleBarHeight, 0, 0);
 
 	public MainViewModel ViewModel => (MainViewModel)DataContext;
 
@@ -41,7 +46,7 @@ public sealed partial class MainPage : Page
 
 	public MainPage()
 	{
-		DataContext = new MainViewModel();
+		DataContext = Ioc.Default.GetRequiredService<MainViewModel>();
 		InitializeComponent();
 
 		_titleBar.Loaded += (s, e) => DragRegionSizeChanged?.Invoke(this, EventArgs.Empty);
@@ -49,10 +54,42 @@ public sealed partial class MainPage : Page
 		_navigationView.PaneOpening += (s, e) => UpdateTitleInset();
 		_navigationView.DisplayModeChanged += (s, e) => UpdateTitleInset();
 		UpdateTitleInset();
+
+		// XXX: NavigationView does not support binding commands to the back button yet:
+		// https://github.com/microsoft/microsoft-ui-xaml/issues/944
+		_navigationView.BackRequested += (s, e) => ViewModel.GoBackCommand.Execute(null);
+		ViewModel.GoBackCommand.CanExecuteChanged += (s, e) => UpdateBackButtonEnabled();
+		ViewModel.PropertyChanged += HandlePropertyChanged;
+		UpdateBackButtonEnabled();
+		UpdateVisiblePage();
 	}
 
-	private void HandleDragRegionSizeChanged(object sender, SizeChangedEventArgs e) => 
+	private void HandlePropertyChanged(object? sender, PropertyChangedEventArgs e)
+	{
+		switch (e.PropertyName)
+		{
+			case nameof(MainViewModel.VisiblePage):
+				UpdateVisiblePage();
+				break;
+		}
+	}
+
+	private void HandleDragRegionSizeChanged(object sender, SizeChangedEventArgs e) =>
 		DragRegionSizeChanged?.Invoke(this, EventArgs.Empty);
+
+	private void UpdateBackButtonEnabled() =>
+		_navigationView.IsBackEnabled = ViewModel.GoBackCommand.CanExecute(null);
+
+	private void UpdateVisiblePage() =>
+		_contentFrame.Navigate(
+			ViewModel.VisiblePage switch
+			{
+				MainViewModel.Page.Settings => typeof(SettingsPage),
+				MainViewModel.Page.Feed => typeof(FeedPage),
+				_ => throw new IndexOutOfRangeException()
+			},
+			null,
+			new EntranceNavigationTransitionInfo());
 
 	/// <summary>
 	/// Update the title's margin. Spacing is added before the title when the navigation bar is collapsed.
@@ -61,8 +98,7 @@ public sealed partial class MainPage : Page
 	{
 		var hasInset = 
 			_navigationView.DisplayMode != NavigationViewDisplayMode.Expanded || !_navigationView.IsPaneOpen;
-		_titleBarTitle.Margin = new Thickness(
-			left: hasInset ? NavigationCompactTitleInset : 0, top: 0, right: 0, bottom: 0);
+		_titleBarTitle.Margin = new Thickness(left: hasInset ? NavigationCompactTitleInset : 0, 0, 0, 0);
 	}
 
 	/// <summary>
