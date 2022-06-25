@@ -27,8 +27,8 @@ public class TitleBarHelper
 		MDT_Default = MDT_Effective_DPI
 	}
 
-	public double CaptionButtonsWidth => Math.Max(_titleBar.LeftInset, _titleBar.RightInset);
-	public double TitleBarHeight => _titleBar.Height;
+	public double CaptionButtonsWidth { get; }
+	public double TitleBarHeight { get; }
 
 	/// <summary>
 	/// Initialize the title bar for a window.
@@ -44,8 +44,14 @@ public class TitleBarHelper
 		_titleBar.ExtendsContentIntoTitleBar = true;
 		_titleBar.PreferredHeightOption = TitleBarHeightOption.Tall;
 		_titleBar.IconShowOptions = IconShowOptions.HideIconAndSystemMenu;
-		_titleBar.ButtonBackgroundColor = Windows.UI.Color.FromArgb(0, 0, 0, 0);
-		_titleBar.ButtonInactiveBackgroundColor = Windows.UI.Color.FromArgb(0, 0, 0, 0);
+		_titleBar.ButtonBackgroundColor = Color.FromArgb(0, 0, 0, 0);
+		_titleBar.ButtonInactiveBackgroundColor = Color.FromArgb(0, 0, 0, 0);
+
+		var scaleAdjustment = GetScaleAdjustment();
+		if (scaleAdjustment < 0.00001)
+			scaleAdjustment = 1;
+		CaptionButtonsWidth = Math.Max(_titleBar.LeftInset, _titleBar.RightInset) / scaleAdjustment;
+		TitleBarHeight = _titleBar.Height / scaleAdjustment;
 
 		if (window.Content is FrameworkElement content)
 		{
@@ -86,14 +92,14 @@ public class TitleBarHelper
 					X = (int)(dragRegions.LeftStart * scaleAdjustment),
 					Y = 0,
 					Width = (int)(dragRegions.LeftWidth * scaleAdjustment),
-					Height = (int)(TitleBarHeight * scaleAdjustment)
+					Height = _titleBar.Height
 				},
 				new RectInt32
 				{
 					X = (int)(dragRegions.RightStart * scaleAdjustment),
 					Y = 0,
 					Width = (int)(dragRegions.RightWidth * scaleAdjustment),
-					Height = (int)(TitleBarHeight * scaleAdjustment)
+					Height = _titleBar.Height
 				}
 			});
 	}
