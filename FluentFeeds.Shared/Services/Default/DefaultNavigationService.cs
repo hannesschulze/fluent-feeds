@@ -11,15 +11,15 @@ public class DefaultNavigationService : INavigationService
 {
 	public DefaultNavigationService()
 	{
-		_backStack.Add(NavigationEntry.FeedItem(new Feed(), null));
+		_backStack.Add(NavigationRoute.Feed(new Feed("Overview", Symbol.Home)));
 	}
 
 	public event EventHandler<EventArgs>? BackStackChanged;
 
 	protected virtual void OnBackStackChanged() => BackStackChanged?.Invoke(this, EventArgs.Empty);
 
-	public IReadOnlyList<NavigationEntry> BackStack => _backStack;
-	public NavigationEntry CurrentEntry => BackStack[BackStack.Count - 1];
+	public IReadOnlyList<NavigationRoute> BackStack => _backStack;
+	public NavigationRoute CurrentRoute => BackStack[BackStack.Count - 1];
 	public bool CanGoBack => BackStack.Count > 1;
 
 	public void GoBack()
@@ -31,14 +31,14 @@ public class DefaultNavigationService : INavigationService
 		OnBackStackChanged();
 	}
 
-	public void Navigate(NavigationEntry destination)
+	public void Navigate(NavigationRoute destination)
 	{
-		if (destination == CurrentEntry)
+		if (destination == CurrentRoute)
 			return;
 
 		_backStack.Add(destination);
 		OnBackStackChanged();
 	}
 
-	private List<NavigationEntry> _backStack = new();
+	private List<NavigationRoute> _backStack = new();
 }

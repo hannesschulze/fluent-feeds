@@ -9,6 +9,7 @@
 	NavigationCacheMode="Required">
 
 	<TextBlock
+		x:Name="_lbl"
 		Style="{ThemeResource HeaderTextBlockStyle}"
 		Text="Feed"
 		HorizontalAlignment="Center"

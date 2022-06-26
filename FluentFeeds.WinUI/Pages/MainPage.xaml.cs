@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using FluentFeeds.Shared.ViewModels;
@@ -27,9 +28,9 @@ public sealed partial class MainPage : Page
 	private GridLength NavigationCompactGridLength => new(NavigationCompactWidth);
 	private GridLength NavigationExpandedGridLength => new(NavigationExpandedWidth);
 	private GridLength CaptionButtonsGridLength => new(CaptionButtonsWidth);
-	private GridLength TitleBarHeightGridLength => new(TitleBarHeight);
 	private Thickness TitleBarAreaLeftMargin => new(left: NavigationCompactWidth, 0, 0, 0);
 	private Thickness ContentFrameMargin => new(0, top: TitleBarHeight, 0, 0);
+	private ObservableCollection<NavigationItemViewModel> FooterItems { get; } = new();
 
 	public MainViewModel ViewModel => (MainViewModel)DataContext;
 
@@ -47,6 +48,7 @@ public sealed partial class MainPage : Page
 	public MainPage()
 	{
 		DataContext = Ioc.Default.GetRequiredService<MainViewModel>();
+		FooterItems.Add(ViewModel.SettingsItem);
 		InitializeComponent();
 
 		_titleBar.Loaded += (s, e) => DragRegionSizeChanged?.Invoke(this, EventArgs.Empty);

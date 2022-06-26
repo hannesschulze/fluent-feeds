@@ -14,12 +14,6 @@
 		<Nullable>enable</Nullable>
 		<AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
 	</PropertyGroup>
-	<ItemGroup>
-	  <None Remove="Pages\ArticlePage.xaml" />
-	  <None Remove="Pages\FeedPage.xaml" />
-	  <None Remove="Pages\ItemListPage.xaml" />
-	  <None Remove="Pages\SettingsPage.xaml" />
-	</ItemGroup>
 	
 	<ItemGroup>
 		<Content Include="Assets\Large310x310Logo.scale-100.png" />
@@ -59,6 +53,7 @@
 		<Content Include="Assets\Wide310x150Logo.scale-200.png" />
 		<Content Include="Assets\Wide310x150Logo.scale-400.png" />
 		<Content Include="Assets\WindowIcon.ico" />
+		<Content Include="Assets\FluentSystemIcons-Resizable.ttf" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -13,7 +13,7 @@ public class DefaultNavigationServiceTests
 	public void InitialBackStackIsNotEmpty()
 	{
 		Assert.Equal(1, Service.BackStack.Count);
-		Assert.Equal(Service.BackStack[0], Service.CurrentEntry);
+		Assert.Equal(Service.BackStack[0], Service.CurrentRoute);
 		Assert.False(Service.CanGoBack);
 	}
 
@@ -23,52 +23,52 @@ public class DefaultNavigationServiceTests
 		Assert.Raises<EventArgs>(
 			h => Service.BackStackChanged += h,
 			h => Service.BackStackChanged -= h,
-			() => Service.Navigate(NavigationEntry.Settings));
+			() => Service.Navigate(NavigationRoute.Settings));
 		Assert.Equal(2, Service.BackStack.Count);
-		Assert.Equal(NavigationEntry.Settings, Service.CurrentEntry);
+		Assert.Equal(NavigationRoute.Settings, Service.CurrentRoute);
 		Assert.True(Service.CanGoBack);
 	}
 
 	[Fact]
 	public void Navigate_ToSameEntry()
 	{
-		Service.Navigate(NavigationEntry.Settings);
+		Service.Navigate(NavigationRoute.Settings);
 		var changed = false;
 		Service.BackStackChanged += (s, e) => changed = true;
-		Service.Navigate(NavigationEntry.Settings);
+		Service.Navigate(NavigationRoute.Settings);
 
 		Assert.False(changed);
 		Assert.Equal(2, Service.BackStack.Count);
-		Assert.Equal(NavigationEntry.Settings, Service.CurrentEntry);
+		Assert.Equal(NavigationRoute.Settings, Service.CurrentRoute);
 		Assert.True(Service.CanGoBack);
 	}
 
 	[Fact]
 	public void GoBack_WithFullBackStack()
 	{
-		var firstEntry = Service.CurrentEntry;
-		Service.Navigate(NavigationEntry.Settings);
+		var firstEntry = Service.CurrentRoute;
+		Service.Navigate(NavigationRoute.Settings);
 
 		Assert.Raises<EventArgs>(
 			h => Service.BackStackChanged += h,
 			h => Service.BackStackChanged -= h,
 			() => Service.GoBack());
 		Assert.Equal(1, Service.BackStack.Count);
-		Assert.Equal(firstEntry, Service.CurrentEntry);
+		Assert.Equal(firstEntry, Service.CurrentRoute);
 		Assert.False(Service.CanGoBack);
 	}
 
 	[Fact]
 	public void GoBack_WithEmptyBackStack()
 	{
-		var firstEntry = Service.CurrentEntry;
+		var firstEntry = Service.CurrentRoute;
 		var changed = false;
 		Service.BackStackChanged += (s, e) => changed = true;
 		Service.GoBack();
 
 		Assert.False(changed);
 		Assert.Equal(1, Service.BackStack.Count);
-		Assert.Equal(firstEntry, Service.CurrentEntry);
+		Assert.Equal(firstEntry, Service.CurrentRoute);
 		Assert.False(Service.CanGoBack);
 	}
 }
