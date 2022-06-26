@@ -52,22 +52,44 @@
 		<Content Include="Assets\Wide310x150Logo.scale-100.png" />
 		<Content Include="Assets\Wide310x150Logo.scale-200.png" />
 		<Content Include="Assets\Wide310x150Logo.scale-400.png" />
+		<Content Include="Assets\WindowIcon.ico" />
+		<Content Include="Assets\FluentSystemIcons-Resizable.ttf" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
 		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.1.1" />
 		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.1" />
 		<Manifest Include="$(ApplicationManifest)" />
 	</ItemGroup>
 
-	<!-- Defining the "Msix" ProjectCapability here allows the Single-project MSIX Packaging
-	     Tools extension to be activated for this project even if the Windows App SDK Nuget
-	     package has not yet been restored -->
+	<!--
+		Defining the "Msix" ProjectCapability here allows the Single-project MSIX Packaging Tools extension to be
+		activated for this project even if the Windows App SDK Nuget package has not yet been restored.
+	-->
 	<ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnablePreviewMsixTooling)'=='true'">
 		<ProjectCapability Include="Msix" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\FluentFeeds.Shared\FluentFeeds.Shared.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Page Update="Pages\MainPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
+		<Page Update="Pages\ItemListPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
+		<Page Update="Pages\FeedPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
+		<Page Update="Pages\ArticlePage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
+		<Page Update="Pages\SettingsPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
 	</ItemGroup>
 </Project>
