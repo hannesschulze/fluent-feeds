@@ -6,7 +6,7 @@ namespace FluentFeeds.Shared.RichText.Blocks;
 /// <para>Base class of rich text blocks.</para>
 ///
 /// <para>Rich text objects are made up of multiple blocks. There are multiple types of blocks which can be used to
-/// define a document – for example, paragraph blocks containing text (in the form of inlines) or image blocks.</para>
+/// define a document – for example, paragraph blocks containing text (in the form of inlines) or table blocks.</para>
 /// </summary>
 public abstract class Block : IEquatable<Block>
 {

@@ -1,40 +1,38 @@
 using System;
 using System.Collections.Immutable;
 using System.Linq;
-using FluentFeeds.Shared.RichText.Blocks;
 using FluentFeeds.Shared.RichText.Helpers;
 
-namespace FluentFeeds.Shared.RichText;
+namespace FluentFeeds.Shared.RichText.Blocks.List;
 
 /// <summary>
-/// <param>A collection of blocks making up rich text.</param>
-///
-/// <param>Like all other rich text data models, this class is immutable.</param>
+/// An item in a list which can contain multiple blocks.
+/// <seealso cref="ListBlock"/>
 /// </summary>
-public sealed class RichText : IEquatable<RichText>
+public sealed class ListItem : IEquatable<ListItem>
 {
 	/// <summary>
-	/// Create a new default-constructed rich text object.
+	/// Create a new default-constructed list item.
 	/// </summary>
-	public RichText()
+	public ListItem()
 	{
 		Blocks = ImmutableArray<Block>.Empty;
 	}
 
 	/// <summary>
-	/// Create a new rich text object from a list of blocks.
+	/// Create a new list item from a list of blocks.
 	/// </summary>
-	public RichText(params Block[] blocks)
+	public ListItem(params Block[] blocks)
 	{
 		Blocks = ImmutableArray.Create(blocks);
 	}
 
 	/// <summary>
-	/// A list of blocks making up the rich text object.
+	/// The list item's content.
 	/// </summary>
 	public ImmutableArray<Block> Blocks { get; init; }
 
-	public bool Equals(RichText? other)
+	public bool Equals(ListItem? other)
 	{
 		if (ReferenceEquals(this, other))
 			return true;
@@ -55,6 +53,6 @@ public sealed class RichText : IEquatable<RichText>
 		return Blocks.SequenceHashCode();
 	}
 
-	public static bool operator ==(RichText lhs, RichText rhs) => lhs.Equals(rhs);
-	public static bool operator !=(RichText lhs, RichText rhs) => !lhs.Equals(rhs);
+	public static bool operator ==(ListItem lhs, ListItem rhs) => lhs.Equals(rhs);
+	public static bool operator !=(ListItem lhs, ListItem rhs) => !lhs.Equals(rhs);
 }
