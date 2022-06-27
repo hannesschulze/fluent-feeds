@@ -6,55 +6,60 @@ using FluentFeeds.Shared.RichText.Blocks;
 namespace FluentFeeds.Shared.RichText;
 
 /// <summary>
-/// A collection of blocks making up a rich text document.
+/// <param>A collection of blocks making up rich text.</param>
+///
+/// <param>Like all other rich text data models, this class is immutable.</param>
 /// </summary>
 public sealed class RichText : IEquatable<RichText>
 {
-	public static RichText ParseHtml(string html) =>
-		throw new NotImplementedException();
-
-	public static bool TryParseHtml(string html, out RichText document)
-	{
-		try
-		{
-			document = ParseHtml(html);
-			return true;
-		}
-		catch (Exception)
-		{
-			document = new RichText();
-			return false;
-		}
-	}
-
-	public RichText(params Block[] blocks)
-	{
-		Blocks = ImmutableArray.Create(blocks);
-	}
-
+	/// <summary>
+	/// Create a new default-constructed rich text object.
+	/// </summary>
 	public RichText()
 	{
 		Blocks = ImmutableArray<Block>.Empty;
 	}
 
+	/// <summary>
+	/// Create a new rich text object from a list of blocks.
+	/// </summary>
+	public RichText(params Block[] blocks)
+	{
+		Blocks = ImmutableArray.Create(blocks);
+	}
+
+	/// <summary>
+	/// A list of blocks making up the rich text object.
+	/// </summary>
 	public ImmutableArray<Block> Blocks { get; init; }
 
 	public bool Equals(RichText? other)
 	{
+		if (ReferenceEquals(this, other))
+			return true;
 		if (ReferenceEquals(null, other))
 			return false;
-		return ReferenceEquals(this, other) || Blocks.SequenceEqual(other.Blocks);
+		return Blocks.SequenceEqual(other.Blocks);
 	}
 
-	public override bool Equals(object? obj) =>
-		ReferenceEquals(this, obj) || (obj is RichText other && Equals(other));
+	public override bool Equals(object? obj)
+	{
+		if (ReferenceEquals(this, obj))
+			return true;
+		return obj is RichText other && Equals(other);
+	}
 
-	public override int GetHashCode() =>
-		Blocks
+	public override int GetHashCode()
+	{
+		return Blocks
 			.Aggregate(new HashCode(), (hash, block) =>
 			{
 				hash.Add(block);
 				return hash;
 			})
 			.ToHashCode();
+	}
+
+	public static bool operator ==(RichText lhs, RichText rhs) => lhs.Equals(rhs);
+	public static bool operator !=(RichText lhs, RichText rhs) => !lhs.Equals(rhs);
 }
