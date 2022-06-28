@@ -9,11 +9,17 @@ jobs:
       - uses: actions/setup-dotnet@v2
         with:
           dotnet-version: 6.0.x
-      - name: Install dependencies
+      - name: Install dependencies (Shared.RichText)
+        run: cd FluentFeeds.Shared.RichText.Tests; dotnet restore
+      - name: Build (Shared.RichText)
+        run: cd FluentFeeds.Shared.RichText.Tests; dotnet build --no-restore
+      - name: Test (Shared.RichText)
+        run: cd FluentFeeds.Shared.RichText.Tests; dotnet test --no-restore --verbosity normal --collect:"XPlat Code Coverage"
+      - name: Install dependencies (Shared)
         run: cd FluentFeeds.Shared.Tests; dotnet restore
-      - name: Build
+      - name: Build (Shared)
         run: cd FluentFeeds.Shared.Tests; dotnet build --no-restore
-      - name: Test
+      - name: Test (Shared)
         run: cd FluentFeeds.Shared.Tests; dotnet test --no-restore --verbosity normal --collect:"XPlat Code Coverage"
       - uses: codecov/codecov-action@v2
         with:
