@@ -56,6 +56,6 @@ public abstract class Inline : IEquatable<Inline>
 
 	public override string ToString() => ToHtml();
 
-	public static bool operator ==(Inline lhs, Inline rhs) => lhs.Equals(rhs);
-	public static bool operator !=(Inline lhs, Inline rhs) => !lhs.Equals(rhs);
+	public static bool operator ==(Inline? lhs, Inline? rhs) => lhs?.Equals(rhs) ?? ReferenceEquals(rhs, null);
+	public static bool operator !=(Inline? lhs, Inline? rhs) => !(lhs == rhs);
 }

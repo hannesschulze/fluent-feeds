@@ -42,6 +42,6 @@ public abstract class ListItem : IEquatable<ListItem>
 		return HashCode.Combine(Type);
 	}
 
-	public static bool operator ==(ListItem lhs, ListItem rhs) => lhs.Equals(rhs);
-	public static bool operator !=(ListItem lhs, ListItem rhs) => !lhs.Equals(rhs);
+	public static bool operator ==(ListItem? lhs, ListItem? rhs) => lhs?.Equals(rhs) ?? ReferenceEquals(rhs, null);
+	public static bool operator !=(ListItem? lhs, ListItem? rhs) => !(lhs == rhs);
 }

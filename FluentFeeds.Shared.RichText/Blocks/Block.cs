@@ -54,6 +54,6 @@ public abstract class Block : IEquatable<Block>
 
 	public override string ToString() => ToHtml();
 
-	public static bool operator ==(Block lhs, Block rhs) => lhs.Equals(rhs);
-	public static bool operator !=(Block lhs, Block rhs) => !lhs.Equals(rhs);
+	public static bool operator ==(Block? lhs, Block? rhs) => lhs?.Equals(rhs) ?? ReferenceEquals(rhs, null);
+	public static bool operator !=(Block? lhs, Block? rhs) => !(lhs == rhs);
 }

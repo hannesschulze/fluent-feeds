@@ -69,6 +69,6 @@ public sealed class RichText : IEquatable<RichText>
 
 	public override string ToString() => ToHtml();
 
-	public static bool operator ==(RichText lhs, RichText rhs) => lhs.Equals(rhs);
-	public static bool operator !=(RichText lhs, RichText rhs) => !lhs.Equals(rhs);
+	public static bool operator ==(RichText? lhs, RichText? rhs) => lhs?.Equals(rhs) ?? ReferenceEquals(rhs, null);
+	public static bool operator !=(RichText? lhs, RichText? rhs) => !(lhs == rhs);
 }
