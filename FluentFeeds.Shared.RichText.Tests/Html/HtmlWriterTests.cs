@@ -1,5 +1,6 @@
 using FluentFeeds.Shared.RichText.Blocks;
 using FluentFeeds.Shared.RichText.Blocks.Heading;
+using FluentFeeds.Shared.RichText.Blocks.List;
 using FluentFeeds.Shared.RichText.Inlines;
 using Xunit;
 
@@ -62,6 +63,42 @@ public class HtmlWriterTests
 	{
 		var block = new HorizontalRuleBlock();
 		Assert.Equal("<hr/>", block.ToHtml());
+	}
+
+	[Fact]
+	public void FormatBlock_List_LeafItems()
+	{
+		var block = new ListBlock(
+			new LeafListItem(
+				new TextInline("foo"),
+				new TextInline("bar")),
+			new LeafListItem(
+				new TextInline("baz")));
+		Assert.Equal("<ul>\n  <li>foobar</li>\n\n  <li>baz</li>\n</ul>", block.ToHtml());
+	}
+
+	[Theory]
+	[InlineData(
+		ListStyle.Unordered, ListStyle.Unordered, 
+		"<ul>\n  <li>\n    <ul>\n      <li>foo</li>\n\n      <li>bar</li>\n    </ul>\n  </li>\n</ul>")]
+	[InlineData(
+		ListStyle.Unordered, ListStyle.Ordered, 
+		"<ul>\n  <li>\n    <ol>\n      <li>foo</li>\n\n      <li>bar</li>\n    </ol>\n  </li>\n</ul>")]
+	[InlineData(
+		ListStyle.Ordered, ListStyle.Unordered, 
+		"<ol>\n  <li>\n    <ul>\n      <li>foo</li>\n\n      <li>bar</li>\n    </ul>\n  </li>\n</ol>")]
+	[InlineData(
+		ListStyle.Ordered, ListStyle.Ordered, 
+		"<ol>\n  <li>\n    <ol>\n      <li>foo</li>\n\n      <li>bar</li>\n    </ol>\n  </li>\n</ol>")]
+	public void FormatBlock_List_NestedItems(ListStyle outerStyle, ListStyle innerStyle, string expectedResult)
+	{
+		var block = new ListBlock(
+			new NestedListItem(
+				new LeafListItem(
+					new TextInline("foo")),
+				new LeafListItem(
+					new TextInline("bar"))) {Style = innerStyle}) {Style = outerStyle};
+		Assert.Equal(expectedResult, block.ToHtml());
 	}
 
 	[Fact]

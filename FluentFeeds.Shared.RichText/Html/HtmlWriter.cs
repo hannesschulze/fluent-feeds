@@ -9,7 +9,7 @@ namespace FluentFeeds.Shared.RichText.Html;
 /// <summary>
 /// Visitor implementation for building HTML.
 /// </summary>
-internal sealed class HtmlWriter : IBlockVisitor, IInlineVisitor
+internal sealed class HtmlWriter : IBlockVisitor, IInlineVisitor, IListItemVisitor
 {
 	public HtmlWriter(HtmlWritingOptions options)
 	{
@@ -37,17 +37,7 @@ internal sealed class HtmlWriter : IBlockVisitor, IInlineVisitor
 
 	public void Visit(HeadingBlock block)
 	{
-		_builder.AppendTagOpen(
-			block.Level switch
-			{
-				HeadingLevel.Level1 => "h1",
-				HeadingLevel.Level2 => "h2",
-				HeadingLevel.Level3 => "h3",
-				HeadingLevel.Level4 => "h4",
-				HeadingLevel.Level5 => "h5",
-				HeadingLevel.Level6 => "h6",
-				_ => throw new IndexOutOfRangeException()
-			}, true);
+		_builder.AppendTagOpen(TagForHeadingLevel(block.Level), true);
 		foreach (var inline in block.Inlines)
 			inline.Accept(this);
 		_builder.AppendTagClose();
@@ -60,20 +50,9 @@ internal sealed class HtmlWriter : IBlockVisitor, IInlineVisitor
 
 	public void Visit(ListBlock block)
 	{
-		_builder.AppendTagOpen(
-			block.Style switch
-			{
-				ListStyle.Ordered => "ol",
-				ListStyle.Unordered => "ul",
-				_ => throw new IndexOutOfRangeException()
-			}, false);
+		_builder.AppendTagOpen(TagForListStyle(block.Style), false);
 		foreach (var item in block.Items)
-		{
-			_builder.AppendTagOpen("li", false);
-			foreach (var itemBlock in item.Blocks)
-				itemBlock.Accept(this);
-			_builder.AppendTagClose();
-		}
+			item.Accept(this);
 		_builder.AppendTagClose();
 	}
 
@@ -94,6 +73,50 @@ internal sealed class HtmlWriter : IBlockVisitor, IInlineVisitor
 		_builder.AppendText(inline.Text);
 	}
 	
+	#endregion
+	
+	#region IListItemVisitor
+
+	public void Visit(LeafListItem listItem)
+	{
+		_builder.AppendTagOpen("li", true);
+		foreach (var inline in listItem.Inlines)
+			inline.Accept(this);
+		_builder.AppendTagClose();
+	}
+	
+	public void Visit(NestedListItem listItem)
+	{
+		_builder.AppendTagOpen("li", false).AppendTagOpen(TagForListStyle(listItem.Style), false);
+		foreach (var item in listItem.Items)
+			item.Accept(this);
+		_builder.AppendTagClose().AppendTagClose();
+	}
+
+	#endregion
+	
+	#region Helpers
+
+	private static string TagForHeadingLevel(HeadingLevel level) =>
+		level switch
+		{
+			HeadingLevel.Level1 => "h1",
+			HeadingLevel.Level2 => "h2",
+			HeadingLevel.Level3 => "h3",
+			HeadingLevel.Level4 => "h4",
+			HeadingLevel.Level5 => "h5",
+			HeadingLevel.Level6 => "h6",
+			_ => throw new IndexOutOfRangeException()
+		};
+
+	private static string TagForListStyle(ListStyle style) =>
+		style switch
+		{
+			ListStyle.Ordered => "ol",
+			ListStyle.Unordered => "ul",
+			_ => throw new IndexOutOfRangeException()
+		};
+
 	#endregion
 	
 	private readonly HtmlBuilder _builder;

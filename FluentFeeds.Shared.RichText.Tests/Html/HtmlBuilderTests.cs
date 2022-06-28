@@ -50,7 +50,7 @@ public class HtmlBuilderTests
 	[InlineData(0, "<foo/>\n<bar/>")]
 	[InlineData(2, "<foo/>\n\n\n<bar/>")]
 	[InlineData(-1, "<foo/>\n<bar/>")]
-	public void LineBreaks_CustomEmptyLines_None(int emptyLinesBetweenTags, string expectedResult)
+	public void LineBreaks_CustomEmptyLines(int emptyLinesBetweenTags, string expectedResult)
 	{
 		var builder = new HtmlBuilder(new HtmlWritingOptions {EmptyLinesBetweenTags = emptyLinesBetweenTags});
 		builder.AppendEmptyTag("foo");
@@ -76,7 +76,7 @@ public class HtmlBuilderTests
 	[InlineData(0, "<foo>\n<bar>\n<baz/>\n</bar>\n</foo>")]
 	[InlineData(4, "<foo>\n    <bar>\n        <baz/>\n    </bar>\n</foo>")]
 	[InlineData(-1, "<foo>\n\t<bar>\n\t\t<baz/>\n\t</bar>\n</foo>")]
-	public void Indentation_CustomSetting_None(int spacesForIndentation, string expectedResult)
+	public void Indentation_CustomSetting(int spacesForIndentation, string expectedResult)
 	{
 		var builder = new HtmlBuilder(new HtmlWritingOptions {SpacesForIndentation = spacesForIndentation});
 		builder.AppendTagOpen("foo", false);
