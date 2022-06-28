@@ -2,6 +2,7 @@ using System;
 using FluentFeeds.Shared.RichText.Blocks;
 using FluentFeeds.Shared.RichText.Blocks.Heading;
 using FluentFeeds.Shared.RichText.Blocks.List;
+using FluentFeeds.Shared.RichText.Blocks.Table;
 using FluentFeeds.Shared.RichText.Inlines;
 using Xunit;
 
@@ -123,6 +124,42 @@ public class HtmlWriterTests
 			new ParagraphBlock(
 				new TextInline("bar")));
 		Assert.Equal("<blockquote>\n  <p>foo</p>\n\n  <p>bar</p>\n</blockquote>", block.ToHtml());
+	}
+
+	[Fact]
+	public void FormatBlock_Table()
+	{
+		var block = new TableBlock(
+			new TableRow(
+				new TableCell(
+					new TextInline("foo"))),
+			new TableRow(
+				new TableCell(
+					new TextInline("bar")),
+				new TableCell(
+					new TextInline("baz"))));
+		Assert.Equal(
+			"<table>\n  <tr>\n    <td>\n      <div>foo</div>\n    </td>\n  </tr>\n\n  " +
+			"<tr>\n    <td>\n      <div>bar</div>\n    </td>\n\n    <td>\n      <div>baz</div>\n    </td>\n  </tr>\n" +
+			"</table>", block.ToHtml());
+	}
+
+	[Theory]
+	[InlineData(1, 1, true, "<table>\n  <tr>\n    <th>\n      <div>foo</div>\n    </th>\n  </tr>\n</table>")]
+	[InlineData(
+		2, -1, false, "<table>\n  <tr>\n    <td colspan=\"2\">\n      <div>foo</div>\n    </td>\n  </tr>\n</table>")]
+	[InlineData(
+		-1, 3, false, "<table>\n  <tr>\n    <td rowspan=\"3\">\n      <div>foo</div>\n    </td>\n  </tr>\n</table>")]
+	[InlineData(
+		3, 2, true,
+		"<table>\n  <tr>\n    <th colspan=\"3\" rowspan=\"2\">\n      <div>foo</div>\n    </th>\n  </tr>\n</table>")]
+	public void FormatBlock_Table_CellProperties(int columnSpan, int rowSpan, bool isHeader, string expectedResult)
+	{
+		var block = new TableBlock(
+			new TableRow(
+				new TableCell(
+					new TextInline("foo")) {ColumnSpan = columnSpan, RowSpan = rowSpan, IsHeader = isHeader}));
+		Assert.Equal(expectedResult, block.ToHtml());
 	}
 
 	[Fact]

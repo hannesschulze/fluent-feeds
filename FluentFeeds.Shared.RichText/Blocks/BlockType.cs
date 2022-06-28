@@ -32,5 +32,9 @@ public enum BlockType
 	/// <summary>
 	/// <see cref="QuoteBlock"/>
 	/// </summary>
-	Quote
+	Quote,
+	/// <summary>
+	/// <see cref="TableBlock"/>
+	/// </summary>
+	Table
 }

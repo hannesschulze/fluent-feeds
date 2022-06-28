@@ -28,6 +28,15 @@ internal sealed class HtmlWriter : IBlockVisitor, IInlineVisitor
 		_builder.AppendTagClose();
 	}
 
+	private void WrapBlocks(
+		IEnumerable<Block> blocks, string tag, IReadOnlyDictionary<string, string>? attributes = null)
+	{
+		_builder.AppendTagOpen(tag, false, attributes);
+		foreach (var block in blocks)
+			block.Accept(this);
+		_builder.AppendTagClose();
+	}
+
 	#region IBlockVisitor
 
 	public void Visit(GenericBlock block)
@@ -78,20 +87,33 @@ internal sealed class HtmlWriter : IBlockVisitor, IInlineVisitor
 				_ => throw new IndexOutOfRangeException()
 			}, false);
 		foreach (var item in block.Items)
-		{
-			_builder.AppendTagOpen("li", false);
-			foreach (var itemBlock in item.Blocks)
-				itemBlock.Accept(this);
-			_builder.AppendTagClose();
-		}
+			WrapBlocks(item.Blocks, "li");
 		_builder.AppendTagClose();
 	}
 
 	public void Visit(QuoteBlock block)
 	{
-		_builder.AppendTagOpen("blockquote", false);
-		foreach (var quoteBlock in block.Blocks)
-			quoteBlock.Accept(this);
+		WrapBlocks(block.Blocks, "blockquote");
+	}
+
+	public void Visit(TableBlock block)
+	{
+		_builder.AppendTagOpen("table", false);
+		foreach (var row in block.Rows)
+		{
+			_builder.AppendTagOpen("tr", false);
+			foreach (var cell in row.Cells)
+			{
+				var attributes = new Dictionary<string, string>();
+				if (cell.ColumnSpan != 1 && cell.ColumnSpan >= 0)
+					attributes.Add("colspan", cell.ColumnSpan.ToString());
+				if (cell.RowSpan != 1 && cell.RowSpan >= 0)
+					attributes.Add("rowspan", cell.RowSpan.ToString());
+				
+				WrapBlocks(cell.Blocks, cell.IsHeader ? "th" : "td", attributes);
+			}
+			_builder.AppendTagClose();
+		}
 		_builder.AppendTagClose();
 	}
 
