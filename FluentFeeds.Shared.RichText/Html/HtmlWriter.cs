@@ -91,58 +91,37 @@ internal sealed class HtmlWriter : IBlockVisitor, IInlineVisitor, IListItemVisit
 
 	public void Visit(BoldInline inline)
 	{
-		_builder.AppendTagOpen("b", true);
-		foreach (var child in inline.Inlines)
-			child.Accept(this);
-		_builder.AppendTagClose();
+		WrapSpan(inline, "b");
 	}
 
 	public void Visit(ItalicInline inline)
 	{
-		_builder.AppendTagOpen("i", true);
-		foreach (var child in inline.Inlines)
-			child.Accept(this);
-		_builder.AppendTagClose();
+		WrapSpan(inline, "i");
 	}
 
 	public void Visit(UnderlineInline inline)
 	{
-		_builder.AppendTagOpen("u", true);
-		foreach (var child in inline.Inlines)
-			child.Accept(this);
-		_builder.AppendTagClose();
+		WrapSpan(inline, "u");
 	}
 
 	public void Visit(StrikethroughInline inline)
 	{
-		_builder.AppendTagOpen("s", true);
-		foreach (var child in inline.Inlines)
-			child.Accept(this);
-		_builder.AppendTagClose();
+		WrapSpan(inline, "s");
 	}
 
 	public void Visit(CodeInline inline)
 	{
-		_builder.AppendTagOpen("code", true);
-		foreach (var child in inline.Inlines)
-			child.Accept(this);
-		_builder.AppendTagClose();
+		WrapSpan(inline, "code");
 	}
 
 	public void Visit(SuperscriptInline inline)
 	{
-		_builder.AppendTagOpen("sup", true);
-		foreach (var child in inline.Inlines)
-			child.Accept(this);
-		_builder.AppendTagClose();
+		WrapSpan(inline, "sup");
 	}
 
 	public void Visit(SubscriptInline inline)
 	{
-		_builder.AppendTagOpen("sub", true);
-		foreach (var child in inline.Inlines)
-			child.Accept(this);
-		_builder.AppendTagClose();
+		WrapSpan(inline, "sub");
 	}
 
 	public void Visit(HyperlinkInline inline)
@@ -151,10 +130,7 @@ internal sealed class HtmlWriter : IBlockVisitor, IInlineVisitor, IListItemVisit
 		if (inline.Target != null)
 			attributes.Add("href", inline.Target.ToString());
 		
-		_builder.AppendTagOpen("a", true, attributes);
-		foreach (var child in inline.Inlines)
-			child.Accept(this);
-		_builder.AppendTagClose();
+		WrapSpan(inline, "a", attributes);
 	}
 
 	#endregion
@@ -203,6 +179,14 @@ internal sealed class HtmlWriter : IBlockVisitor, IInlineVisitor, IListItemVisit
 			ListStyle.Unordered => "ul",
 			_ => throw new IndexOutOfRangeException()
 		};
+
+	private void WrapSpan(SpanInline span, string tag, IReadOnlyDictionary<string, string>? attributes = null)
+	{
+		_builder.AppendTagOpen(tag, true, attributes);
+		foreach (var inline in span.Inlines)
+			inline.Accept(this);
+		_builder.AppendTagClose();
+	}
 
 	#endregion
 	

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Immutable;
 using System.Linq;
 using FluentFeeds.Shared.RichText.Helpers;
 
@@ -8,28 +7,21 @@ namespace FluentFeeds.Shared.RichText.Inlines;
 /// <summary>
 /// An inline for linking to a URI.
 /// </summary>
-public sealed class HyperlinkInline : Inline
+public sealed class HyperlinkInline : SpanInline
 {
 	/// <summary>
 	/// Create a new default-constructed hyperlink inline.
 	/// </summary>
 	public HyperlinkInline()
 	{
-		Inlines = ImmutableArray<Inline>.Empty;
 	}
 
 	/// <summary>
 	/// Create a new hyperlink inline with the provided child inline elements.
 	/// </summary>
-	public HyperlinkInline(params Inline[] inlines)
+	public HyperlinkInline(params Inline[] inlines) : base(inlines)
 	{
-		Inlines = ImmutableArray.Create(inlines);
 	}
-	
-	/// <summary>
-	/// The child inline elements.
-	/// </summary>
-	public ImmutableArray<Inline> Inlines { get; init; }
 	
 	/// <summary>
 	/// The target URI of this hyperlink.
@@ -46,11 +38,11 @@ public sealed class HyperlinkInline : Inline
 			return true;
 		if (!base.Equals(other))
 			return false;
-		return other is HyperlinkInline casted && Inlines.SequenceEqual(casted.Inlines) && Target == casted.Target;
+		return other is HyperlinkInline casted && Target == casted.Target;
 	}
 
 	public override int GetHashCode()
 	{
-		return HashCode.Combine(base.GetHashCode(), Inlines.SequenceHashCode(), Target);
+		return HashCode.Combine(base.GetHashCode(), Target);
 	}
 }
