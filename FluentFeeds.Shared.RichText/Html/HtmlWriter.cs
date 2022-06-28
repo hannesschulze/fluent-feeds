@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using FluentFeeds.Shared.RichText.Blocks;
 using FluentFeeds.Shared.RichText.Blocks.Heading;
 using FluentFeeds.Shared.RichText.Blocks.List;
@@ -73,6 +74,89 @@ internal sealed class HtmlWriter : IBlockVisitor, IInlineVisitor, IListItemVisit
 		_builder.AppendText(inline.Text);
 	}
 	
+	public void Visit(ImageInline inline)
+	{
+		var attributes = new Dictionary<string, string>();
+		if (inline.Source != null)
+			attributes.Add("src", inline.Source.ToString());
+		if (inline.AlternateText != null)
+			attributes.Add("alt", inline.AlternateText);
+		if (inline.Width >= 0)
+			attributes.Add("width", inline.Width.ToString());
+		if (inline.Height >= 0)
+			attributes.Add("height", inline.Height.ToString());
+		
+		_builder.AppendEmptyTag("img", attributes);
+	}
+
+	public void Visit(BoldInline inline)
+	{
+		_builder.AppendTagOpen("b", true);
+		foreach (var child in inline.Inlines)
+			child.Accept(this);
+		_builder.AppendTagClose();
+	}
+
+	public void Visit(ItalicInline inline)
+	{
+		_builder.AppendTagOpen("i", true);
+		foreach (var child in inline.Inlines)
+			child.Accept(this);
+		_builder.AppendTagClose();
+	}
+
+	public void Visit(UnderlineInline inline)
+	{
+		_builder.AppendTagOpen("u", true);
+		foreach (var child in inline.Inlines)
+			child.Accept(this);
+		_builder.AppendTagClose();
+	}
+
+	public void Visit(StrikethroughInline inline)
+	{
+		_builder.AppendTagOpen("s", true);
+		foreach (var child in inline.Inlines)
+			child.Accept(this);
+		_builder.AppendTagClose();
+	}
+
+	public void Visit(CodeInline inline)
+	{
+		_builder.AppendTagOpen("code", true);
+		foreach (var child in inline.Inlines)
+			child.Accept(this);
+		_builder.AppendTagClose();
+	}
+
+	public void Visit(SuperscriptInline inline)
+	{
+		_builder.AppendTagOpen("sup", true);
+		foreach (var child in inline.Inlines)
+			child.Accept(this);
+		_builder.AppendTagClose();
+	}
+
+	public void Visit(SubscriptInline inline)
+	{
+		_builder.AppendTagOpen("sub", true);
+		foreach (var child in inline.Inlines)
+			child.Accept(this);
+		_builder.AppendTagClose();
+	}
+
+	public void Visit(HyperlinkInline inline)
+	{
+		var attributes = new Dictionary<string, string>();
+		if (inline.Target != null)
+			attributes.Add("href", inline.Target.ToString());
+		
+		_builder.AppendTagOpen("a", true, attributes);
+		foreach (var child in inline.Inlines)
+			child.Accept(this);
+		_builder.AppendTagClose();
+	}
+
 	#endregion
 	
 	#region IListItemVisitor

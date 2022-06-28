@@ -1,3 +1,4 @@
+using System;
 using FluentFeeds.Shared.RichText.Blocks;
 using FluentFeeds.Shared.RichText.Blocks.Heading;
 using FluentFeeds.Shared.RichText.Blocks.List;
@@ -113,9 +114,105 @@ public class HtmlWriterTests
 	}
 
 	[Fact]
-	public void FormatInline()
+	public void FormatInline_Text()
 	{
 		var inline = new TextInline("foo&bar");
 		Assert.Equal("foo&amp;bar", inline.ToHtml());
+	}
+
+	[Theory]
+	[InlineData(null, null, -1, -1, "<img/>")]
+	[InlineData("https://www.example.com/", null, -1, -1, "<img src=\"https://www.example.com/\"/>")]
+	[InlineData("https://www.example.com/", null, 10, -1, "<img src=\"https://www.example.com/\" width=\"10\"/>")]
+	[InlineData(
+		"https://www.example.com/", "alternate text", -1, 20, 
+		"<img src=\"https://www.example.com/\" alt=\"alternate text\" height=\"20\"/>")]
+	[InlineData(
+		"https://www.example.com/", "alternate text", 10, 20, 
+		"<img src=\"https://www.example.com/\" alt=\"alternate text\" width=\"10\" height=\"20\"/>")]
+	public void FormatInline_Image(string? source, string? alternateText, int width, int height, string expectedResult)
+	{
+		var inline =
+			new ImageInline(source != null ? new Uri(source) : null)
+			{
+				AlternateText = alternateText, 
+				Width = width,
+				Height = height
+			};
+		Assert.Equal(expectedResult, inline.ToHtml());
+	}
+
+	[Fact]
+	public void FormatInline_Bold()
+	{
+		var inline = new BoldInline(
+			new TextInline("foo"),
+			new TextInline("bar"));
+		Assert.Equal("<b>foobar</b>", inline.ToHtml());
+	}
+
+	[Fact]
+	public void FormatInline_Italic()
+	{
+		var inline = new ItalicInline(
+			new TextInline("foo"),
+			new TextInline("bar"));
+		Assert.Equal("<i>foobar</i>", inline.ToHtml());
+	}
+
+	[Fact]
+	public void FormatInline_Underline()
+	{
+		var inline = new UnderlineInline(
+			new TextInline("foo"),
+			new TextInline("bar"));
+		Assert.Equal("<u>foobar</u>", inline.ToHtml());
+	}
+
+	[Fact]
+	public void FormatInline_Strikethrough()
+	{
+		var inline = new StrikethroughInline(
+			new TextInline("foo"),
+			new TextInline("bar"));
+		Assert.Equal("<s>foobar</s>", inline.ToHtml());
+	}
+
+	[Fact]
+	public void FormatInline_Code()
+	{
+		var inline = new CodeInline(
+			new TextInline("foo"),
+			new TextInline("bar"));
+		Assert.Equal("<code>foobar</code>", inline.ToHtml());
+	}
+
+	[Fact]
+	public void FormatInline_Superscript()
+	{
+		var inline = new SuperscriptInline(
+			new TextInline("foo"),
+			new TextInline("bar"));
+		Assert.Equal("<sup>foobar</sup>", inline.ToHtml());
+	}
+
+	[Fact]
+	public void FormatInline_Subscript()
+	{
+		var inline = new SubscriptInline(
+			new TextInline("foo"),
+			new TextInline("bar"));
+		Assert.Equal("<sub>foobar</sub>", inline.ToHtml());
+	}
+
+	[Theory]
+	[InlineData(null, "<a>foobar</a>")]
+	[InlineData("https://www.example.com/", "<a href=\"https://www.example.com/\">foobar</a>")]
+	public void FormatInline_Hyperlink(string? target, string expectedResult)
+	{
+		var inline = new HyperlinkInline(
+			new TextInline("foo"),
+			new TextInline("bar")) {Target = target != null ? new Uri(target) : null};
+		Assert.Equal(expectedResult, inline.ToHtml());
 	}
 }
