@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using FluentFeeds.Shared.RichText.Blocks;
 using FluentFeeds.Shared.RichText.Helpers;
+using FluentFeeds.Shared.RichText.Html;
 
 namespace FluentFeeds.Shared.RichText;
 
@@ -34,6 +35,17 @@ public sealed class RichText : IEquatable<RichText>
 	/// </summary>
 	public ImmutableArray<Block> Blocks { get; init; }
 
+	/// <summary>
+	/// Format this rich text object as a HTML string.
+	/// </summary>
+	public string ToHtml(HtmlWritingOptions? options = null)
+	{
+		var writer = new HtmlWriter(options ?? new HtmlWritingOptions());
+		foreach (var block in Blocks)
+			block.Accept(writer);
+		return writer.GetResult();
+	}
+
 	public bool Equals(RichText? other)
 	{
 		if (ReferenceEquals(this, other))
@@ -54,6 +66,8 @@ public sealed class RichText : IEquatable<RichText>
 	{
 		return Blocks.SequenceHashCode();
 	}
+
+	public override string ToString() => ToHtml();
 
 	public static bool operator ==(RichText lhs, RichText rhs) => lhs.Equals(rhs);
 	public static bool operator !=(RichText lhs, RichText rhs) => !lhs.Equals(rhs);

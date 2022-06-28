@@ -1,4 +1,5 @@
 using System;
+using FluentFeeds.Shared.RichText.Html;
 
 namespace FluentFeeds.Shared.RichText.Blocks;
 
@@ -20,6 +21,16 @@ public abstract class Block : IEquatable<Block>
 	/// </summary>
 	public abstract void Accept(IBlockVisitor visitor);
 	
+	/// <summary>
+	/// Format this rich text block as a HTML string.
+	/// </summary>
+	public string ToHtml(HtmlWritingOptions? options = null)
+	{
+		var writer = new HtmlWriter(options ?? new HtmlWritingOptions());
+		Accept(writer);
+		return writer.GetResult();
+	}
+	
 	public virtual bool Equals(Block? other)
 	{
 		if (ReferenceEquals(this, other))
@@ -40,6 +51,8 @@ public abstract class Block : IEquatable<Block>
 	{
 		return HashCode.Combine(Type);
 	}
+
+	public override string ToString() => ToHtml();
 
 	public static bool operator ==(Block lhs, Block rhs) => lhs.Equals(rhs);
 	public static bool operator !=(Block lhs, Block rhs) => !lhs.Equals(rhs);
