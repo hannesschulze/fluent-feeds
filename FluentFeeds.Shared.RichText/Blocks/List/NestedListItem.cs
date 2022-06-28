@@ -15,16 +15,32 @@ public sealed class NestedListItem : ListItem
 	/// </summary>
 	public NestedListItem()
 	{
+		Content = new LeafListItem();
 		Items = ImmutableArray<ListItem>.Empty;
 	}
 
 	/// <summary>
-	/// Create a new nested list item hosting the provided items.
+	/// Create a new nested list item hosting the provided content.
 	/// </summary>
-	public NestedListItem(params ListItem[] items)
+	public NestedListItem(LeafListItem content)
 	{
+		Content = content;
+		Items = ImmutableArray<ListItem>.Empty;
+	}
+
+	/// <summary>
+	/// Create a new nested list item hosting the provided items below a leaf list item.
+	/// </summary>
+	public NestedListItem(LeafListItem content, params ListItem[] items)
+	{
+		Content = content;
 		Items = ImmutableArray.Create(items);
 	}
+	
+	/// <summary>
+	/// The content of this list item, displayed above the nested list.
+	/// </summary>
+	public LeafListItem Content { get; init; }
 
 	/// <summary>
 	/// The items in this nested list.

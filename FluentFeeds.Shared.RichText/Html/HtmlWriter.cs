@@ -171,7 +171,10 @@ internal sealed class HtmlWriter : IBlockVisitor, IInlineVisitor, IListItemVisit
 	
 	public void Visit(NestedListItem listItem)
 	{
-		_builder.AppendTagOpen("li", false).AppendTagOpen(TagForListStyle(listItem.Style), false);
+		_builder.AppendTagOpen("li", false);
+		foreach (var inline in listItem.Content.Inlines)
+				inline.Accept(this);
+		_builder.AppendTagOpen(TagForListStyle(listItem.Style), false);
 		foreach (var item in listItem.Items)
 			item.Accept(this);
 		_builder.AppendTagClose().AppendTagClose();

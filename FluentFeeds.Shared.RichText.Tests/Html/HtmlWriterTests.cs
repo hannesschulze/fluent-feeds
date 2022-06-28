@@ -81,16 +81,16 @@ public class HtmlWriterTests
 	[Theory]
 	[InlineData(
 		ListStyle.Unordered, ListStyle.Unordered, 
-		"<ul>\n  <li>\n    <ul>\n      <li>foo</li>\n\n      <li>bar</li>\n    </ul>\n  </li>\n</ul>")]
+		"<ul>\n  <li>\n    foo\n\n    <ul>\n      <li>bar</li>\n    </ul>\n  </li>\n</ul>")]
 	[InlineData(
 		ListStyle.Unordered, ListStyle.Ordered, 
-		"<ul>\n  <li>\n    <ol>\n      <li>foo</li>\n\n      <li>bar</li>\n    </ol>\n  </li>\n</ul>")]
+		"<ul>\n  <li>\n    foo\n\n    <ol>\n      <li>bar</li>\n    </ol>\n  </li>\n</ul>")]
 	[InlineData(
 		ListStyle.Ordered, ListStyle.Unordered, 
-		"<ol>\n  <li>\n    <ul>\n      <li>foo</li>\n\n      <li>bar</li>\n    </ul>\n  </li>\n</ol>")]
+		"<ol>\n  <li>\n    foo\n\n    <ul>\n      <li>bar</li>\n    </ul>\n  </li>\n</ol>")]
 	[InlineData(
 		ListStyle.Ordered, ListStyle.Ordered, 
-		"<ol>\n  <li>\n    <ol>\n      <li>foo</li>\n\n      <li>bar</li>\n    </ol>\n  </li>\n</ol>")]
+		"<ol>\n  <li>\n    foo\n\n    <ol>\n      <li>bar</li>\n    </ol>\n  </li>\n</ol>")]
 	public void FormatBlock_List_NestedItems(ListStyle outerStyle, ListStyle innerStyle, string expectedResult)
 	{
 		var block = new ListBlock(
