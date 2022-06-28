@@ -6,17 +6,21 @@ namespace FluentFeeds.Shared.RichText.Blocks;
 public enum BlockType
 {
 	/// <summary>
+	/// <see cref="GenericBlock"/>
+	/// </summary>
+	Generic,
+	/// <summary>
 	/// <see cref="ParagraphBlock"/>
 	/// </summary>
 	Paragraph,
 	/// <summary>
-	/// <see cref="CodeBlock"/>
-	/// </summary>
-	Code,
-	/// <summary>
 	/// <see cref="HeadingBlock"/>
 	/// </summary>
 	Heading,
+	/// <summary>
+	/// <see cref="CodeBlock"/>
+	/// </summary>
+	Code,
 	/// <summary>
 	/// <see cref="HorizontalRuleBlock"/>
 	/// </summary>

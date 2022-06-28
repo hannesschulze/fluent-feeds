@@ -10,7 +10,7 @@ namespace FluentFeeds.Shared.RichText.Html;
 /// <summary>
 /// Visitor implementation for building HTML.
 /// </summary>
-internal sealed class HtmlWriter : IBlockVisitor, IInlineVisitor, IListItemVisitor
+internal sealed class HtmlWriter : IBlockVisitor, IInlineVisitor
 {
 	public HtmlWriter(HtmlWritingOptions options)
 	{
@@ -18,15 +18,42 @@ internal sealed class HtmlWriter : IBlockVisitor, IInlineVisitor, IListItemVisit
 	}
 
 	public string GetResult() => _builder.GetResult();
-
-	#region IBlockVisitor
 	
-	public void Visit(ParagraphBlock block)
+	private void WrapInlines(
+		IEnumerable<Inline> inlines, string tag, IReadOnlyDictionary<string, string>? attributes = null)
 	{
-		_builder.AppendTagOpen("p", true);
-		foreach (var inline in block.Inlines)
+		_builder.AppendTagOpen(tag, true, attributes);
+		foreach (var inline in inlines)
 			inline.Accept(this);
 		_builder.AppendTagClose();
+	}
+
+	#region IBlockVisitor
+
+	public void Visit(GenericBlock block)
+	{
+		WrapInlines(block.Inlines, "div");
+	}
+
+	public void Visit(ParagraphBlock block)
+	{
+		WrapInlines(block.Inlines, "p");
+	}
+	
+	public void Visit(HeadingBlock block)
+	{
+		WrapInlines(
+			block.Inlines,
+			block.Level switch
+			{
+				HeadingLevel.Level1 => "h1",
+				HeadingLevel.Level2 => "h2",
+				HeadingLevel.Level3 => "h3",
+				HeadingLevel.Level4 => "h4",
+				HeadingLevel.Level5 => "h5",
+				HeadingLevel.Level6 => "h6",
+				_ => throw new IndexOutOfRangeException()
+			});
 	}
 
 	public void Visit(CodeBlock block)
@@ -36,14 +63,6 @@ internal sealed class HtmlWriter : IBlockVisitor, IInlineVisitor, IListItemVisit
 		_builder.DisableIndentation = false;
 	}
 
-	public void Visit(HeadingBlock block)
-	{
-		_builder.AppendTagOpen(TagForHeadingLevel(block.Level), true);
-		foreach (var inline in block.Inlines)
-			inline.Accept(this);
-		_builder.AppendTagClose();
-	}
-
 	public void Visit(HorizontalRuleBlock block)
 	{
 		_builder.AppendEmptyTag("hr");
@@ -51,9 +70,20 @@ internal sealed class HtmlWriter : IBlockVisitor, IInlineVisitor, IListItemVisit
 
 	public void Visit(ListBlock block)
 	{
-		_builder.AppendTagOpen(TagForListStyle(block.Style), false);
+		_builder.AppendTagOpen(
+			block.Style switch
+			{
+				ListStyle.Ordered => "ol",
+				ListStyle.Unordered => "ul",
+				_ => throw new IndexOutOfRangeException()
+			}, false);
 		foreach (var item in block.Items)
-			item.Accept(this);
+		{
+			_builder.AppendTagOpen("li", false);
+			foreach (var itemBlock in item.Blocks)
+				itemBlock.Accept(this);
+			_builder.AppendTagClose();
+		}
 		_builder.AppendTagClose();
 	}
 
@@ -64,7 +94,7 @@ internal sealed class HtmlWriter : IBlockVisitor, IInlineVisitor, IListItemVisit
 			quoteBlock.Accept(this);
 		_builder.AppendTagClose();
 	}
-	
+
 	#endregion
 	
 	#region IInlineVisitor
@@ -91,37 +121,37 @@ internal sealed class HtmlWriter : IBlockVisitor, IInlineVisitor, IListItemVisit
 
 	public void Visit(BoldInline inline)
 	{
-		WrapSpan(inline, "b");
+		WrapInlines(inline.Inlines, "b");
 	}
 
 	public void Visit(ItalicInline inline)
 	{
-		WrapSpan(inline, "i");
+		WrapInlines(inline.Inlines, "i");
 	}
 
 	public void Visit(UnderlineInline inline)
 	{
-		WrapSpan(inline, "u");
+		WrapInlines(inline.Inlines, "u");
 	}
 
 	public void Visit(StrikethroughInline inline)
 	{
-		WrapSpan(inline, "s");
+		WrapInlines(inline.Inlines, "s");
 	}
 
 	public void Visit(CodeInline inline)
 	{
-		WrapSpan(inline, "code");
+		WrapInlines(inline.Inlines, "code");
 	}
 
 	public void Visit(SuperscriptInline inline)
 	{
-		WrapSpan(inline, "sup");
+		WrapInlines(inline.Inlines, "sup");
 	}
 
 	public void Visit(SubscriptInline inline)
 	{
-		WrapSpan(inline, "sub");
+		WrapInlines(inline.Inlines, "sub");
 	}
 
 	public void Visit(HyperlinkInline inline)
@@ -130,62 +160,7 @@ internal sealed class HtmlWriter : IBlockVisitor, IInlineVisitor, IListItemVisit
 		if (inline.Target != null)
 			attributes.Add("href", inline.Target.ToString());
 		
-		WrapSpan(inline, "a", attributes);
-	}
-
-	#endregion
-	
-	#region IListItemVisitor
-
-	public void Visit(LeafListItem listItem)
-	{
-		_builder.AppendTagOpen("li", true);
-		foreach (var inline in listItem.Inlines)
-			inline.Accept(this);
-		_builder.AppendTagClose();
-	}
-	
-	public void Visit(NestedListItem listItem)
-	{
-		_builder.AppendTagOpen("li", false);
-		foreach (var inline in listItem.Content.Inlines)
-				inline.Accept(this);
-		_builder.AppendTagOpen(TagForListStyle(listItem.Style), false);
-		foreach (var item in listItem.Items)
-			item.Accept(this);
-		_builder.AppendTagClose().AppendTagClose();
-	}
-
-	#endregion
-	
-	#region Helpers
-
-	private static string TagForHeadingLevel(HeadingLevel level) =>
-		level switch
-		{
-			HeadingLevel.Level1 => "h1",
-			HeadingLevel.Level2 => "h2",
-			HeadingLevel.Level3 => "h3",
-			HeadingLevel.Level4 => "h4",
-			HeadingLevel.Level5 => "h5",
-			HeadingLevel.Level6 => "h6",
-			_ => throw new IndexOutOfRangeException()
-		};
-
-	private static string TagForListStyle(ListStyle style) =>
-		style switch
-		{
-			ListStyle.Ordered => "ol",
-			ListStyle.Unordered => "ul",
-			_ => throw new IndexOutOfRangeException()
-		};
-
-	private void WrapSpan(SpanInline span, string tag, IReadOnlyDictionary<string, string>? attributes = null)
-	{
-		_builder.AppendTagOpen(tag, true, attributes);
-		foreach (var inline in span.Inlines)
-			inline.Accept(this);
-		_builder.AppendTagClose();
+		WrapInlines(inline.Inlines, "a", attributes);
 	}
 
 	#endregion

@@ -2,32 +2,52 @@ using System;
 using System.Collections.Immutable;
 using System.Linq;
 using FluentFeeds.Shared.RichText.Helpers;
+using FluentFeeds.Shared.RichText.Inlines;
 
 namespace FluentFeeds.Shared.RichText.Blocks.List;
 
 /// <summary>
-/// Base class for items in a list.
+/// An item in a list which can contain multiple blocks.
 /// <seealso cref="ListBlock"/>
 /// </summary>
-public abstract class ListItem : IEquatable<ListItem>
+public sealed class ListItem : IEquatable<ListItem>
 {
 	/// <summary>
-	/// The type of this list item.
+	/// Create a new default-constructed list item.
 	/// </summary>
-	public abstract ListItemType Type { get; }
+	public ListItem()
+	{
+		Blocks = ImmutableArray<Block>.Empty;
+	}
 
 	/// <summary>
-	/// Accept a visitor for this list item.
+	/// Create a new list item from a list of blocks.
 	/// </summary>
-	public abstract void Accept(IListItemVisitor visitor);
+	public ListItem(params Block[] blocks)
+	{
+		Blocks = ImmutableArray.Create(blocks);
+	}
 
-	public virtual bool Equals(ListItem? other)
+	/// <summary>
+	/// Create a new list item hosting a single generic block with the provided inline elements.
+	/// </summary>
+	public ListItem(params Inline[] inlines)
+	{
+		Blocks = ImmutableArray.Create<Block>(new GenericBlock(inlines));
+	}
+	
+	/// <summary>
+	/// The list item's content.
+	/// </summary>
+	public ImmutableArray<Block> Blocks { get; init; }
+
+	public bool Equals(ListItem? other)
 	{
 		if (ReferenceEquals(this, other))
 			return true;
 		if (ReferenceEquals(null, other))
 			return false;
-		return true;
+		return Blocks.SequenceEqual(other.Blocks);
 	}
 
 	public override bool Equals(object? obj)
@@ -39,7 +59,7 @@ public abstract class ListItem : IEquatable<ListItem>
 
 	public override int GetHashCode()
 	{
-		return HashCode.Combine(Type);
+		return Blocks.SequenceHashCode();
 	}
 
 	public static bool operator ==(ListItem? lhs, ListItem? rhs) => lhs?.Equals(rhs) ?? ReferenceEquals(rhs, null);

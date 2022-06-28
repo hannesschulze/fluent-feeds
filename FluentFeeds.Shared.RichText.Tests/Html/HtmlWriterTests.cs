@@ -21,27 +21,21 @@ public class HtmlWriterTests
 	}
 
 	[Fact]
+	public void FormatBlock_Generic()
+	{
+		var block = new GenericBlock(
+			new TextInline("foo"),
+			new TextInline("bar"));
+		Assert.Equal("<div>foobar</div>", block.ToHtml());
+	}
+
+	[Fact]
 	public void FormatBlock_Paragraph()
 	{
 		var block = new ParagraphBlock(
 			new TextInline("foo"),
 			new TextInline("bar"));
 		Assert.Equal("<p>foobar</p>", block.ToHtml());
-	}
-
-	[Fact]
-	public void FormatBlock_Code()
-	{
-		var block = new CodeBlock("void Foo() =>\n    Bar();");
-		Assert.Equal("<pre>\nvoid Foo() =&gt;\n    Bar();\n</pre>", block.ToHtml());
-	}
-
-	[Fact]
-	public void FormatBlock_Code_Nested()
-	{
-		var block = new QuoteBlock(
-			new CodeBlock("void Foo() =>\n    Bar();"));
-		Assert.Equal("<blockquote>\n<pre>\nvoid Foo() =&gt;\n    Bar();\n</pre>\n</blockquote>", block.ToHtml());
 	}
 
 	[Theory]
@@ -60,6 +54,21 @@ public class HtmlWriterTests
 	}
 
 	[Fact]
+	public void FormatBlock_Code()
+	{
+		var block = new CodeBlock("void Foo() =>\n    Bar();");
+		Assert.Equal("<pre>\nvoid Foo() =&gt;\n    Bar();\n</pre>", block.ToHtml());
+	}
+
+	[Fact]
+	public void FormatBlock_Code_Nested()
+	{
+		var block = new QuoteBlock(
+			new CodeBlock("void Foo() =>\n    Bar();"));
+		Assert.Equal("<blockquote>\n<pre>\nvoid Foo() =&gt;\n    Bar();\n</pre>\n</blockquote>", block.ToHtml());
+	}
+
+	[Fact]
 	public void FormatBlock_HorizontalRule()
 	{
 		var block = new HorizontalRuleBlock();
@@ -70,35 +79,38 @@ public class HtmlWriterTests
 	public void FormatBlock_List_LeafItems()
 	{
 		var block = new ListBlock(
-			new LeafListItem(
+			new ListItem(
 				new TextInline("foo"),
 				new TextInline("bar")),
-			new LeafListItem(
+			new ListItem(
 				new TextInline("baz")));
-		Assert.Equal("<ul>\n  <li>foobar</li>\n\n  <li>baz</li>\n</ul>", block.ToHtml());
+		Assert.Equal(
+			"<ul>\n  <li>\n    <div>foobar</div>\n  </li>\n\n  <li>\n    <div>baz</div>\n  </li>\n</ul>",
+			block.ToHtml());
 	}
 
 	[Theory]
 	[InlineData(
 		ListStyle.Unordered, ListStyle.Unordered, 
-		"<ul>\n  <li>\n    foo\n\n    <ul>\n      <li>bar</li>\n    </ul>\n  </li>\n</ul>")]
+		"<ul>\n  <li>\n    <div>foo</div>\n\n    <ul>\n      <li>\n        <div>bar</div>\n      </li>\n    </ul>\n  </li>\n</ul>")]
 	[InlineData(
 		ListStyle.Unordered, ListStyle.Ordered, 
-		"<ul>\n  <li>\n    foo\n\n    <ol>\n      <li>bar</li>\n    </ol>\n  </li>\n</ul>")]
+		"<ul>\n  <li>\n    <div>foo</div>\n\n    <ol>\n      <li>\n        <div>bar</div>\n      </li>\n    </ol>\n  </li>\n</ul>")]
 	[InlineData(
 		ListStyle.Ordered, ListStyle.Unordered, 
-		"<ol>\n  <li>\n    foo\n\n    <ul>\n      <li>bar</li>\n    </ul>\n  </li>\n</ol>")]
+		"<ol>\n  <li>\n    <div>foo</div>\n\n    <ul>\n      <li>\n        <div>bar</div>\n      </li>\n    </ul>\n  </li>\n</ol>")]
 	[InlineData(
 		ListStyle.Ordered, ListStyle.Ordered, 
-		"<ol>\n  <li>\n    foo\n\n    <ol>\n      <li>bar</li>\n    </ol>\n  </li>\n</ol>")]
-	public void FormatBlock_List_NestedItems(ListStyle outerStyle, ListStyle innerStyle, string expectedResult)
+		"<ol>\n  <li>\n    <div>foo</div>\n\n    <ol>\n      <li>\n        <div>bar</div>\n      </li>\n    </ol>\n  </li>\n</ol>")]
+	public void FormatBlock_List_NestedList(ListStyle outerStyle, ListStyle innerStyle, string expectedResult)
 	{
 		var block = new ListBlock(
-			new NestedListItem(
-				new LeafListItem(
+			new ListItem(
+				new GenericBlock(
 					new TextInline("foo")),
-				new LeafListItem(
-					new TextInline("bar"))) {Style = innerStyle}) {Style = outerStyle};
+				new ListBlock(
+					new ListItem(
+						new TextInline("bar"))) {Style = innerStyle})) {Style = outerStyle};
 		Assert.Equal(expectedResult, block.ToHtml());
 	}
 
