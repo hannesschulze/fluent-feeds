@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -93,8 +94,7 @@ internal sealed class HtmlBuilder
 			if (scope.HasElements)
 			{
 				// Add additional line breaks for separating tags.
-				for (var i = 0; i < _options.EmptyLinesBetweenTags; ++i)
-					_builder.AppendLine();
+				_builder.Append('\n', Math.Max(0, _options.EmptyLinesBetweenTags));
 				AppendLineBreak();
 			}
 			else if (_scopes.Count > 1)
@@ -112,7 +112,7 @@ internal sealed class HtmlBuilder
 	/// </summary>
 	private void AppendLineBreak()
 	{
-		_builder.AppendLine();
+		_builder.Append('\n');
 		if (DisableIndentation)
 			return;
 		
