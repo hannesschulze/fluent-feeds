@@ -236,24 +236,6 @@ public class HtmlWriterTests
 		Assert.Equal("<code>foobar</code>", inline.ToHtml());
 	}
 
-	[Fact]
-	public void FormatInline_Superscript()
-	{
-		var inline = new SuperscriptInline(
-			new TextInline("foo"),
-			new TextInline("bar"));
-		Assert.Equal("<sup>foobar</sup>", inline.ToHtml());
-	}
-
-	[Fact]
-	public void FormatInline_Subscript()
-	{
-		var inline = new SubscriptInline(
-			new TextInline("foo"),
-			new TextInline("bar"));
-		Assert.Equal("<sub>foobar</sub>", inline.ToHtml());
-	}
-
 	[Theory]
 	[InlineData(null, "<a>foobar</a>")]
 	[InlineData("https://www.example.com/", "<a href=\"https://www.example.com/\">foobar</a>")]

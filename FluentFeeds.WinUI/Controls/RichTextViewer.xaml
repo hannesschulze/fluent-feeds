@@ -1,0 +1,19 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:FluentFeeds.WinUI.Controls">
+
+	<Style TargetType="local:RichTextViewer">
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="local:RichTextViewer">
+					<StackPanel
+						x:Name="Container"
+						Orientation="Vertical"
+						Background="#C8323C" />
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+</ResourceDictionary>

@@ -12,7 +12,5 @@ public interface IInlineVisitor
 	void Visit(UnderlineInline inline);
 	void Visit(StrikethroughInline inline);
 	void Visit(CodeInline inline);
-	void Visit(SuperscriptInline inline);
-	void Visit(SubscriptInline inline);
 	void Visit(HyperlinkInline inline);
 }
