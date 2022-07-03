@@ -17,8 +17,7 @@ public partial class RichTextViewer
 	/// Wrapper around a Microsoft.UI.Xaml.Documents inline and an inline collection inside it to allow layered
 	/// spans to be used as one container (the span itself is different from the span hosting inner elements).
 	/// </summary>
-	private readonly record struct InlineContainer(
-		MUXD.Inline OuterInline, MUXD.InlineCollection InnerContainer)
+	private readonly record struct InlineContainer(MUXD.Inline OuterInline, MUXD.InlineCollection InnerContainer)
 	{
 		public InlineContainer(MUXD.Span span) : this(span, span.Inlines)
 		{
@@ -52,15 +51,19 @@ public partial class RichTextViewer
 		/// Create a new inline renderer.
 		/// </summary>
 		/// <param name="container">The container into which the inlines should be rendered.</param>
-		public InlineRenderer(MUXD.InlineCollection container, in InlineRenderingContext context)
+		public InlineRenderer(
+			RichTextViewer viewer, MUXD.InlineCollection container, in InlineRenderingContext context)
 		{
 			Container = container;
 			Context = context;
+			Viewer = viewer;
 		}
 
 		public MUXD.InlineCollection Container { get; set; }
 		
 		public InlineRenderingContext Context { get; }
+
+		public RichTextViewer Viewer { get; }
 
 		public void Visit(TextInline inline)
 		{
@@ -164,7 +167,12 @@ public partial class RichTextViewer
 					parent.WrapSpan(
 						inline, () =>
 						{
-							var hyperlink = new MUXD.Hyperlink { NavigateUri = inline.Target };
+							var hyperlink = 
+								new MUXD.Hyperlink 
+								{
+									NavigateUri = inline.Target, 
+									Foreground = Viewer.HyperlinkForeground
+								};
 							// Restore outer format.
 							var innerSpan = ApplyFormat(hyperlink, parent.Context, innerContext);
 							return new(hyperlink, innerSpan.Inlines);
@@ -184,13 +192,13 @@ public partial class RichTextViewer
 		private static MUXD.Span CreateStrikethroughSpan() =>
 			new MUXD.Span { TextDecorations = TextDecorations.Strikethrough };
 
-		private static MUXD.Span CreateCodeSpan() =>
-			new MUXD.Span { Foreground = new SolidColorBrush(Color.FromArgb(255, 0, 80, 90)) };
+		private MUXD.Span CreateCodeSpan() =>
+			new MUXD.Span { FontFamily = Viewer.CodeFontFamily };
 
 		/// <summary>
 		/// Apply a context's format inside a container with a different format. This ignores hyperlinks.
 		/// </summary>
-		private static MUXD.Span ApplyFormat(
+		private MUXD.Span ApplyFormat(
 			MUXD.Span container, in InlineRenderingContext containerFormat, in InlineRenderingContext desiredFormat)
 		{
 			if (desiredFormat.IsBold && !containerFormat.IsBold)
@@ -296,7 +304,8 @@ public partial class RichTextViewer
 			var firstContainer = createContainer();
 			Container.Add(firstContainer.OuterInline);
 			var renderer = new InlineRenderer(
-				firstContainer.InnerContainer, context with { Parent = this, CreateContainer = createContainer });
+				Viewer, firstContainer.InnerContainer, 
+				context with { Parent = this, CreateContainer = createContainer });
 			foreach (var inline in span.Inlines)
 				inline.Accept(renderer);
 		}

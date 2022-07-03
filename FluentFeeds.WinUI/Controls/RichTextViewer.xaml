@@ -4,13 +4,93 @@
     xmlns:local="using:FluentFeeds.WinUI.Controls">
 
 	<Style TargetType="local:RichTextViewer">
+		<Setter Property="CodeFontFamily" Value="Consolas" />
+		<Setter Property="CodeFontWeight" Value="Normal" />
+		<Setter Property="CodeFontSize" Value="14" />
+		<Setter Property="CodeLineHeight" Value="20" />
+		<Setter Property="CodeBackground" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+		<Setter Property="CodeForeground" Value="{ThemeResource SystemControlForegroundBaseHighBrush}" />
+		<Setter Property="CodeBorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+		<Setter Property="CodeBorderThickness" Value="1" />
+		<Setter Property="CodePadding" Value="16,12,16,12" />
+		<Setter Property="CodeMargin" Value="8" />
+		<Setter Property="CodeCornerRadius" Value="8" />
+
+		<Setter Property="HyperlinkForeground" Value="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+
+		<Setter Property="BodyFontFamily" Value="Segoe UI" />
+		<Setter Property="BodyFontWeight" Value="Normal" />
+		<Setter Property="BodyFontSize" Value="14" />
+		<Setter Property="BodyLineHeight" Value="20" />
+		<Setter Property="BodyForeground" Value="{ThemeResource SystemControlForegroundBaseHighBrush}" />
+		<Setter Property="BodyDefaultMargin" Value="0" />
+		<Setter Property="BodyParagraphMargin" Value="8" />
+		
+		<Setter Property="Heading1FontFamily" Value="Segoe UI" />
+		<Setter Property="Heading1FontWeight" Value="SemiBold" />
+		<Setter Property="Heading1FontSize" Value="28" />
+		<Setter Property="Heading1LineHeight" Value="36" />
+		<Setter Property="Heading1Foreground" Value="{ThemeResource SystemControlForegroundBaseHighBrush}" />
+		<Setter Property="Heading1Margin" Value="16" />
+
+		<Setter Property="Heading2FontFamily" Value="Segoe UI" />
+		<Setter Property="Heading2FontWeight" Value="SemiBold" />
+		<Setter Property="Heading2FontSize" Value="21" />
+		<Setter Property="Heading2LineHeight" Value="28" />
+		<Setter Property="Heading2Foreground" Value="{ThemeResource SystemControlForegroundBaseHighBrush}" />
+		<Setter Property="Heading2Margin" Value="16" />
+
+		<Setter Property="Heading3FontFamily" Value="Segoe UI" />
+		<Setter Property="Heading3FontWeight" Value="SemiBold" />
+		<Setter Property="Heading3FontSize" Value="16" />
+		<Setter Property="Heading3LineHeight" Value="22" />
+		<Setter Property="Heading3Foreground" Value="{ThemeResource SystemControlForegroundBaseHighBrush}" />
+		<Setter Property="Heading3Margin" Value="16" />
+
+		<Setter Property="Heading4FontFamily" Value="Segoe UI" />
+		<Setter Property="Heading4FontWeight" Value="Bold" />
+		<Setter Property="Heading4FontSize" Value="14" />
+		<Setter Property="Heading4LineHeight" Value="20" />
+		<Setter Property="Heading4Foreground" Value="{ThemeResource SystemControlForegroundBaseHighBrush}" />
+		<Setter Property="Heading4Margin" Value="16" />
+
+		<Setter Property="Heading5FontFamily" Value="Segoe UI" />
+		<Setter Property="Heading5FontWeight" Value="Bold" />
+		<Setter Property="Heading5FontSize" Value="12" />
+		<Setter Property="Heading5LineHeight" Value="15" />
+		<Setter Property="Heading5Foreground" Value="{ThemeResource SystemControlForegroundBaseHighBrush}" />
+		<Setter Property="Heading5Margin" Value="16" />
+
+		<Setter Property="Heading6FontFamily" Value="Segoe UI" />
+		<Setter Property="Heading6FontWeight" Value="Bold" />
+		<Setter Property="Heading6FontSize" Value="10" />
+		<Setter Property="Heading6LineHeight" Value="12" />
+		<Setter Property="Heading6Foreground" Value="{ThemeResource SystemControlForegroundBaseHighBrush}" />
+		<Setter Property="Heading6Margin" Value="16" />
+
+		<Setter Property="DividerThickness" Value="1" />
+		<Setter Property="DividerBrush" Value="{ThemeResource SystemControlForegroundBaseLowBrush}" />
+		<Setter Property="DividerMargin" Value="8" />
+
+		<Setter Property="ListBulletIndent" Value="20" />
+		<Setter Property="ListBulletSpacing" Value="16" />
+		<Setter Property="ListMargin" Value="0" />
+
+		<Setter Property="QuoteIndent" Value="24" />
+		<Setter Property="QuoteIndicatorThickness" Value="3" />
+		<Setter Property="QuoteIndicatorBrush" Value="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+		<Setter Property="QuoteMargin" Value="8" />
+
+		<Setter Property="TableHeaderFontWeight" Value="Bold" />
+		<Setter Property="TableHeaderBackground" Value="{ThemeResource AccentFillColorDefaultBrush}" />
+		<Setter Property="TableHeaderForeground" Value="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+		<Setter Property="TablePadding" Value="8,4,8,4" />
+		<Setter Property="TableMargin" Value="8" />
+
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate TargetType="local:RichTextViewer">
-					<StackPanel
-						x:Name="Container"
-						Orientation="Vertical"
-						Background="#C8323C" />
+					<StackPanel x:Name="Container" Orientation="Vertical" />
 				</ControlTemplate>
 			</Setter.Value>
 		</Setter>

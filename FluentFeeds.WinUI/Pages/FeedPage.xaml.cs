@@ -88,7 +88,7 @@ public sealed partial class FeedPage : Page
 				new TextInline("Blockquotes"))
 			{ Level = HeadingLevel.Level2 },
 			new QuoteBlock(
-				new ParagraphBlock(
+				new GenericBlock(
 					new TextInline(
 						"Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor " +
 						"invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam " +
@@ -102,7 +102,7 @@ public sealed partial class FeedPage : Page
 						"et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit " +
 						"amet.")),
 				new QuoteBlock(
-					new ParagraphBlock(
+					new GenericBlock(
 						new TextInline(
 							"Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie " +
 							"consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et " +
