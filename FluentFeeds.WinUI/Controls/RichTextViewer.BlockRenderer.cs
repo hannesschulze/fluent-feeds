@@ -281,6 +281,13 @@ public partial class RichTextViewer
 			AddElement(grid, Viewer.TableMargin);
 		}
 
+		/// <summary>
+		/// Add margin to a framework element and add it to the container.
+		/// </summary>
+		/// <remarks>
+		/// This makes sure that the spacing between this element and the next one is the maximum of both element's 
+		/// margins.
+		/// </remarks>
 		private void AddElement(FrameworkElement element, double margin)
 		{
 			element.Margin = GetNextMargin(margin);
@@ -288,6 +295,13 @@ public partial class RichTextViewer
 			_lastRichTextBlock = null;
 		}
 
+		/// <summary>
+		/// Add margin to a block and add it to the container, reusing a rich text block instance if possible.
+		/// </summary>
+		/// <remarks>
+		/// This makes sure that the spacing between this element and the next one is the maximum of both element's 
+		/// margins.
+		/// </remarks>
 		private void AddBlock(MUXD.Block block, double margin)
 		{
 			if (_lastRichTextBlock == null)
@@ -311,6 +325,9 @@ public partial class RichTextViewer
 			_lastRichTextBlock.Blocks.Add(block);
 		}
 
+		/// <summary>
+		/// Create a paragraph block wrapping the provided inlines.
+		/// </summary>
 		private MUXD.Paragraph CreateParagraph(IEnumerable<Inline> inlines)
 		{
 			var paragraph = new MUXD.Paragraph();
@@ -320,6 +337,10 @@ public partial class RichTextViewer
 			return paragraph;
 		}
 
+		/// <summary>
+		/// Calculate the leading and trailing margins for a provided margin, taking into account and updating the last
+		/// element's trailing margin.
+		/// </summary>
 		private Thickness GetNextMargin(double margin)
 		{
 			// Remove the already existing trailing margin from the previous block.
@@ -328,6 +349,9 @@ public partial class RichTextViewer
 			return new Thickness(0, top: actualLeading, 0, bottom: margin);
 		}
 
+		/// <summary>
+		/// Create a list of table cells based on a table block, computing rows and columns.
+		/// </summary>
 		private List<TableCell> ComputeTableCells(TableBlock block, out int rowCount, out int columnCount)
 		{
 			var cells = new List<TableCell>();
@@ -405,6 +429,9 @@ public partial class RichTextViewer
 			return cells;
 		}
 
+		/// <summary>
+		/// Compute the natural column sizes for a table.
+		/// </summary>
 		private static double[] ComputeTableColumnSizes(int columnCount, IReadOnlyList<TableCell> cells)
 		{
 			// Determine the maximum width for every column
