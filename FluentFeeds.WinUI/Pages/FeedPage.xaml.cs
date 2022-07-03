@@ -3,6 +3,7 @@ using FluentFeeds.Shared.RichText;
 using FluentFeeds.Shared.RichText.Blocks;
 using FluentFeeds.Shared.RichText.Blocks.Heading;
 using FluentFeeds.Shared.RichText.Blocks.List;
+using FluentFeeds.Shared.RichText.Blocks.Table;
 using FluentFeeds.Shared.RichText.Inlines;
 using FluentFeeds.Shared.Services;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
@@ -152,7 +153,25 @@ public sealed partial class FeedPage : Page
 								new ImageInline(new Uri("https://upload.wikimedia.org/wikipedia/mediawiki/a/a9/Example.jpg")),
 								new TextInline(" an"))))
 					{ Target = new Uri("https://www.example.com") },
-					new TextInline(" image"))));
+					new TextInline(" image"))),
+			new HeadingBlock(
+				new TextInline("Table"))
+			{ Level = HeadingLevel.Level2 },
+			new TableBlock(
+				new TableRow(
+					new TableCell(
+						new TextInline("foo\nfoo\nfoo"))
+					{ IsHeader = true, RowSpan = 2 },
+					new TableCell(
+						new TextInline("bar"))
+					{ IsHeader = true },
+					new TableCell(
+						new TextInline("baz"))
+					{ IsHeader = true }),
+				new TableRow(
+					new TableCell(
+						new TextInline("test jl a fjido ajsdiof jaiop jasiopdf jiopsaj iodp fjioasd jfiopaj difop jaifo pjasdiop fjioasd jfiopas jdi\nofpjasdiop fioapsdf jiopasdj"))
+					{ ColumnSpan = 2 })));
 		//var navigationService = Ioc.Default.GetRequiredService<INavigationService>();
 		//var updateLabel = () => _lbl.Text = navigationService.CurrentRoute.FeedSource?.Name ?? "Unknown feed";
 		//navigationService.BackStackChanged += (s, e) => updateLabel();

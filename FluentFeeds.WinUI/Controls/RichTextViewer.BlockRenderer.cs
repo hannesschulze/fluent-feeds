@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using FluentFeeds.Shared.RichText.Blocks;
 using FluentFeeds.Shared.RichText.Blocks.Heading;
@@ -9,6 +10,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Shapes;
+using Windows.Foundation;
 using Windows.UI;
 using MUXD = Microsoft.UI.Xaml.Documents;
 
@@ -16,6 +18,12 @@ namespace FluentFeeds.WinUI.Controls;
 
 public partial class RichTextViewer
 {
+	/// <summary>
+	/// Cell in a table.
+	/// </summary>
+	private readonly record struct TableCell(
+		StackPanel Content, Size NaturalSize, int RowStart, int RowSpan, int ColumnStart, int ColumnSpan);
+
 	/// <summary>
 	/// Renders blocks and appends them to a stack panel.
 	/// </summary>
@@ -197,8 +205,39 @@ public partial class RichTextViewer
 
 		public void Visit(TableBlock block)
 		{
-			// TODO: Render tables
-			throw new System.NotImplementedException();
+			var cells = ComputeTableCells(block, out var rowCount, out var columnCount);
+			var columnSizes = ComputeTableColumnSizes(columnCount, cells);
+
+			var grid = 
+				new Grid
+				{
+					HorizontalAlignment = HorizontalAlignment.Left,
+					MaxWidth = columnSizes.Sum() + 1,
+					BorderThickness = new Thickness(0, 0, right: 1, bottom: 1),
+					BorderBrush = new SolidColorBrush(Color.FromArgb(255, 0, 255, 0))
+				};
+
+			for (var row = 0; row < rowCount; ++row)
+			{
+				grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+			}
+
+			foreach (var columnSize in columnSizes)
+			{
+				grid.ColumnDefinitions.Add(
+					new ColumnDefinition { Width = new GridLength(columnSize, GridUnitType.Star) });
+			}
+
+			foreach (var cell in cells)
+			{
+				Grid.SetRow(cell.Content, cell.RowStart);
+				Grid.SetRowSpan(cell.Content, cell.RowSpan);
+				Grid.SetColumn(cell.Content, cell.ColumnStart);
+				Grid.SetColumnSpan(cell.Content, cell.ColumnSpan);
+				grid.Children.Add(cell.Content);
+			}
+
+			AddElement(grid, 14, 14);
 		}
 
 		private void AddElement(FrameworkElement element, double marginLeading, double marginTrailing)
@@ -246,6 +285,104 @@ public partial class RichTextViewer
 			var actualLeading = Math.Max(0.0, marginLeading - _trailingMargin);
 			_trailingMargin = marginTrailing;
 			return new Thickness(0, top: actualLeading, 0, bottom: marginTrailing);
+		}
+
+		private static List<TableCell> ComputeTableCells(TableBlock block, out int rowCount, out int columnCount)
+		{
+			var cells = new List<TableCell>();
+			var rowOffsets = new List<int>();
+			for (var rowIndex = 0; rowIndex < block.Rows.Length; ++rowIndex)
+			{
+				// The row always matches the one requested.
+				var row = block.Rows[rowIndex];
+				var columnIndex = 0;
+				foreach (var cell in row.Cells)
+				{
+					if (cell.RowSpan == 0 || cell.ColumnSpan == 0)
+						continue;
+
+					while (columnIndex < rowOffsets.Count && rowOffsets[columnIndex] > 0)
+					{
+						// This column is blocked by a row above the current one -> move to the next one.
+						rowOffsets[columnIndex]--;
+						columnIndex++;
+					}
+
+					var columnStart = columnIndex;
+					var columnSpan = 0;
+					for (; columnIndex < columnStart + cell.ColumnSpan; ++columnIndex)
+					{
+						if (columnIndex < rowOffsets.Count && rowOffsets[columnIndex] > 0)
+							// The requested column span is blocked by another cell -> shrink the column.
+							break;
+
+						// Reserve the requested row span for each column the cell blocks.
+						columnSpan++;
+						while (rowOffsets.Count <= columnIndex)
+							rowOffsets.Add(0);
+						rowOffsets[columnIndex] += cell.RowSpan - 1;
+					}
+
+					var content =
+						new StackPanel
+						{
+							HorizontalAlignment = HorizontalAlignment.Stretch,
+							VerticalAlignment = VerticalAlignment.Stretch,
+							Padding = new Thickness(4),
+							BorderThickness = new Thickness(left: 1, top: 1, 0, 0),
+							BorderBrush = new SolidColorBrush(Color.FromArgb(255, 0, 255, 0))
+						};
+					if (cell.IsHeader)
+						content.Background = new SolidColorBrush(Color.FromArgb(50, 10, 90, 230));
+					var renderer = new BlockRenderer(content);
+					foreach (var itemBlock in cell.Blocks)
+						itemBlock.Accept(renderer);
+					content.Measure(new Size(Double.PositiveInfinity, Double.PositiveInfinity));
+
+					cells.Add(new TableCell(
+						Content: content,
+						NaturalSize: content.DesiredSize,
+						RowStart: rowIndex,
+						RowSpan: cell.RowSpan,
+						ColumnStart: columnStart,
+						ColumnSpan: columnSpan));
+				}
+			}
+
+			rowCount = block.Rows.Length + rowOffsets.Max();
+			columnCount = rowOffsets.Count;
+			return cells;
+		}
+
+		private static double[] ComputeTableColumnSizes(int columnCount, IReadOnlyList<TableCell> cells)
+		{
+			// Determine the maximum width for every column
+			// Pass 1: single-column cells
+			var columnSizes = new double[columnCount];
+			foreach (var cell in cells)
+			{
+				if (cell.ColumnSpan == 1)
+				{
+					var column = cell.ColumnStart;
+					columnSizes[column] = Math.Max(columnSizes[column], cell.NaturalSize.Width);
+				}
+			}
+
+			// Pass 2: multi-column cells -> subtract already allocated widths
+			foreach (var cell in cells)
+			{
+				if (cell.ColumnSpan > 1)
+				{
+					var remainingWidth = cell.NaturalSize.Width;
+					for (var column = cell.ColumnStart; column < cell.ColumnStart + cell.ColumnSpan; ++column)
+						remainingWidth -= columnSizes[column];
+					var additionalWidth = Math.Max(remainingWidth, 0.0) / cell.ColumnSpan;
+					for (var column = cell.ColumnStart; column < cell.ColumnStart + cell.ColumnSpan; ++column)
+						columnSizes[column] += additionalWidth;
+				}
+			}
+
+			return columnSizes;
 		}
 
 		private readonly StackPanel _container;
