@@ -20,11 +20,12 @@ public sealed partial class FeedPage : Page
 			new ParagraphBlock(
 				new TextInline("This is a demo for the "),
 				new HyperlinkInline(
+					new BoldInline(
 					new TextInline("FluentFeeds "),
-					/*new HyperlinkInline(
+					new HyperlinkInline(
 						new TextInline("Rich Text"))
-					{ Target = new Uri("https://github.com/") },*/
-					new TextInline(" object model"))
+					{ Target = new Uri("https://github.com/") },
+					new TextInline(" object model")))
 				{ Target = new Uri("https://www.example.com") },
 				new TextInline(".")),
 			new HorizontalRuleBlock(),

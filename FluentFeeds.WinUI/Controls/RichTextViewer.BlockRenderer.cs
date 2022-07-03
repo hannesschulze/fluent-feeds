@@ -16,6 +16,9 @@ namespace FluentFeeds.WinUI.Controls;
 
 public partial class RichTextViewer
 {
+	/// <summary>
+	/// Renders blocks and appends them to a stack panel.
+	/// </summary>
 	private sealed class BlockRenderer : IBlockVisitor
 	{
 		public BlockRenderer(StackPanel container)
