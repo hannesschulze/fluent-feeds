@@ -249,11 +249,10 @@ public partial class RichTextViewer
 			var cells = ComputeTableCells(block, out var rowCount, out var columnCount);
 			var columnSizes = ComputeTableColumnSizes(columnCount, cells);
 
-			var grid = 
+			var table = 
 				new Grid
 				{
-					HorizontalAlignment = HorizontalAlignment.Left,
-					MaxWidth = columnSizes.Sum() + Viewer.DividerThickness,
+					HorizontalAlignment = HorizontalAlignment.Stretch,
 					BorderThickness = 
 						new Thickness(0, 0, right: Viewer.DividerThickness, bottom: Viewer.DividerThickness),
 					BorderBrush = Viewer.DividerBrush
@@ -261,12 +260,12 @@ public partial class RichTextViewer
 
 			for (var row = 0; row < rowCount; ++row)
 			{
-				grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+				table.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 			}
 
 			foreach (var columnSize in columnSizes)
 			{
-				grid.ColumnDefinitions.Add(
+				table.ColumnDefinitions.Add(
 					new ColumnDefinition { Width = new GridLength(columnSize, GridUnitType.Star) });
 			}
 
@@ -276,10 +275,20 @@ public partial class RichTextViewer
 				Grid.SetRowSpan(cell.Content, cell.RowSpan);
 				Grid.SetColumn(cell.Content, cell.ColumnStart);
 				Grid.SetColumnSpan(cell.Content, cell.ColumnSpan);
-				grid.Children.Add(cell.Content);
+				table.Children.Add(cell.Content);
 			}
 
-			AddElement(grid, Viewer.TableMargin);
+			var outerGrid = new Grid();
+			outerGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+			outerGrid.ColumnDefinitions.Add(
+				new ColumnDefinition
+				{
+					Width = new GridLength(1, GridUnitType.Star),
+					MaxWidth = columnSizes.Sum() + Viewer.DividerThickness
+				});
+			outerGrid.Children.Add(table);
+
+			AddElement(outerGrid, Viewer.TableMargin);
 		}
 
 		/// <summary>
