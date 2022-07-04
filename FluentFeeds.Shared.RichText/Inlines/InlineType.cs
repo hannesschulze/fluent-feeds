@@ -34,14 +34,6 @@ public enum InlineType
 	/// </summary>
 	Code,
 	/// <summary>
-	/// <see cref="SuperscriptInline"/>
-	/// </summary>
-	Superscript,
-	/// <summary>
-	/// <see cref="SubscriptInline"/>
-	/// </summary>
-	Subscript,
-	/// <summary>
 	/// <see cref="HyperlinkInline"/>
 	/// </summary>
 	Hyperlink

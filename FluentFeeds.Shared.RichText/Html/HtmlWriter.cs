@@ -166,16 +166,6 @@ internal sealed class HtmlWriter : IBlockVisitor, IInlineVisitor
 		WrapInlines(inline.Inlines, "code");
 	}
 
-	public void Visit(SuperscriptInline inline)
-	{
-		WrapInlines(inline.Inlines, "sup");
-	}
-
-	public void Visit(SubscriptInline inline)
-	{
-		WrapInlines(inline.Inlines, "sub");
-	}
-
 	public void Visit(HyperlinkInline inline)
 	{
 		var attributes = new Dictionary<string, string>();
