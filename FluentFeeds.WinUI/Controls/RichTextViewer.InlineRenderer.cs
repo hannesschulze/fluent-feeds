@@ -1,13 +1,12 @@
 ﻿using System;
+using System.IO;
 using FluentFeeds.Shared.RichText.Inlines;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
-using Windows.UI;
+using Microsoft.UI.Xaml.Media.Imaging;
 using Windows.UI.Text;
 using MUXD = Microsoft.UI.Xaml.Documents;
-using System.IO;
-using Microsoft.UI.Xaml.Media.Imaging;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml;
 
 namespace FluentFeeds.WinUI.Controls;
 

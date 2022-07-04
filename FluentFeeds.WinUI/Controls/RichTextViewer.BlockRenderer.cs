@@ -203,6 +203,7 @@ public partial class RichTextViewer
 				var renderer = new BlockRenderer(Viewer, content, Context);
 				foreach (var itemBlock in item.Blocks)
 					itemBlock.Accept(renderer);
+				renderer.AddOuterMargin();
 				Grid.SetRow(content, i);
 				Grid.SetColumn(content, 1);
 				grid.Children.Add(content);
@@ -282,6 +283,16 @@ public partial class RichTextViewer
 		}
 
 		/// <summary>
+		/// Add the outer margin to the container after visiting all blocks.
+		/// </summary>
+		public void AddOuterMargin()
+		{
+			var padding = Container.Padding;
+			Container.Padding = new Thickness(
+				padding.Left, padding.Top + _firstMargin, padding.Right, padding.Bottom + _lastMargin);
+		}
+
+		/// <summary>
 		/// Add margin to a framework element and add it to the container.
 		/// </summary>
 		/// <remarks>
@@ -290,7 +301,7 @@ public partial class RichTextViewer
 		/// </remarks>
 		private void AddElement(FrameworkElement element, double margin)
 		{
-			element.Margin = GetNextMargin(margin);
+			element.Margin = new Thickness(0, top: GetNextMargin(margin), 0, 0);
 			Container.Children.Add(element);
 			_lastRichTextBlock = null;
 		}
@@ -314,13 +325,12 @@ public partial class RichTextViewer
 				Container.Children.Add(_lastRichTextBlock);
 			}
 
-			// Blocks already merge the margins themselves, add outer margin to rich text block.
-			block.Margin = new Thickness(0, top: margin, 0, bottom: margin);
-			var blockMargin = GetNextMargin(margin);
+			// Rich text block ignores outer margin so we add it to the block itself manually.
+			var leadingMargin = GetNextMargin(margin);
 			if (_lastRichTextBlock.Blocks.Count == 0)
-				_lastRichTextBlock.Margin = blockMargin;
+				_lastRichTextBlock.Margin = new Thickness(0, top: leadingMargin, 0, 0);
 			else
-				_lastRichTextBlock.Margin = _lastRichTextBlock.Margin with { Bottom = blockMargin.Bottom };
+				block.Margin = new Thickness(0, top: leadingMargin, 0, 0);
 
 			_lastRichTextBlock.Blocks.Add(block);
 		}
@@ -338,15 +348,22 @@ public partial class RichTextViewer
 		}
 
 		/// <summary>
-		/// Calculate the leading and trailing margins for a provided margin, taking into account and updating the last
-		/// element's trailing margin.
+		/// Calculate the leading margin for a provided margin, taking into account and updating the last element's
+		/// trailing margin.
 		/// </summary>
-		private Thickness GetNextMargin(double margin)
+		private double GetNextMargin(double margin)
 		{
-			// Remove the already existing trailing margin from the previous block.
-			var actualLeading = Math.Max(0.0, margin - _trailingMargin);
-			_trailingMargin = margin;
-			return new Thickness(0, top: actualLeading, 0, bottom: margin);
+			if (!_firstMarginSet)
+			{
+				// Save first margin which can be applied later.
+				_firstMargin = margin;
+				_firstMarginSet = true;
+				return 0;
+			}
+
+			var leadingMargin = Math.Max(_lastMargin, margin);
+			_lastMargin = margin;
+			return leadingMargin;
 		}
 
 		/// <summary>
@@ -412,6 +429,7 @@ public partial class RichTextViewer
 					var renderer = new BlockRenderer(Viewer, content, contentContext);
 					foreach (var itemBlock in cell.Blocks)
 						itemBlock.Accept(renderer);
+					renderer.AddOuterMargin();
 					content.Measure(new Size(Double.PositiveInfinity, Double.PositiveInfinity));
 
 					cells.Add(new TableCell(
@@ -464,6 +482,8 @@ public partial class RichTextViewer
 		}
 
 		private RichTextBlock? _lastRichTextBlock;
-		private double _trailingMargin = 0;
+		private double _firstMargin = 0;
+		private bool _firstMarginSet = false;
+		private double _lastMargin = 0;
 	}
 }
