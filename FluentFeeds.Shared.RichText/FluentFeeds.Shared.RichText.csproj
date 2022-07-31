@@ -8,4 +8,8 @@
 	<ItemGroup>
 		<InternalsVisibleTo Include="$(AssemblyName).Tests" />
 	</ItemGroup>
+	
+	<ItemGroup>
+	  <PackageReference Include="AngleSharp" Version="0.17.1" />
+	</ItemGroup>
 </Project>
