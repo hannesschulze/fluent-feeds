@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using AngleSharp.Dom;
 using AngleSharp.Html.Dom;
 using FluentFeeds.Shared.RichText.Blocks;
 using FluentFeeds.Shared.RichText.Blocks.Heading;
+using FluentFeeds.Shared.RichText.Blocks.List;
+using FluentFeeds.Shared.RichText.Blocks.Table;
 
 namespace FluentFeeds.Shared.RichText.Html;
 
@@ -29,6 +32,14 @@ internal sealed class HtmlBlockProcessor : HtmlProcessor
 			"H4" => HeadingLevel.Level4,
 			"H5" => HeadingLevel.Level5,
 			"H6" => HeadingLevel.Level6,
+			_ => throw new ArgumentOutOfRangeException(nameof(tagName))
+		};
+
+	private static ListStyle ListStyleFromTagName(string tagName) =>
+		tagName switch
+		{
+			"UL" => ListStyle.Unordered,
+			"OL" => ListStyle.Ordered,
 			_ => throw new ArgumentOutOfRangeException(nameof(tagName))
 		};
 	
@@ -83,13 +94,18 @@ internal sealed class HtmlBlockProcessor : HtmlProcessor
 				AddBlock(new HorizontalRuleBlock());
 				break;
 			case "UL": case "OL":
-				// TODO
+				AddBlock(
+					new ListBlock
+					{
+						Items = TransformListItems(node.ChildNodes),
+						Style = ListStyleFromTagName(tagName)
+					});
 				break;
 			case "BLOCKQUOTE":
 				AddBlock(new QuoteBlock { Blocks = TransformAll(Options, node.ChildNodes) });
 				break;
 			case "TABLE":
-				// TODO
+				AddBlock(new TableBlock { Rows = TransformTableRows(node.ChildNodes) });
 				break;
 			case not null when IsBlockTag(tagName):
 				// Make sure the contents of this block are not displayed inline.
@@ -117,6 +133,76 @@ internal sealed class HtmlBlockProcessor : HtmlProcessor
 	{
 		FlushGenericBlock();
 		_blocks.Add(block);
+	}
+
+	private ImmutableArray<ListItem> TransformListItems(IEnumerable<INode> nodes)
+	{
+		HtmlBlockProcessor? fallbackItemProcessor = null;
+		void FlushFallbackItem(List<ListItem> items)
+		{
+			if (fallbackItemProcessor == null)
+				return;
+					
+			items.Add(new ListItem { Blocks = fallbackItemProcessor.GetResult() });
+			fallbackItemProcessor = null;
+		}
+
+		var items = new List<ListItem>();
+		foreach (var node in nodes)
+		{
+			if (node is IHtmlListItemElement)
+			{
+				FlushFallbackItem(items);
+				items.Add(new ListItem { Blocks = TransformAll(Options, node.ChildNodes) });
+			}
+			else
+			{
+				fallbackItemProcessor ??= new HtmlBlockProcessor(Options);
+				fallbackItemProcessor.Process(node);
+			}
+		}
+		
+		FlushFallbackItem(items);
+		return items.ToImmutableArray();
+	}
+
+	private ImmutableArray<TableRow> TransformTableRows(IEnumerable<INode> sections)
+	{
+		var rows = new List<TableRow>();
+		
+		foreach (var section in sections)
+		{
+			if (section is IHtmlTableSectionElement)
+			{
+				rows.AddRange(section.ChildNodes
+					.Where(row => row is IHtmlTableRowElement)
+					.Select(row => new TableRow { Cells = TransformTableCells(row.ChildNodes) }));
+			}
+		}
+
+		return rows.ToImmutableArray();
+	}
+
+	private ImmutableArray<TableCell> TransformTableCells(IEnumerable<INode> nodes)
+	{
+		var cells = new List<TableCell>();
+		
+		foreach (var cell in nodes)
+		{
+			if (cell is IHtmlTableCellElement cellElement)
+			{
+				cells.Add(
+					new TableCell
+					{
+						Blocks = TransformAll(Options, cell.ChildNodes),
+						ColumnSpan = cellElement.ColumnSpan,
+						RowSpan = cellElement.RowSpan,
+						IsHeader = cellElement.TagName == "TH"
+					});
+			}
+		}
+
+		return cells.ToImmutableArray();
 	}
 
 	private readonly List<Block> _blocks = new();

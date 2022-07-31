@@ -1,6 +1,8 @@
 using System;
 using FluentFeeds.Shared.RichText.Blocks;
 using FluentFeeds.Shared.RichText.Blocks.Heading;
+using FluentFeeds.Shared.RichText.Blocks.List;
+using FluentFeeds.Shared.RichText.Blocks.Table;
 using FluentFeeds.Shared.RichText.Html;
 using FluentFeeds.Shared.RichText.Inlines;
 using Xunit;
@@ -164,6 +166,111 @@ public class HtmlProcessorTests
 				new GenericBlock(new TextInline("foo")), 
 				new ParagraphBlock(new TextInline("bar")), 
 				new GenericBlock(new TextInline("baz"))));
+		Assert.Equal(expected, actual);
+	}
+
+	[Theory]
+	[InlineData("<ul><li>test</li></ul>", ListStyle.Unordered)]
+	[InlineData("<ol><li>test</li></ol>", ListStyle.Ordered)]
+	public void Blocks_Known_List_Styles(string html, ListStyle listStyle)
+	{
+		var actual = RichText.ParseHtml(html);
+		var expected = new RichText(new ListBlock(new ListItem(new TextInline("test"))) { Style = listStyle });
+		Assert.Equal(expected, actual);
+	}
+
+	[Fact]
+	public void Blocks_Known_List_ItemWithMultipleBlocks()
+	{
+		var actual = RichText.ParseHtml("<ul><li>foo<p>bar</p></li></ul>");
+		var expected = new RichText(
+			new ListBlock(
+				new ListItem(
+					new GenericBlock(new TextInline("foo")),
+					new ParagraphBlock(new TextInline("bar")))));
+		Assert.Equal(expected, actual);
+	}
+
+	[Fact]
+	public void Blocks_Known_List_MissingItemElement()
+	{
+		var actual = RichText.ParseHtml("<ul><p>foo</p><li>test</li>bar<b>baz</b></ul>");
+		var expected = new RichText(
+			new ListBlock(
+				new ListItem(new ParagraphBlock(new TextInline("foo"))),
+				new ListItem(new TextInline("test")),
+				new ListItem(new TextInline("bar"), new BoldInline(new TextInline("baz")))));
+		Assert.Equal(expected, actual);
+	}
+
+	[Fact]
+	public void Blocks_Known_Table()
+	{
+		var actual = RichText.ParseHtml("<table><tr><th>foo</th><td>bar</td></tr><tr><td>baz</td></tr></table>");
+		var expected = new RichText(
+			new TableBlock(
+				new TableRow(
+					new TableCell(new TextInline("foo")) { IsHeader = true },
+					new TableCell(new TextInline("bar"))),
+				new TableRow(
+					new TableCell(new TextInline("baz")))));
+		Assert.Equal(expected, actual);
+	}
+
+	[Fact]
+	public void Blocks_Known_Table_SpanAttributes()
+	{
+		var actual = RichText.ParseHtml("<table><tr><td colspan=\"2\" rowspan=\"3\">foo</td></tr></table>");
+		var expected = new RichText(
+			new TableBlock(new TableRow(new TableCell(new TextInline("foo")) { ColumnSpan = 2, RowSpan = 3 })));
+		Assert.Equal(expected, actual);
+	}
+
+	[Fact]
+	public void Blocks_Known_Table_CellWithMultipleBlocks()
+	{
+		var actual = RichText.ParseHtml("<table><tr><td>foo<p>bar</p></td></tr></table>");
+		var expected = new RichText(
+			new TableBlock(
+				new TableRow(
+					new TableCell(
+						new GenericBlock(new TextInline("foo")),
+						new ParagraphBlock(new TextInline("bar"))))));
+		Assert.Equal(expected, actual);
+	}
+
+	[Fact]
+	public void Blocks_Known_Table_MissingRow()
+	{
+		var actual = RichText.ParseHtml("<table><td>foo</td><td>bar</td></table>");
+		var expected = new RichText(
+			new TableBlock(
+				new TableRow(
+					new TableCell(new TextInline("foo")),
+					new TableCell(new TextInline("bar")))));
+		Assert.Equal(expected, actual);
+	}
+
+	[Fact]
+	public void Blocks_Known_Table_NonSectionsIgnored()
+	{
+		var actual = RichText.ParseHtml("<table><caption>test</caption><tr><td>foo</td></tr></table>");
+		var expected = new RichText(
+			new TableBlock(
+				new TableRow(
+					new TableCell(new TextInline("foo")))));
+		Assert.Equal(expected, actual);
+	}
+
+	[Fact]
+	public void Blocks_Known_Table_MissingColumn()
+	{
+		var actual = RichText.ParseHtml("<table><tr>foo<td>bar</td></tr></table>");
+		var expected = new RichText(
+			new GenericBlock(new TextInline("foo")),
+			new TableBlock(
+				new TableRow(
+					new TableCell(new TextInline("bar")))));
 		Assert.Equal(expected, actual);
 	}
 

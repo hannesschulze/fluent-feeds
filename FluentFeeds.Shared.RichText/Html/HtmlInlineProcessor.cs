@@ -99,22 +99,22 @@ internal sealed class HtmlInlineProcessor : HtmlProcessor
 					_isFirstTextInLine = false;
 					break;
 				case "B": case "STRONG":
-					WrapChildren(node, inlines => new BoldInline { Inlines = inlines });
+					AddSpan(node, inlines => new BoldInline { Inlines = inlines });
 					break;
 				case "I": case "EM":
-					WrapChildren(node, inlines => new ItalicInline { Inlines = inlines });
+					AddSpan(node, inlines => new ItalicInline { Inlines = inlines });
 					break;
 				case "U":
-					WrapChildren(node, inlines => new UnderlineInline { Inlines = inlines });
+					AddSpan(node, inlines => new UnderlineInline { Inlines = inlines });
 					break;
 				case "S":
-					WrapChildren(node, inlines => new StrikethroughInline { Inlines = inlines });
+					AddSpan(node, inlines => new StrikethroughInline { Inlines = inlines });
 					break;
 				case "CODE":
-					WrapChildren(node, inlines => new CodeInline { Inlines = inlines });
+					AddSpan(node, inlines => new CodeInline { Inlines = inlines });
 					break;
 				case "A" when element is IHtmlAnchorElement anchorElement:
-					WrapChildren(node, inlines =>
+					AddSpan(node, inlines =>
 						new HyperlinkInline { Inlines = inlines, Target = CreateUri(anchorElement.Href) });
 					break;
 				default:
@@ -125,9 +125,9 @@ internal sealed class HtmlInlineProcessor : HtmlProcessor
 		}
 	}
 
-	private void WrapChildren(INode parent, Func<ImmutableArray<Inline>, Inline> createInline)
+	private void AddSpan(INode node, Func<ImmutableArray<Inline>, SpanInline> createInline)
 	{
-		var inlines = TransformAll(Options, parent.ChildNodes);
+		var inlines = TransformAll(Options, node.ChildNodes);
 		if (inlines.Length == 0)
 			return;
 		_inlines.Add(createInline(inlines));
