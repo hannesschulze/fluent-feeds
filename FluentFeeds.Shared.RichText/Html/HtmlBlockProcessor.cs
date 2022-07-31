@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Text;
 using AngleSharp.Dom;
 using AngleSharp.Html.Dom;
 using FluentFeeds.Shared.RichText.Blocks;
@@ -39,6 +40,14 @@ internal sealed class HtmlBlockProcessor : HtmlProcessor
 			or "H5" or "H6" or "HEADER" or "HGROUP" or "HR" or "LI" or "MAIN" or "NAV" or "OL" or "P" or "PRE"
 			or "SECTION" or "TABLE" or "UL";
 
+	private static string CodeTextContent(INode node)
+	{
+		// Ignore nested tags (not supported)
+		var result = node.TextContent;
+		// Remove trailing newline (\r\n is already handled by the HTML parser)
+		return result.EndsWith('\n') ? result[..^1] : result;
+	}
+
 	public ImmutableArray<Block> GetResult()
 	{
 		FlushGenericBlock();
@@ -64,7 +73,7 @@ internal sealed class HtmlBlockProcessor : HtmlProcessor
 					});
 				break;
 			case "PRE":
-				// TODO
+				AddBlock(new CodeBlock(CodeTextContent(node)));
 				break;
 			case "HR":
 				AddBlock(new HorizontalRuleBlock());

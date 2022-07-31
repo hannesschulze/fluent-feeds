@@ -85,6 +85,19 @@ public class HtmlProcessorTests
 	}
 
 	[Fact]
+	public void Blocks_WhitespaceIgnored()
+	{
+		var actual = RichText.ParseHtml(
+			"<div>\n" +
+			"  <p>\n" +
+			"    test\n" +
+			"  </p>\n" +
+			"</div>");
+		var expected = new RichText(new ParagraphBlock(new TextInline("test")));
+		Assert.Equal(expected, actual);
+	}
+
+	[Fact]
 	public void Blocks_Known_Paragraph()
 	{
 		var actual = RichText.ParseHtml("<p>foo</p>");
@@ -103,6 +116,30 @@ public class HtmlProcessorTests
 	{
 		var actual = RichText.ParseHtml(html);
 		var expected = new RichText(new HeadingBlock(new TextInline("foo")) { Level = headingLevel });
+		Assert.Equal(expected, actual);
+	}
+
+	[Fact]
+	public void Blocks_Known_Code_NoTrailingNewline()
+	{
+		var actual = RichText.ParseHtml("<pre>hello, \n\tworld</pre>");
+		var expected = new RichText(new CodeBlock("hello, \n\tworld"));
+		Assert.Equal(expected, actual);
+	}
+
+	[Fact]
+	public void Blocks_Known_Code_TrailingNewline()
+	{
+		var actual = RichText.ParseHtml("<pre>\nfoo\r\n</pre>");
+		var expected = new RichText(new CodeBlock("foo"));
+		Assert.Equal(expected, actual);
+	}
+
+	[Fact]
+	public void Blocks_Known_Code_MultipleTrailingNewlines()
+	{
+		var actual = RichText.ParseHtml("<pre>\nfoo\r\n\n\r\n</pre>");
+		var expected = new RichText(new CodeBlock("foo\n\n"));
 		Assert.Equal(expected, actual);
 	}
 
@@ -135,6 +172,27 @@ public class HtmlProcessorTests
 		var actual = RichText.ParseHtml("<p>foo<test>bar</test>baz</p>");
 		var expected = new RichText(
 			new ParagraphBlock(new TextInline("foo"), new TextInline("bar"), new TextInline("baz")));
+		Assert.Equal(expected, actual);
+	}
+
+	[Fact]
+	public void Inlines_CollapseWhitespace()
+	{
+		var actual = RichText.ParseHtml("<p>  foo\t <span>  \n</span>\fbaz \r</p>");
+		var expected = new RichText(new ParagraphBlock(new TextInline("foo "), new TextInline(" baz")));
+		Assert.Equal(expected, actual);
+	}
+	
+	[Fact]
+	public void Inlines_CollapseWhitespace_Newlines()
+	{
+		var actual = RichText.ParseHtml("<p>foo\t <br>\n <br>  bar</p>");
+		var expected = new RichText(
+			new ParagraphBlock(
+				new TextInline("foo "),
+				new TextInline("\n"),
+				new TextInline("\n"),
+				new TextInline("bar")));
 		Assert.Equal(expected, actual);
 	}
 }
