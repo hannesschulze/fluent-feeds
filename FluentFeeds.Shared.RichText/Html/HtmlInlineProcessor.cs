@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Text;
@@ -12,9 +13,9 @@ namespace FluentFeeds.Shared.RichText.Html;
 /// </summary>
 internal sealed class HtmlInlineProcessor : HtmlProcessor
 {
-	public static ImmutableArray<Inline> TransformAll(IEnumerable<INode> nodes)
+	public static ImmutableArray<Inline> TransformAll(HtmlParsingOptions options, IEnumerable<INode> nodes)
 	{
-		var processor = new HtmlInlineProcessor();
+		var processor = new HtmlInlineProcessor(options);
 		processor.ProcessAll(nodes);
 		return processor.GetResult();
 	}
@@ -39,6 +40,19 @@ internal sealed class HtmlInlineProcessor : HtmlProcessor
 		}
 		
 		return trimEnd ? builder.ToString().TrimEnd(' ') : builder.ToString();
+	}
+	
+	private static Uri? CreateUri(string? source)
+	{
+		if (String.IsNullOrEmpty(source))
+			return null;
+		if (!Uri.TryCreate(source, UriKind.Absolute, out var result))
+			return null;
+		return result;
+	}
+
+	public HtmlInlineProcessor(HtmlParsingOptions options) : base(options)
+	{
 	}
 	
 	public ImmutableArray<Inline> GetResult() => _inlines.ToImmutableArray();
@@ -71,26 +85,37 @@ internal sealed class HtmlInlineProcessor : HtmlProcessor
 					_inlines.Add(new TextInline("\n"));
 					_isFirstTextInLine = true;
 					break;
-				case "IMG":
-					// TODO
+				case "IMG" when element is IHtmlImageElement imageElement:
+					var width = imageElement.DisplayWidth;
+					var height = imageElement.DisplayHeight;
+					_inlines.Add(
+						new ImageInline
+						{
+							Source = CreateUri(imageElement.Source),
+							AlternateText = imageElement.AlternativeText,
+							Width = width > 0 ? width : -1,
+							Height = height > 0 ? height : -1
+						});
+					_isFirstTextInLine = false;
 					break;
 				case "B": case "STRONG":
-					// TODO
+					WrapChildren(node, inlines => new BoldInline { Inlines = inlines });
 					break;
 				case "I": case "EM":
-					// TODO
+					WrapChildren(node, inlines => new ItalicInline { Inlines = inlines });
 					break;
 				case "U":
-					// TODO
+					WrapChildren(node, inlines => new UnderlineInline { Inlines = inlines });
 					break;
 				case "S":
-					// TODO
+					WrapChildren(node, inlines => new StrikethroughInline { Inlines = inlines });
 					break;
 				case "CODE":
-					// TODO
+					WrapChildren(node, inlines => new CodeInline { Inlines = inlines });
 					break;
-				case "A":
-					// TODO
+				case "A" when element is IHtmlAnchorElement anchorElement:
+					WrapChildren(node, inlines =>
+						new HyperlinkInline { Inlines = inlines, Target = CreateUri(anchorElement.Href) });
 					break;
 				default:
 					// Unknown tag, process inner nodes
@@ -98,6 +123,15 @@ internal sealed class HtmlInlineProcessor : HtmlProcessor
 					break;
 			}
 		}
+	}
+
+	private void WrapChildren(INode parent, Func<ImmutableArray<Inline>, Inline> createInline)
+	{
+		var inlines = TransformAll(Options, parent.ChildNodes);
+		if (inlines.Length == 0)
+			return;
+		_inlines.Add(createInline(inlines));
+		_isFirstTextInLine = false;
 	}
 
 	private readonly List<Inline> _inlines = new();

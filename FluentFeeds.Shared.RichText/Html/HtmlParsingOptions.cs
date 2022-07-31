@@ -1,3 +1,5 @@
+using System;
+
 namespace FluentFeeds.Shared.RichText.Html;
 
 /// <summary>
@@ -9,4 +11,9 @@ public record HtmlParsingOptions
 	/// If set to true, exceptions are thrown even if the parser could continue.
 	/// </summary>
 	public bool IsStrict { get; init; } = false;
+
+	/// <summary>
+	/// Base URI used for resolving resources.
+	/// </summary>
+	public Uri? BaseUri { get; init; } = new("about:///");
 }

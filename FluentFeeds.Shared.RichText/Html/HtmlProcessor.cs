@@ -8,6 +8,13 @@ namespace FluentFeeds.Shared.RichText.Html;
 /// </summary>
 internal abstract class HtmlProcessor
 {
+	public HtmlProcessor(HtmlParsingOptions options)
+	{
+		Options = options;
+	}
+	
+	public HtmlParsingOptions Options { get; }
+	
 	public abstract void Process(INode node);
 
 	public void ProcessAll(IEnumerable<INode> nodes)

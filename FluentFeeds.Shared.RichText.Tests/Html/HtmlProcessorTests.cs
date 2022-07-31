@@ -1,3 +1,4 @@
+using System;
 using FluentFeeds.Shared.RichText.Blocks;
 using FluentFeeds.Shared.RichText.Blocks.Heading;
 using FluentFeeds.Shared.RichText.Html;
@@ -193,6 +194,157 @@ public class HtmlProcessorTests
 				new TextInline("\n"),
 				new TextInline("\n"),
 				new TextInline("bar")));
+		Assert.Equal(expected, actual);
+	}
+
+	[Fact]
+	public void Inlines_Known_Image_NoUri()
+	{
+		var actual = RichText.ParseHtml("<p><img/> foo</p>");
+		var expected = new RichText(
+			new ParagraphBlock(
+				new ImageInline(),
+				new TextInline(" foo")));
+		Assert.Equal(expected, actual);
+	}
+
+	[Fact]
+	public void Inlines_Known_Image_RelativeUri()
+	{
+		var actual = RichText.ParseHtml(
+			"<p><img src=\"images/test.png\"/> foo</p>",
+			new HtmlParsingOptions { BaseUri = new Uri("https://www.example.com") });
+		var expected = new RichText(
+			new ParagraphBlock(
+				new ImageInline(new Uri("https://www.example.com/images/test.png")),
+				new TextInline(" foo")));
+		Assert.Equal(expected, actual);
+	}
+
+	[Fact]
+	public void Inlines_Known_Image_AbsoluteUri()
+	{
+		var actual = RichText.ParseHtml("<p><img src=\"http://localhost/images/test.png\"/> foo</p>");
+		var expected = new RichText(
+			new ParagraphBlock(
+				new ImageInline(new Uri("http://localhost/images/test.png")),
+				new TextInline(" foo")));
+		Assert.Equal(expected, actual);
+	}
+
+	[Fact]
+	public void Inlines_Known_Image_OtherAttributes()
+	{
+		var actual = RichText.ParseHtml("<p><img alt=\"foo&amp;bar\" width=\"500\" height=\"600\"/> foo</p>");
+		var expected = new RichText(
+			new ParagraphBlock(
+				new ImageInline { Width = 500, Height = 600, AlternateText = "foo&bar" },
+				new TextInline(" foo")));
+		Assert.Equal(expected, actual);
+	}
+
+	[Theory]
+	[InlineData("<p><b> foo </b> bar</p>")]
+	[InlineData("<p><strong> foo </strong> bar</p>")]
+	public void Inlines_Known_Bold(string html)
+	{
+		var actual = RichText.ParseHtml(html);
+		var expected = new RichText(
+			new ParagraphBlock(
+				new BoldInline(new TextInline("foo")),
+				new TextInline(" bar")));
+		Assert.Equal(expected, actual);
+	}
+
+	[Fact]
+	public void Inlines_Known_Bold_Empty()
+	{
+		var actual = RichText.ParseHtml("<p><b></b> foo</p>");
+		var expected = new RichText(
+			new ParagraphBlock(
+				new TextInline("foo")));
+		Assert.Equal(expected, actual);
+	}
+
+	[Theory]
+	[InlineData("<p><i> foo </i> bar</p>")]
+	[InlineData("<p><em> foo </em> bar</p>")]
+	public void Inlines_Known_Italic(string html)
+	{
+		var actual = RichText.ParseHtml(html);
+		var expected = new RichText(
+			new ParagraphBlock(
+				new ItalicInline(new TextInline("foo")),
+				new TextInline(" bar")));
+		Assert.Equal(expected, actual);
+	}
+
+	[Fact]
+	public void Inlines_Known_Underline()
+	{
+		var actual = RichText.ParseHtml("<p><u> foo </u> bar</p>");
+		var expected = new RichText(
+			new ParagraphBlock(
+				new UnderlineInline(new TextInline("foo")),
+				new TextInline(" bar")));
+		Assert.Equal(expected, actual);
+	}
+
+	[Fact]
+	public void Inlines_Known_Strikethrough()
+	{
+		var actual = RichText.ParseHtml("<p><s> foo </s> bar</p>");
+		var expected = new RichText(
+			new ParagraphBlock(
+				new StrikethroughInline(new TextInline("foo")),
+				new TextInline(" bar")));
+		Assert.Equal(expected, actual);
+	}
+
+	[Fact]
+	public void Inlines_Known_Code()
+	{
+		var actual = RichText.ParseHtml("<p><code> foo </code> bar</p>");
+		var expected = new RichText(
+			new ParagraphBlock(
+				new CodeInline(new TextInline("foo")),
+				new TextInline(" bar")));
+		Assert.Equal(expected, actual);
+	}
+
+	[Fact]
+	public void Inlines_Known_Hyperlink_NoUri()
+	{
+		var actual = RichText.ParseHtml("<p><a> foo </a> bar</p>");
+		var expected = new RichText(
+			new ParagraphBlock(
+				new HyperlinkInline(new TextInline("foo")),
+				new TextInline(" bar")));
+		Assert.Equal(expected, actual);
+	}
+
+	[Fact]
+	public void Inlines_Known_Hyperlink_RelativeUri()
+	{
+		var actual = RichText.ParseHtml(
+			"<p><a href=\"images/test.png\"> foo </a> bar</p>",
+			new HtmlParsingOptions { BaseUri = new Uri("https://www.example.com") });
+		var expected = new RichText(
+			new ParagraphBlock(
+				new HyperlinkInline(
+					new TextInline("foo")) { Target = new Uri("https://www.example.com/images/test.png") },
+				new TextInline(" bar")));
+		Assert.Equal(expected, actual);
+	}
+
+	[Fact]
+	public void Inlines_Known_Hyperlink_AbsoluteUri()
+	{
+		var actual = RichText.ParseHtml("<p><a href=\"http://localhost/images/test.png\"> foo </a> bar</p>");
+		var expected = new RichText(
+			new ParagraphBlock(
+				new HyperlinkInline(new TextInline("foo")) { Target = new Uri("http://localhost/images/test.png") },
+				new TextInline(" bar")));
 		Assert.Equal(expected, actual);
 	}
 }

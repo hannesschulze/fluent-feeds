@@ -26,11 +26,11 @@ public sealed class RichText : IEquatable<RichText>
 		var configuration = Configuration.Default
 			.WithOnly(ctx => new HtmlParser(new HtmlParserOptions { IsStrictMode = options.IsStrict }, ctx));
 		var document = await BrowsingContext.New(configuration)
-			.OpenAsync(res => res.Content(html))
+			.OpenAsync(res => res.Content(html).Address(options.BaseUri))
 			.ConfigureAwait(false);
 		return document.Body == null
 			? new RichText()
-			: new RichText { Blocks = HtmlBlockProcessor.TransformAll(document.Body.ChildNodes) };
+			: new RichText { Blocks = HtmlBlockProcessor.TransformAll(options, document.Body.ChildNodes) };
 	}
 
 	/// <summary>

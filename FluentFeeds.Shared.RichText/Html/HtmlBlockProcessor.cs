@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Text;
 using AngleSharp.Dom;
 using AngleSharp.Html.Dom;
 using FluentFeeds.Shared.RichText.Blocks;
@@ -14,9 +13,9 @@ namespace FluentFeeds.Shared.RichText.Html;
 /// </summary>
 internal sealed class HtmlBlockProcessor : HtmlProcessor
 {
-	public static ImmutableArray<Block> TransformAll(IEnumerable<INode> nodes)
+	public static ImmutableArray<Block> TransformAll(HtmlParsingOptions options, IEnumerable<INode> nodes)
 	{
-		var processor = new HtmlBlockProcessor();
+		var processor = new HtmlBlockProcessor(options);
 		processor.ProcessAll(nodes);
 		return processor.GetResult();
 	}
@@ -47,6 +46,11 @@ internal sealed class HtmlBlockProcessor : HtmlProcessor
 		// Remove trailing newline (\r\n is already handled by the HTML parser)
 		return result.EndsWith('\n') ? result[..^1] : result;
 	}
+	
+	public HtmlBlockProcessor(HtmlParsingOptions options) : base(options)
+	{
+		_currentGenericProcessor = new HtmlInlineProcessor(options);
+	}
 
 	public ImmutableArray<Block> GetResult()
 	{
@@ -62,13 +66,13 @@ internal sealed class HtmlBlockProcessor : HtmlProcessor
 		switch (tagName)
 		{
 			case "P":
-				AddBlock(new ParagraphBlock { Inlines = HtmlInlineProcessor.TransformAll(node.ChildNodes) });
+				AddBlock(new ParagraphBlock { Inlines = HtmlInlineProcessor.TransformAll(Options, node.ChildNodes) });
 				break;
 			case "H1": case "H2": case "H3": case "H4": case "H5": case "H6":
 				AddBlock(
 					new HeadingBlock
 					{
-						Inlines = HtmlInlineProcessor.TransformAll(node.ChildNodes),
+						Inlines = HtmlInlineProcessor.TransformAll(Options, node.ChildNodes),
 						Level = HeadingLevelFromTagName(tagName)
 					});
 				break;
@@ -82,7 +86,7 @@ internal sealed class HtmlBlockProcessor : HtmlProcessor
 				// TODO
 				break;
 			case "BLOCKQUOTE":
-				AddBlock(new QuoteBlock { Blocks = TransformAll(node.ChildNodes) });
+				AddBlock(new QuoteBlock { Blocks = TransformAll(Options, node.ChildNodes) });
 				break;
 			case "TABLE":
 				// TODO
@@ -116,5 +120,5 @@ internal sealed class HtmlBlockProcessor : HtmlProcessor
 	}
 
 	private readonly List<Block> _blocks = new();
-	private readonly HtmlInlineProcessor _currentGenericProcessor = new();
+	private readonly HtmlInlineProcessor _currentGenericProcessor;
 }
