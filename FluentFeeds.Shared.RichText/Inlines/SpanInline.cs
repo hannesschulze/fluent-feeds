@@ -1,13 +1,16 @@
 using System;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Text.Json.Serialization;
 using FluentFeeds.Shared.RichText.Helpers;
+using FluentFeeds.Shared.RichText.Json;
 
 namespace FluentFeeds.Shared.RichText.Inlines;
 
 /// <summary>
 /// Base class for inlines containing multiple child inline elements.
 /// </summary>
+[JsonConverter(typeof(InlineJsonConverter<SpanInline>))]
 public abstract class SpanInline : Inline
 {
 	/// <summary>
@@ -30,6 +33,8 @@ public abstract class SpanInline : Inline
 	/// The child inline elements.
 	/// </summary>
 	public ImmutableArray<Inline> Inlines { get; init; }
+	
+	public override string ToString() => $"SpanInline {{ Type = {Type}, Inlines = {Inlines.SequenceString()} }}";
 
 	public override bool Equals(Inline? other)
 	{

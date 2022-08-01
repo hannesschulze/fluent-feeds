@@ -1,13 +1,13 @@
 using System;
-using System.Collections.Immutable;
-using System.Linq;
-using FluentFeeds.Shared.RichText.Helpers;
+using System.Text.Json.Serialization;
+using FluentFeeds.Shared.RichText.Json;
 
 namespace FluentFeeds.Shared.RichText.Inlines;
 
 /// <summary>
 /// Inline embedding an image.
 /// </summary>
+[JsonConverter(typeof(InlineJsonConverter<ImageInline>))]
 public sealed class ImageInline : Inline
 {
 	/// <summary>
@@ -48,6 +48,10 @@ public sealed class ImageInline : Inline
 	public override InlineType Type => InlineType.Image;
 
 	public override void Accept(IInlineVisitor visitor) => visitor.Visit(this);
+	
+	public override string ToString() =>
+		$"ImageInline {{ Source = {Source?.ToString() ?? "[null]"}, AlternateText = {AlternateText ?? "[null]"}, " +
+		$"Width = {Width}, Height = {Height} }}";
 	
 	public override bool Equals(Inline? other)
 	{

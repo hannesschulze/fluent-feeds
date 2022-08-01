@@ -1,15 +1,18 @@
 using System;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Text.Json.Serialization;
 using FluentFeeds.Shared.RichText.Blocks.Heading;
 using FluentFeeds.Shared.RichText.Helpers;
 using FluentFeeds.Shared.RichText.Inlines;
+using FluentFeeds.Shared.RichText.Json;
 
 namespace FluentFeeds.Shared.RichText.Blocks;
 
 /// <summary>
 /// A heading block hosting a group of inlines.
 /// </summary>
+[JsonConverter(typeof(BlockJsonConverter<HeadingBlock>))]
 public sealed class HeadingBlock : Block
 {
 	/// <summary>
@@ -41,6 +44,8 @@ public sealed class HeadingBlock : Block
 	public override BlockType Type => BlockType.Heading;
 
 	public override void Accept(IBlockVisitor visitor) => visitor.Visit(this);
+	
+	public override string ToString() => $"HeadingBlock {{ Inlines = {Inlines.SequenceString()}, Level = {Level} }}";
 
 	public override bool Equals(Block? other)
 	{

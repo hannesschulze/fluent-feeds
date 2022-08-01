@@ -1,8 +1,13 @@
+using System.Text.Json.Serialization;
+using FluentFeeds.Shared.RichText.Helpers;
+using FluentFeeds.Shared.RichText.Json;
+
 namespace FluentFeeds.Shared.RichText.Inlines;
 
 /// <summary>
 /// An inline for making text strikethrough.
 /// </summary>
+[JsonConverter(typeof(InlineJsonConverter<StrikethroughInline>))]
 public sealed class StrikethroughInline : SpanInline
 {
 	/// <summary>
@@ -22,6 +27,8 @@ public sealed class StrikethroughInline : SpanInline
 	public override InlineType Type => InlineType.Strikethrough;
 
 	public override void Accept(IInlineVisitor visitor) => visitor.Visit(this);
+	
+	public override string ToString() => $"StrikethroughInline {{ Inlines = {Inlines.SequenceString()} }}";
 	
 	public override bool Equals(Inline? other)
 	{

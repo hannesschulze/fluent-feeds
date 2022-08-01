@@ -1,8 +1,14 @@
+using System.Linq;
+using System.Text.Json.Serialization;
+using FluentFeeds.Shared.RichText.Helpers;
+using FluentFeeds.Shared.RichText.Json;
+
 namespace FluentFeeds.Shared.RichText.Inlines;
 
 /// <summary>
 /// An inline for making text bold.
 /// </summary>
+[JsonConverter(typeof(InlineJsonConverter<BoldInline>))]
 public sealed class BoldInline : SpanInline
 {
 	/// <summary>
@@ -22,6 +28,8 @@ public sealed class BoldInline : SpanInline
 	public override InlineType Type => InlineType.Bold;
 
 	public override void Accept(IInlineVisitor visitor) => visitor.Visit(this);
+	
+	public override string ToString() => $"BoldInline {{ Inlines = {Inlines.SequenceString()} }}";
 
 	public override bool Equals(Inline? other)
 	{

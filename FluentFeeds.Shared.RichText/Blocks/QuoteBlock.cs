@@ -1,13 +1,16 @@
 using System;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Text.Json.Serialization;
 using FluentFeeds.Shared.RichText.Helpers;
+using FluentFeeds.Shared.RichText.Json;
 
 namespace FluentFeeds.Shared.RichText.Blocks;
 
 /// <summary>
 /// A blockquote which can contain multiple child blocks.
 /// </summary>
+[JsonConverter(typeof(BlockJsonConverter<QuoteBlock>))]
 public sealed class QuoteBlock : Block
 {
 	/// <summary>
@@ -34,6 +37,8 @@ public sealed class QuoteBlock : Block
 	public override BlockType Type => BlockType.Quote;
 
 	public override void Accept(IBlockVisitor visitor) => visitor.Visit(this);
+	
+	public override string ToString() => $"QuoteBlock {{ Blocks = {Blocks.SequenceString()} }}";
 
 	public override bool Equals(Block? other)
 	{

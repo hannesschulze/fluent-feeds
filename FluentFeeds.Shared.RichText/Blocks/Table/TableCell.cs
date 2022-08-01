@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Text.Json.Serialization;
 using FluentFeeds.Shared.RichText.Helpers;
 using FluentFeeds.Shared.RichText.Inlines;
+using FluentFeeds.Shared.RichText.Json;
 
 namespace FluentFeeds.Shared.RichText.Blocks.Table;
 
@@ -10,6 +12,7 @@ namespace FluentFeeds.Shared.RichText.Blocks.Table;
 /// A cell in a table row which can host multiple blocks.
 /// <seealso cref="TableBlock"/>
 /// </summary>
+[JsonConverter(typeof(TableCellJsonConverter))]
 public sealed class TableCell
 {
 	/// <summary>
@@ -77,6 +80,10 @@ public sealed class TableCell
 	{
 		return HashCode.Combine(Blocks.SequenceHashCode(), ColumnSpan, RowSpan, IsHeader);
 	}
+	
+	public override string ToString() =>
+		$"TableCell {{ Blocks = {Blocks.SequenceString()}, ColumnSpan = {ColumnSpan}, RowSpan = {RowSpan}, " +
+		$"IsHeader = {IsHeader} }}";
 
 	public static bool operator ==(TableCell? lhs, TableCell? rhs) => lhs?.Equals(rhs) ?? ReferenceEquals(rhs, null);
 	public static bool operator !=(TableCell? lhs, TableCell? rhs) => !(lhs == rhs);

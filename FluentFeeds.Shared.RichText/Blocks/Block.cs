@@ -1,5 +1,7 @@
 using System;
+using System.Text.Json.Serialization;
 using FluentFeeds.Shared.RichText.Html;
+using FluentFeeds.Shared.RichText.Json;
 
 namespace FluentFeeds.Shared.RichText.Blocks;
 
@@ -9,6 +11,7 @@ namespace FluentFeeds.Shared.RichText.Blocks;
 /// <para>Rich text objects are made up of multiple blocks. There are multiple types of blocks which can be used to
 /// define a document – for example, paragraph blocks containing text (in the form of inlines) or table blocks.</para>
 /// </summary>
+[JsonConverter(typeof(BlockJsonConverter<Block>))]
 public abstract class Block : IEquatable<Block>
 {
 	/// <summary>
@@ -52,7 +55,7 @@ public abstract class Block : IEquatable<Block>
 		return HashCode.Combine(Type);
 	}
 
-	public override string ToString() => ToHtml();
+	public override string ToString() => $"Block {{ Type = {Type} }}";
 
 	public static bool operator ==(Block? lhs, Block? rhs) => lhs?.Equals(rhs) ?? ReferenceEquals(rhs, null);
 	public static bool operator !=(Block? lhs, Block? rhs) => !(lhs == rhs);

@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Text.Json.Serialization;
 using FluentFeeds.Shared.RichText.Helpers;
 using FluentFeeds.Shared.RichText.Inlines;
+using FluentFeeds.Shared.RichText.Json;
 
 namespace FluentFeeds.Shared.RichText.Blocks;
 
@@ -11,6 +13,7 @@ namespace FluentFeeds.Shared.RichText.Blocks;
 ///
 /// <para>Unlike <see cref="ParagraphBlock"/>, this block type does not have a semantic meaning.</para>
 /// </summary>
+[JsonConverter(typeof(BlockJsonConverter<GenericBlock>))]
 public sealed class GenericBlock : Block
 {
 	/// <summary>
@@ -37,6 +40,8 @@ public sealed class GenericBlock : Block
 	public override BlockType Type => BlockType.Generic;
 
 	public override void Accept(IBlockVisitor visitor) => visitor.Visit(this);
+	
+	public override string ToString() => $"GenericBlock {{ Inlines = {Inlines.SequenceString()} }}";
 
 	public override bool Equals(Block? other)
 	{

@@ -1,10 +1,13 @@
 using System;
+using System.Text.Json.Serialization;
+using FluentFeeds.Shared.RichText.Json;
 
 namespace FluentFeeds.Shared.RichText.Blocks;
 
 /// <summary>
 /// A block for formatting code with a monospace font. 
 /// </summary>
+[JsonConverter(typeof(BlockJsonConverter<CodeBlock>))]
 public sealed class CodeBlock : Block
 {
 	/// <summary>
@@ -31,6 +34,8 @@ public sealed class CodeBlock : Block
 	public override BlockType Type => BlockType.Code;
 
 	public override void Accept(IBlockVisitor visitor) => visitor.Visit(this);
+	
+	public override string ToString() => $"CodeBlock {{ Code = {Code} }}";
 
 	public override bool Equals(Block? other)
 	{

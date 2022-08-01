@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace FluentFeeds.Shared.RichText.Helpers;
 
-internal static class HashCodeHelper
+internal static class CollectionHelper
 {
 	internal static int SequenceHashCode<TSource>(this IEnumerable<TSource> source) =>
 		source
@@ -14,4 +14,7 @@ internal static class HashCodeHelper
 				return hash;
 			})
 			.ToHashCode();
+
+	internal static string SequenceString<TSource>(this IReadOnlyCollection<TSource> source) =>
+		$"[{source.Count} {(source.Count == 1 ? "element" : "elements")}]";
 }

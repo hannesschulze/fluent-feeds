@@ -1,8 +1,12 @@
+using System.Text.Json.Serialization;
+using FluentFeeds.Shared.RichText.Json;
+
 namespace FluentFeeds.Shared.RichText.Blocks;
 
 /// <summary>
 /// Block rendered as a horizontal line.
 /// </summary>
+[JsonConverter(typeof(BlockJsonConverter<HorizontalRuleBlock>))]
 public sealed class HorizontalRuleBlock : Block
 {
 	/// <summary>
@@ -15,6 +19,8 @@ public sealed class HorizontalRuleBlock : Block
 	public override BlockType Type => BlockType.HorizontalRule;
 
 	public override void Accept(IBlockVisitor visitor) => visitor.Visit(this);
+	
+	public override string ToString() => "HorizontalRuleBlock { }";
 
 	public override bool Equals(Block? other)
 	{

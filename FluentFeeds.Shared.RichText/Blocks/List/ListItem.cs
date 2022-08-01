@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Text.Json.Serialization;
 using FluentFeeds.Shared.RichText.Helpers;
 using FluentFeeds.Shared.RichText.Inlines;
+using FluentFeeds.Shared.RichText.Json;
 
 namespace FluentFeeds.Shared.RichText.Blocks.List;
 
@@ -10,6 +12,7 @@ namespace FluentFeeds.Shared.RichText.Blocks.List;
 /// An item in a list which can contain multiple blocks.
 /// <seealso cref="ListBlock"/>
 /// </summary>
+[JsonConverter(typeof(ListItemJsonConverter))]
 public sealed class ListItem : IEquatable<ListItem>
 {
 	/// <summary>
@@ -61,6 +64,8 @@ public sealed class ListItem : IEquatable<ListItem>
 	{
 		return Blocks.SequenceHashCode();
 	}
+
+	public override string ToString() => $"ListItem {{ Blocks = {Blocks.SequenceString()} }}";
 
 	public static bool operator ==(ListItem? lhs, ListItem? rhs) => lhs?.Equals(rhs) ?? ReferenceEquals(rhs, null);
 	public static bool operator !=(ListItem? lhs, ListItem? rhs) => !(lhs == rhs);
