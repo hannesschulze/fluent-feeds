@@ -96,7 +96,7 @@ public class BlockJsonConverterTests
 	}
 	
 	[Fact]
-	public void ConvertList()
+	public void ConvertList_CompactItems()
 	{
 		var original = new ListBlock(
 			new ListItem(
@@ -108,7 +108,7 @@ public class BlockJsonConverterTests
 	}
 	
 	[Fact]
-	public void ConvertList_NonCompactItem()
+	public void ConvertList_NonCompactItems()
 	{
 		const string json = "{\"Type\": 5, \"Items\": [{\"Blocks\": [{\"Type\": 0}, {\"Type\": 1}]}]}";
 		var expected = new ListBlock(new ListItem(new GenericBlock(), new ParagraphBlock()));
@@ -127,7 +127,7 @@ public class BlockJsonConverterTests
 	}
 	
 	[Fact]
-	public void ConvertTable()
+	public void ConvertTable_CompactRows()
 	{
 		var original = new TableBlock(
 			new TableRow(
@@ -142,7 +142,7 @@ public class BlockJsonConverterTests
 	}
 
 	[Fact]
-	public void ConvertTable_NonCompactRow()
+	public void ConvertTable_NonCompactRows()
 	{
 		const string json = "{\"Type\": 7, \"Rows\": [{\"Cells\": [[], {\"IsHeader\": true}]}]}";
 		var expected = new TableBlock(new TableRow(new TableCell(), new TableCell { IsHeader = true }));

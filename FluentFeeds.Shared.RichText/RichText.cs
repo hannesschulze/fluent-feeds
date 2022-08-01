@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using AngleSharp;
 using AngleSharp.Html.Parser;
 using FluentFeeds.Shared.RichText.Blocks;
 using FluentFeeds.Shared.RichText.Helpers;
 using FluentFeeds.Shared.RichText.Html;
+using FluentFeeds.Shared.RichText.Json;
 
 namespace FluentFeeds.Shared.RichText;
 
@@ -15,6 +17,7 @@ namespace FluentFeeds.Shared.RichText;
 ///
 /// <param>Like all other rich text data models, this class is immutable.</param>
 /// </summary>
+[JsonConverter(typeof(RichTextJsonConverter))]
 public sealed class RichText : IEquatable<RichText>
 {
 	/// <summary>
@@ -111,7 +114,7 @@ public sealed class RichText : IEquatable<RichText>
 		return Blocks.SequenceHashCode();
 	}
 
-	public override string ToString() => ToHtml();
+	public override string ToString() => $"RichText {{ Blocks = {Blocks.SequenceString()} }}";
 
 	public static bool operator ==(RichText? lhs, RichText? rhs) => lhs?.Equals(rhs) ?? ReferenceEquals(rhs, null);
 	public static bool operator !=(RichText? lhs, RichText? rhs) => !(lhs == rhs);
