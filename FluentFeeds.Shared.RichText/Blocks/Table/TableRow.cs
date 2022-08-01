@@ -1,6 +1,8 @@
 using System.Collections.Immutable;
 using System.Linq;
+using System.Text.Json.Serialization;
 using FluentFeeds.Shared.RichText.Helpers;
+using FluentFeeds.Shared.RichText.Json;
 
 namespace FluentFeeds.Shared.RichText.Blocks.Table;
 
@@ -8,6 +10,7 @@ namespace FluentFeeds.Shared.RichText.Blocks.Table;
 /// Row in a table.
 /// <seealso cref="TableBlock"/>
 /// </summary>
+[JsonConverter(typeof(TableRowJsonConverter))]
 public sealed class TableRow
 {
 	/// <summary>
@@ -30,6 +33,8 @@ public sealed class TableRow
 	/// The table row's cells.
 	/// </summary>
 	public ImmutableArray<TableCell> Cells { get; init; }
+	
+	public override string ToString() => $"TableRow {{ Cells = {Cells.SequenceString()} }}";
 
 	public bool Equals(TableRow? other)
 	{

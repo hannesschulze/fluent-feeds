@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Text.Json.Serialization;
 using FluentFeeds.Shared.RichText.Helpers;
 using FluentFeeds.Shared.RichText.Inlines;
+using FluentFeeds.Shared.RichText.Json;
 
 namespace FluentFeeds.Shared.RichText.Blocks.Table;
 
@@ -10,6 +12,7 @@ namespace FluentFeeds.Shared.RichText.Blocks.Table;
 /// A cell in a table row which can host multiple blocks.
 /// <seealso cref="TableBlock"/>
 /// </summary>
+[JsonConverter(typeof(TableCellJsonConverter))]
 public sealed class TableCell
 {
 	/// <summary>
@@ -55,6 +58,10 @@ public sealed class TableCell
 	/// Flag indicating if this cell should be rendered with a table-header-like appearance.
 	/// </summary>
 	public bool IsHeader { get; init; } = false;
+
+	public override string ToString() =>
+		$"TableCell {{ Blocks = {Blocks.SequenceString()}, ColumnSpan = {ColumnSpan}, RowSpan = {RowSpan}, " +
+		$"IsHeader = {IsHeader} }}";
 
 	public bool Equals(TableCell? other)
 	{

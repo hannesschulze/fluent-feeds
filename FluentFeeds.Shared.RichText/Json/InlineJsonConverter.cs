@@ -24,12 +24,9 @@ public sealed class InlineJsonConverter<TInline> : JsonConverter<TInline> where 
 		string? alternateText = null;
 		int? width = null;
 		int? height = null;
-		
-		while (reader.Read())
-		{
-			if (reader.TokenType == JsonTokenType.EndObject)
-				break;
 
+		while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
+		{
 			if (reader.TokenType == JsonTokenType.PropertyName)
 			{
 				var propertyName = reader.GetString();

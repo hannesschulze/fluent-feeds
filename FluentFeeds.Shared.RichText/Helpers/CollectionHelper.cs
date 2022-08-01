@@ -15,6 +15,6 @@ internal static class CollectionHelper
 			})
 			.ToHashCode();
 
-	internal static string SequenceString<TSource>(this IEnumerable<TSource> source) =>
-		$"{{ {String.Join(", ", source.Select(item => item?.ToString() ?? "null"))} }}";
+	internal static string SequenceString<TSource>(this IReadOnlyCollection<TSource> source) =>
+		$"[{source.Count} {(source.Count == 1 ? "element" : "elements")}]";
 }

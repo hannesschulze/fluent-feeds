@@ -27,8 +27,8 @@ public class InlineJsonConverterTests
 	public void ConvertSpecial_MissingType()
 	{
 		const string json = "{\"Text\":\"foo\"}";
-		Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<Inline>(json));
 		Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<TextInline>(json));
+		Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<Inline>(json));
 	}
 
 	[Fact]
@@ -41,35 +41,31 @@ public class InlineJsonConverterTests
 	[Fact]
 	public void ConvertSpecial_NullValue()
 	{
-		Assert.Null(JsonSerializer.Deserialize<Inline>("null"));
 		Assert.Null(JsonSerializer.Deserialize<TextInline>("null"));
+		Assert.Null(JsonSerializer.Deserialize<Inline>("null"));
 	}
 
 	[Fact]
-	public void ConvertSpecial_InvalidType()
+	public void ConvertSpecial_InvalidToken()
 	{
-		Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<Inline>("[]"));
 		Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<TextInline>("[]"));
+		Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<Inline>("[]"));
 	}
 	
 	[Fact]
 	public void ConvertText()
 	{
 		var original = new TextInline("foo");
-		var decoded = EncodeAndDecode(original);
-		var decodedBase = EncodeAndDecodeBase(original);
-		Assert.Equal(original, decoded);
-		Assert.Equal(original, decodedBase);
+		Assert.Equal(original, EncodeAndDecode(original));
+		Assert.Equal(original, EncodeAndDecodeBase(original));
 	}
 	
 	[Fact]
 	public void ConvertImage_NoProperties()
 	{
 		var original = new ImageInline();
-		var decoded = EncodeAndDecode(original);
-		var decodedBase = EncodeAndDecodeBase(original);
-		Assert.Equal(original, decoded);
-		Assert.Equal(original, decodedBase);
+		Assert.Equal(original, EncodeAndDecode(original));
+		Assert.Equal(original, EncodeAndDecodeBase(original));
 	}
 	
 	[Fact]
@@ -82,70 +78,56 @@ public class InlineJsonConverterTests
 				Width = 50,
 				Height = 30
 			};
-		var decoded = EncodeAndDecode(original);
-		var decodedBase = EncodeAndDecodeBase(original);
-		Assert.Equal(original, decoded);
-		Assert.Equal(original, decodedBase);
+		Assert.Equal(original, EncodeAndDecode(original));
+		Assert.Equal(original, EncodeAndDecodeBase(original));
 	}
 	
 	[Fact]
 	public void ConvertBold()
 	{
 		var original = new BoldInline(new TextInline("foo"), new TextInline("bar"));
-		var decoded = EncodeAndDecode(original);
-		var decodedBase = EncodeAndDecodeBase(original);
-		Assert.Equal(original, decoded);
-		Assert.Equal(original, decodedBase);
+		Assert.Equal(original, EncodeAndDecode(original));
+		Assert.Equal(original, EncodeAndDecodeBase(original));
 	}
 	
 	[Fact]
 	public void ConvertItalic()
 	{
 		var original = new ItalicInline(new TextInline("foo"), new TextInline("bar"));
-		var decoded = EncodeAndDecode(original);
-		var decodedBase = EncodeAndDecodeBase(original);
-		Assert.Equal(original, decoded);
-		Assert.Equal(original, decodedBase);
+		Assert.Equal(original, EncodeAndDecode(original));
+		Assert.Equal(original, EncodeAndDecodeBase(original));
 	}
 	
 	[Fact]
 	public void ConvertUnderline()
 	{
 		var original = new UnderlineInline(new TextInline("foo"), new TextInline("bar"));
-		var decoded = EncodeAndDecode(original);
-		var decodedBase = EncodeAndDecodeBase(original);
-		Assert.Equal(original, decoded);
-		Assert.Equal(original, decodedBase);
+		Assert.Equal(original, EncodeAndDecode(original));
+		Assert.Equal(original, EncodeAndDecodeBase(original));
 	}
 	
 	[Fact]
 	public void ConvertStrikethrough()
 	{
 		var original = new StrikethroughInline(new TextInline("foo"), new TextInline("bar"));
-		var decoded = EncodeAndDecode(original);
-		var decodedBase = EncodeAndDecodeBase(original);
-		Assert.Equal(original, decoded);
-		Assert.Equal(original, decodedBase);
+		Assert.Equal(original, EncodeAndDecode(original));
+		Assert.Equal(original, EncodeAndDecodeBase(original));
 	}
 	
 	[Fact]
 	public void ConvertCode()
 	{
 		var original = new CodeInline(new TextInline("foo"), new TextInline("bar"));
-		var decoded = EncodeAndDecode(original);
-		var decodedBase = EncodeAndDecodeBase(original);
-		Assert.Equal(original, decoded);
-		Assert.Equal(original, decodedBase);
+		Assert.Equal(original, EncodeAndDecode(original));
+		Assert.Equal(original, EncodeAndDecodeBase(original));
 	}
 	
 	[Fact]
 	public void ConvertHyperlink_NoTarget()
 	{
 		var original = new HyperlinkInline(new TextInline("foo"), new TextInline("bar"));
-		var decoded = EncodeAndDecode(original);
-		var decodedBase = EncodeAndDecodeBase(original);
-		Assert.Equal(original, decoded);
-		Assert.Equal(original, decodedBase);
+		Assert.Equal(original, EncodeAndDecode(original));
+		Assert.Equal(original, EncodeAndDecodeBase(original));
 	}
 	
 	[Fact]
@@ -156,9 +138,7 @@ public class InlineJsonConverterTests
 			{
 				Target = new Uri("https://www.example.com")
 			};
-		var decoded = EncodeAndDecode(original);
-		var decodedBase = EncodeAndDecodeBase(original);
-		Assert.Equal(original, decoded);
-		Assert.Equal(original, decodedBase);
+		Assert.Equal(original, EncodeAndDecode(original));
+		Assert.Equal(original, EncodeAndDecodeBase(original));
 	}
 }

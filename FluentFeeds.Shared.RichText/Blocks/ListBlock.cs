@@ -1,14 +1,17 @@
 using System;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Text.Json.Serialization;
 using FluentFeeds.Shared.RichText.Blocks.List;
 using FluentFeeds.Shared.RichText.Helpers;
+using FluentFeeds.Shared.RichText.Json;
 
 namespace FluentFeeds.Shared.RichText.Blocks;
 
 /// <summary>
 /// An ordered or unordered list containing items which can host other blocks.
 /// </summary>
+[JsonConverter(typeof(BlockJsonConverter<ListBlock>))]
 public sealed class ListBlock : Block
 {
 	/// <summary>
@@ -40,6 +43,7 @@ public sealed class ListBlock : Block
 	public override BlockType Type => BlockType.List;
 
 	public override void Accept(IBlockVisitor visitor) => visitor.Visit(this);
+	public override string ToString() => $"ListBlock {{ Items = {Items.SequenceString()}, Style = {Style} }}";
 
 	public override bool Equals(Block? other)
 	{

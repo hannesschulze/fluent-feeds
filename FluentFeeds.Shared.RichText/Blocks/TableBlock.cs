@@ -1,14 +1,17 @@
 using System;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Text.Json.Serialization;
 using FluentFeeds.Shared.RichText.Blocks.Table;
 using FluentFeeds.Shared.RichText.Helpers;
+using FluentFeeds.Shared.RichText.Json;
 
 namespace FluentFeeds.Shared.RichText.Blocks;
 
 /// <summary>
 /// A block for rendering tabular data.
 /// </summary>
+[JsonConverter(typeof(BlockJsonConverter<TableBlock>))]
 public sealed class TableBlock : Block
 {
 	/// <summary>
@@ -35,6 +38,7 @@ public sealed class TableBlock : Block
 	public override BlockType Type => BlockType.Table;
 
 	public override void Accept(IBlockVisitor visitor) => visitor.Visit(this);
+	public override string ToString() => $"TableBlock {{ Rows = {Rows.SequenceString()} }}";
 
 	public override bool Equals(Block? other)
 	{
