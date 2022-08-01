@@ -33,8 +33,6 @@ public sealed class TableRow
 	/// The table row's cells.
 	/// </summary>
 	public ImmutableArray<TableCell> Cells { get; init; }
-	
-	public override string ToString() => $"TableRow {{ Cells = {Cells.SequenceString()} }}";
 
 	public bool Equals(TableRow? other)
 	{
@@ -56,6 +54,8 @@ public sealed class TableRow
 	{
 		return Cells.SequenceHashCode();
 	}
+	
+	public override string ToString() => $"TableRow {{ Cells = {Cells.SequenceString()} }}";
 
 	public static bool operator ==(TableRow? lhs, TableRow? rhs) => lhs?.Equals(rhs) ?? ReferenceEquals(rhs, null);
 	public static bool operator !=(TableRow? lhs, TableRow? rhs) => !(lhs == rhs);

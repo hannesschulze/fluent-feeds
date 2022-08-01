@@ -19,6 +19,7 @@ public sealed class HorizontalRuleBlock : Block
 	public override BlockType Type => BlockType.HorizontalRule;
 
 	public override void Accept(IBlockVisitor visitor) => visitor.Visit(this);
+	
 	public override string ToString() => "HorizontalRuleBlock { }";
 
 	public override bool Equals(Block? other)

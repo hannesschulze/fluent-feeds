@@ -28,6 +28,7 @@ public sealed class BoldInline : SpanInline
 	public override InlineType Type => InlineType.Bold;
 
 	public override void Accept(IInlineVisitor visitor) => visitor.Visit(this);
+	
 	public override string ToString() => $"BoldInline {{ Inlines = {Inlines.SequenceString()} }}";
 
 	public override bool Equals(Inline? other)

@@ -44,7 +44,8 @@ public sealed class HeadingBlock : Block
 	public override BlockType Type => BlockType.Heading;
 
 	public override void Accept(IBlockVisitor visitor) => visitor.Visit(this);
-	public override string ToString() => $"GenericBlock {{ Inlines = {Inlines.SequenceString()}, Level = {Level} }}";
+	
+	public override string ToString() => $"HeadingBlock {{ Inlines = {Inlines.SequenceString()}, Level = {Level} }}";
 
 	public override bool Equals(Block? other)
 	{

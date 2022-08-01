@@ -43,6 +43,7 @@ public sealed class ListBlock : Block
 	public override BlockType Type => BlockType.List;
 
 	public override void Accept(IBlockVisitor visitor) => visitor.Visit(this);
+	
 	public override string ToString() => $"ListBlock {{ Items = {Items.SequenceString()}, Style = {Style} }}";
 
 	public override bool Equals(Block? other)

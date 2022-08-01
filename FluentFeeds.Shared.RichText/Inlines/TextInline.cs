@@ -34,6 +34,7 @@ public sealed class TextInline : Inline
 	public override InlineType Type => InlineType.Text;
 
 	public override void Accept(IInlineVisitor visitor) => visitor.Visit(this);
+	
 	public override string ToString() => $"TextInline {{ Text = {Text} }}";
 	
 	public override bool Equals(Inline? other)

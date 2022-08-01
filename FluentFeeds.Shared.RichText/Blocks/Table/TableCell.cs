@@ -59,10 +59,6 @@ public sealed class TableCell
 	/// </summary>
 	public bool IsHeader { get; init; } = false;
 
-	public override string ToString() =>
-		$"TableCell {{ Blocks = {Blocks.SequenceString()}, ColumnSpan = {ColumnSpan}, RowSpan = {RowSpan}, " +
-		$"IsHeader = {IsHeader} }}";
-
 	public bool Equals(TableCell? other)
 	{
 		if (ReferenceEquals(this, other))
@@ -84,6 +80,10 @@ public sealed class TableCell
 	{
 		return HashCode.Combine(Blocks.SequenceHashCode(), ColumnSpan, RowSpan, IsHeader);
 	}
+	
+	public override string ToString() =>
+		$"TableCell {{ Blocks = {Blocks.SequenceString()}, ColumnSpan = {ColumnSpan}, RowSpan = {RowSpan}, " +
+		$"IsHeader = {IsHeader} }}";
 
 	public static bool operator ==(TableCell? lhs, TableCell? rhs) => lhs?.Equals(rhs) ?? ReferenceEquals(rhs, null);
 	public static bool operator !=(TableCell? lhs, TableCell? rhs) => !(lhs == rhs);

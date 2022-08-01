@@ -27,6 +27,7 @@ public sealed class CodeInline : SpanInline
 	public override InlineType Type => InlineType.Code;
 
 	public override void Accept(IInlineVisitor visitor) => visitor.Visit(this);
+	
 	public override string ToString() => $"CodeInline {{ Inlines = {Inlines.SequenceString()} }}";
 	
 	public override bool Equals(Inline? other)

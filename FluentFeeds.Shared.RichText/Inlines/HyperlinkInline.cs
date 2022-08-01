@@ -34,6 +34,7 @@ public sealed class HyperlinkInline : SpanInline
 	public override InlineType Type => InlineType.Hyperlink;
 
 	public override void Accept(IInlineVisitor visitor) => visitor.Visit(this);
+	
 	public override string ToString() =>
 		$"HyperlinkInline {{ Inlines = {Inlines.SequenceString()}, Target = {Target?.ToString() ?? "[null]"} }}";
 	

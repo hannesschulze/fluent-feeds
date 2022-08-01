@@ -38,6 +38,7 @@ public sealed class ParagraphBlock : Block
 	public override BlockType Type => BlockType.Paragraph;
 
 	public override void Accept(IBlockVisitor visitor) => visitor.Visit(this);
+	
 	public override string ToString() => $"ParagraphBlock {{ Inlines = {Inlines.SequenceString()} }}";
 
 	public override bool Equals(Block? other)

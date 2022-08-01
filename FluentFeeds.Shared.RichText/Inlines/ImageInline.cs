@@ -48,6 +48,7 @@ public sealed class ImageInline : Inline
 	public override InlineType Type => InlineType.Image;
 
 	public override void Accept(IInlineVisitor visitor) => visitor.Visit(this);
+	
 	public override string ToString() =>
 		$"ImageInline {{ Source = {Source?.ToString() ?? "[null]"}, AlternateText = {AlternateText ?? "[null]"}, " +
 		$"Width = {Width}, Height = {Height} }}";

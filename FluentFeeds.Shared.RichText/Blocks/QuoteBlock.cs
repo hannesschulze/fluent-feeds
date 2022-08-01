@@ -37,6 +37,7 @@ public sealed class QuoteBlock : Block
 	public override BlockType Type => BlockType.Quote;
 
 	public override void Accept(IBlockVisitor visitor) => visitor.Visit(this);
+	
 	public override string ToString() => $"QuoteBlock {{ Blocks = {Blocks.SequenceString()} }}";
 
 	public override bool Equals(Block? other)

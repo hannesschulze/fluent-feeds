@@ -44,8 +44,6 @@ public sealed class ListItem : IEquatable<ListItem>
 	/// </summary>
 	public ImmutableArray<Block> Blocks { get; init; }
 
-	public override string ToString() => $"ListItem {{ Blocks = {Blocks.SequenceString()} }}";
-
 	public bool Equals(ListItem? other)
 	{
 		if (ReferenceEquals(this, other))
@@ -66,6 +64,8 @@ public sealed class ListItem : IEquatable<ListItem>
 	{
 		return Blocks.SequenceHashCode();
 	}
+
+	public override string ToString() => $"ListItem {{ Blocks = {Blocks.SequenceString()} }}";
 
 	public static bool operator ==(ListItem? lhs, ListItem? rhs) => lhs?.Equals(rhs) ?? ReferenceEquals(rhs, null);
 	public static bool operator !=(ListItem? lhs, ListItem? rhs) => !(lhs == rhs);

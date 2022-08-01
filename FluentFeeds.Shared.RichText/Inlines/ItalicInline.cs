@@ -27,6 +27,7 @@ public sealed class ItalicInline : SpanInline
 	public override InlineType Type => InlineType.Italic;
 
 	public override void Accept(IInlineVisitor visitor) => visitor.Visit(this);
+	
 	public override string ToString() => $"ItalicInline {{ Inlines = {Inlines.SequenceString()} }}";
 	
 	public override bool Equals(Inline? other)

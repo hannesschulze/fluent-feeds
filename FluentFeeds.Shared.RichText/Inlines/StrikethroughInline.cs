@@ -27,6 +27,7 @@ public sealed class StrikethroughInline : SpanInline
 	public override InlineType Type => InlineType.Strikethrough;
 
 	public override void Accept(IInlineVisitor visitor) => visitor.Visit(this);
+	
 	public override string ToString() => $"StrikethroughInline {{ Inlines = {Inlines.SequenceString()} }}";
 	
 	public override bool Equals(Inline? other)

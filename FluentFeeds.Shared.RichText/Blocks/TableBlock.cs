@@ -38,6 +38,7 @@ public sealed class TableBlock : Block
 	public override BlockType Type => BlockType.Table;
 
 	public override void Accept(IBlockVisitor visitor) => visitor.Visit(this);
+	
 	public override string ToString() => $"TableBlock {{ Rows = {Rows.SequenceString()} }}";
 
 	public override bool Equals(Block? other)

@@ -27,6 +27,7 @@ public sealed class UnderlineInline : SpanInline
 	public override InlineType Type => InlineType.Underline;
 
 	public override void Accept(IInlineVisitor visitor) => visitor.Visit(this);
+	
 	public override string ToString() => $"UnderlineInline {{ Inlines = {Inlines.SequenceString()} }}";
 	
 	public override bool Equals(Inline? other)

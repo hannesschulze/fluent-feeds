@@ -34,6 +34,7 @@ public sealed class CodeBlock : Block
 	public override BlockType Type => BlockType.Code;
 
 	public override void Accept(IBlockVisitor visitor) => visitor.Visit(this);
+	
 	public override string ToString() => $"CodeBlock {{ Code = {Code} }}";
 
 	public override bool Equals(Block? other)

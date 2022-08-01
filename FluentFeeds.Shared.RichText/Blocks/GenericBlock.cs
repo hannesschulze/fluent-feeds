@@ -40,6 +40,7 @@ public sealed class GenericBlock : Block
 	public override BlockType Type => BlockType.Generic;
 
 	public override void Accept(IBlockVisitor visitor) => visitor.Visit(this);
+	
 	public override string ToString() => $"GenericBlock {{ Inlines = {Inlines.SequenceString()} }}";
 
 	public override bool Equals(Block? other)
