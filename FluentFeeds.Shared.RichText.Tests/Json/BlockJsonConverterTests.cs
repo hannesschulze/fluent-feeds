@@ -51,16 +51,25 @@ public class BlockJsonConverterTests
 	[Fact]
 	public void ConvertSpecial_InvalidToken()
 	{
-		Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<GenericBlock>("[]"));
-		Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<Block>("[]"));
+		Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<GenericBlock>("true"));
+		Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<Block>("true"));
 	}
 	
 	[Fact]
-	public void ConvertGeneric()
+	public void ConvertGeneric_Compact()
 	{
 		var original = new GenericBlock(new TextInline("foo"), new TextInline("bar"));
 		Assert.Equal(original, EncodeAndDecode(original));
 		Assert.Equal(original, EncodeAndDecodeBase(original));
+	}
+	
+	[Fact]
+	public void ConvertGeneric_NonCompact()
+	{
+		const string json = "{\"Type\": 0, \"Inlines\": [\"foo\", \"bar\"]}";
+		var expected = new GenericBlock(new TextInline("foo"), new TextInline("bar"));
+		Assert.Equal(expected, JsonSerializer.Deserialize<GenericBlock>(json));
+		Assert.Equal(expected, JsonSerializer.Deserialize<Block>(json));
 	}
 	
 	[Fact]

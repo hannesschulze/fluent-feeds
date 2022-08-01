@@ -48,16 +48,25 @@ public class InlineJsonConverterTests
 	[Fact]
 	public void ConvertSpecial_InvalidToken()
 	{
-		Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<TextInline>("[]"));
-		Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<Inline>("[]"));
+		Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<TextInline>("true"));
+		Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<Inline>("true"));
 	}
 	
 	[Fact]
-	public void ConvertText()
+	public void ConvertText_Compact()
 	{
 		var original = new TextInline("foo");
 		Assert.Equal(original, EncodeAndDecode(original));
 		Assert.Equal(original, EncodeAndDecodeBase(original));
+	}
+	
+	[Fact]
+	public void ConvertText_NonCompact()
+	{
+		const string json = "{\"Type\": 0, \"Text\": \"foo\"}";
+		var expected = new TextInline("foo");
+		Assert.Equal(expected, JsonSerializer.Deserialize<TextInline>(json));
+		Assert.Equal(expected, JsonSerializer.Deserialize<Inline>(json));
 	}
 	
 	[Fact]

@@ -13,76 +13,84 @@ public sealed class InlineJsonConverter<TInline> : JsonConverter<TInline> where 
 {
 	private static Inline ReadBase(ref Utf8JsonReader reader, JsonSerializerOptions options)
 	{
-		if (reader.TokenType != JsonTokenType.StartObject)
-			throw new JsonException();
-
-		InlineType? type = null;
-		string? text = null;
-		ImmutableArray<Inline>? inlines = null;
-		Uri? target = null;
-		Uri? source = null;
-		string? alternateText = null;
-		int? width = null;
-		int? height = null;
-
-		while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
+		if (reader.TokenType == JsonTokenType.String)
 		{
-			if (reader.TokenType == JsonTokenType.PropertyName)
+			return new TextInline(reader.GetString() ?? String.Empty);
+		}
+		else if (reader.TokenType == JsonTokenType.StartObject)
+		{
+			InlineType? type = null;
+			string? text = null;
+			ImmutableArray<Inline>? inlines = null;
+			Uri? target = null;
+			Uri? source = null;
+			string? alternateText = null;
+			int? width = null;
+			int? height = null;
+
+			while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
 			{
-				var propertyName = reader.GetString();
-				reader.Read();
-				switch (propertyName)
+				if (reader.TokenType == JsonTokenType.PropertyName)
 				{
-					case "Type":
-						type = JsonSerializer.Deserialize<InlineType>(ref reader, options);
-						break;
-					case "Text":
-						text = reader.GetString();
-						break;
-					case "Inlines":
-						inlines = JsonSerializer.Deserialize<ImmutableArray<Inline>>(ref reader, options);
-						break;
-					case "Target":
-						target = JsonSerializer.Deserialize<Uri>(ref reader, options);
-						break;
-					case "Source":
-						source = JsonSerializer.Deserialize<Uri>(ref reader, options);
-						break;
-					case "AlternateText":
-						alternateText = reader.GetString();
-						break;
-					case "Width":
-						width = reader.GetInt32();
-						break;
-					case "Height":
-						height = reader.GetInt32();
-						break;
+					var propertyName = reader.GetString();
+					reader.Read();
+					switch (propertyName)
+					{
+						case "Type":
+							type = JsonSerializer.Deserialize<InlineType>(ref reader, options);
+							break;
+						case "Text":
+							text = reader.GetString();
+							break;
+						case "Inlines":
+							inlines = JsonSerializer.Deserialize<ImmutableArray<Inline>>(ref reader, options);
+							break;
+						case "Target":
+							target = JsonSerializer.Deserialize<Uri>(ref reader, options);
+							break;
+						case "Source":
+							source = JsonSerializer.Deserialize<Uri>(ref reader, options);
+							break;
+						case "AlternateText":
+							alternateText = reader.GetString();
+							break;
+						case "Width":
+							width = reader.GetInt32();
+							break;
+						case "Height":
+							height = reader.GetInt32();
+							break;
+					}
 				}
 			}
-		}
 
-		return
-			type switch
-			{
-				InlineType.Text => new TextInline { Text = text ?? String.Empty },
-				InlineType.Image =>
-					new ImageInline
-					{
-						Source = source,
-						AlternateText = alternateText,
-						Width = width ?? -1,
-						Height = height ?? -1
-					},
-				InlineType.Bold => new BoldInline { Inlines = inlines ?? ImmutableArray<Inline>.Empty },
-				InlineType.Italic => new ItalicInline { Inlines = inlines ?? ImmutableArray<Inline>.Empty },
-				InlineType.Underline => new UnderlineInline { Inlines = inlines ?? ImmutableArray<Inline>.Empty },
-				InlineType.Strikethrough =>
-					new StrikethroughInline { Inlines = inlines ?? ImmutableArray<Inline>.Empty },
-				InlineType.Code => new CodeInline { Inlines = inlines ?? ImmutableArray<Inline>.Empty },
-				InlineType.Hyperlink =>
-					new HyperlinkInline { Inlines = inlines ?? ImmutableArray<Inline>.Empty, Target = target },
-				_ => throw new JsonException("Inline missing type")
-			};
+			return
+				type switch
+				{
+					InlineType.Text => new TextInline { Text = text ?? String.Empty },
+					InlineType.Image =>
+						new ImageInline
+						{
+							Source = source,
+							AlternateText = alternateText,
+							Width = width ?? -1,
+							Height = height ?? -1
+						},
+					InlineType.Bold => new BoldInline { Inlines = inlines ?? ImmutableArray<Inline>.Empty },
+					InlineType.Italic => new ItalicInline { Inlines = inlines ?? ImmutableArray<Inline>.Empty },
+					InlineType.Underline => new UnderlineInline { Inlines = inlines ?? ImmutableArray<Inline>.Empty },
+					InlineType.Strikethrough =>
+						new StrikethroughInline { Inlines = inlines ?? ImmutableArray<Inline>.Empty },
+					InlineType.Code => new CodeInline { Inlines = inlines ?? ImmutableArray<Inline>.Empty },
+					InlineType.Hyperlink =>
+						new HyperlinkInline { Inlines = inlines ?? ImmutableArray<Inline>.Empty, Target = target },
+					_ => throw new JsonException("Inline missing type")
+				};
+		}
+		else
+		{
+			throw new JsonException();
+		}
 	}
 
 	public override TInline Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -104,11 +112,13 @@ public sealed class InlineJsonConverter<TInline> : JsonConverter<TInline> where 
 		
 		public void Visit(TextInline inline)
 		{
-			_writer.WriteString("Text", inline.Text);
+			_writer.WriteStringValue(inline.Text);
 		}
 
 		public void Visit(ImageInline inline)
 		{
+			WriteStart(inline);
+			
 			if (inline.Source != null)
 			{
 				_writer.WritePropertyName("Source");
@@ -129,40 +139,39 @@ public sealed class InlineJsonConverter<TInline> : JsonConverter<TInline> where 
 			{
 				_writer.WriteNumber("Height", inline.Height);
 			}
+			
+			WriteEnd();
 		}
 
 		public void Visit(BoldInline inline)
 		{
-			_writer.WritePropertyName("Inlines");
-			JsonSerializer.Serialize(_writer, inline.Inlines, _options);
+			WriteSimpleSpan(inline);
 		}
 
 		public void Visit(ItalicInline inline)
 		{
-			_writer.WritePropertyName("Inlines");
-			JsonSerializer.Serialize(_writer, inline.Inlines, _options);
+			WriteSimpleSpan(inline);
 		}
 
 		public void Visit(UnderlineInline inline)
 		{
-			_writer.WritePropertyName("Inlines");
-			JsonSerializer.Serialize(_writer, inline.Inlines, _options);
+			WriteSimpleSpan(inline);
 		}
 
 		public void Visit(StrikethroughInline inline)
 		{
-			_writer.WritePropertyName("Inlines");
-			JsonSerializer.Serialize(_writer, inline.Inlines, _options);
+			WriteSimpleSpan(inline);
 		}
 
 		public void Visit(CodeInline inline)
 		{
-			_writer.WritePropertyName("Inlines");
-			JsonSerializer.Serialize(_writer, inline.Inlines, _options);
+			WriteSimpleSpan(inline);
 		}
 
 		public void Visit(HyperlinkInline inline)
 		{
+			WriteStart(inline);
+			
 			if (inline.Target != null)
 			{
 				_writer.WritePropertyName("Target");
@@ -171,18 +180,34 @@ public sealed class InlineJsonConverter<TInline> : JsonConverter<TInline> where 
 			
 			_writer.WritePropertyName("Inlines");
 			JsonSerializer.Serialize(_writer, inline.Inlines, _options);
+			
+			WriteEnd();
+		}
+
+		private void WriteSimpleSpan(SpanInline inline)
+		{
+			WriteStart(inline);
+			_writer.WritePropertyName("Inlines");
+			JsonSerializer.Serialize(_writer, inline.Inlines, _options);
+			WriteEnd();
+		}
+
+		private void WriteStart(Inline inline)
+		{
+			_writer.WriteStartObject();
+			_writer.WritePropertyName("Type");
+			JsonSerializer.Serialize(_writer, inline.Type, _options);
+		}
+
+		private void WriteEnd()
+		{
+			_writer.WriteEndObject();
 		}
 		
 		private readonly Utf8JsonWriter _writer;
 		private readonly JsonSerializerOptions _options;
 	}
 
-	public override void Write(Utf8JsonWriter writer, TInline value, JsonSerializerOptions options)
-	{
-		writer.WriteStartObject();
-		writer.WritePropertyName("Type");
-		JsonSerializer.Serialize(writer, value.Type, options);
+	public override void Write(Utf8JsonWriter writer, TInline value, JsonSerializerOptions options) => 
 		value.Accept(new Visitor(writer, options));
-		writer.WriteEndObject();
-	}
 }
