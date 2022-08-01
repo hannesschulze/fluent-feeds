@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading.Tasks;
+using AngleSharp;
+using AngleSharp.Html.Parser;
 using FluentFeeds.Shared.RichText.Blocks;
 using FluentFeeds.Shared.RichText.Helpers;
 using FluentFeeds.Shared.RichText.Html;
@@ -14,6 +17,47 @@ namespace FluentFeeds.Shared.RichText;
 /// </summary>
 public sealed class RichText : IEquatable<RichText>
 {
+	/// <summary>
+	/// Create a rich text object by asynchronously parsing HTML input.
+	/// </summary>
+	public static async Task<RichText> ParseHtmlAsync(string html, HtmlParsingOptions? options = null)
+	{
+		options ??= new HtmlParsingOptions();
+		var configuration = Configuration.Default
+			.WithOnly(ctx => new HtmlParser(new HtmlParserOptions { IsStrictMode = options.IsStrict }, ctx));
+		var document = await BrowsingContext.New(configuration)
+			.OpenAsync(res => res.Content(html).Address(options.BaseUri))
+			.ConfigureAwait(false);
+		return document.Body == null
+			? new RichText()
+			: new RichText { Blocks = HtmlBlockProcessor.TransformAll(options, document.Body.ChildNodes) };
+	}
+
+	/// <summary>
+	/// Create a rich text object by parsing HTML input.
+	/// </summary>
+	public static RichText ParseHtml(string html, HtmlParsingOptions? options = null)
+	{
+		return ParseHtmlAsync(html, options).Result;
+	}
+
+	/// <summary>
+	/// Try to create a rich text object by parsing HTML input.
+	/// </summary>
+	public static bool TryParseHtml(string html, out RichText result, HtmlParsingOptions? options = null)
+	{
+		try
+		{
+			result = ParseHtml(html, options);
+			return true;
+		}
+		catch (Exception)
+		{
+			result = new RichText();
+			return false;
+		}
+	}
+	
 	/// <summary>
 	/// Create a new default-constructed rich text object.
 	/// </summary>

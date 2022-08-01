@@ -37,7 +37,7 @@ public abstract class SpanInline : Inline
 			return true;
 		if (!base.Equals(other))
 			return false;
-		return other is BoldInline casted && Inlines.SequenceEqual(casted.Inlines);
+		return other is SpanInline casted && Inlines.SequenceEqual(casted.Inlines);
 	}
 
 	public override int GetHashCode()
