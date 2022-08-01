@@ -1,6 +1,8 @@
 using System;
+using System.Text.Json.Serialization;
 using FluentFeeds.Shared.RichText.Blocks;
 using FluentFeeds.Shared.RichText.Html;
+using FluentFeeds.Shared.RichText.Json;
 
 namespace FluentFeeds.Shared.RichText.Inlines;
 
@@ -11,6 +13,7 @@ namespace FluentFeeds.Shared.RichText.Inlines;
 /// multiple container inlines which can change the format of other inlines, as well as leaf inlines like text or image
 /// inlines.</para>
 /// </summary>
+[JsonConverter(typeof(InlineJsonConverter<Inline>))]
 public abstract class Inline : IEquatable<Inline>
 {
 	/// <summary>
@@ -54,7 +57,7 @@ public abstract class Inline : IEquatable<Inline>
 		return HashCode.Combine(Type);
 	}
 
-	public override string ToString() => ToHtml();
+	public override string ToString() => $"Inline {{ Type = {Type} }}";
 
 	public static bool operator ==(Inline? lhs, Inline? rhs) => lhs?.Equals(rhs) ?? ReferenceEquals(rhs, null);
 	public static bool operator !=(Inline? lhs, Inline? rhs) => !(lhs == rhs);

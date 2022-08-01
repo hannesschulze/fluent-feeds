@@ -1,8 +1,13 @@
+using System.Text.Json.Serialization;
+using FluentFeeds.Shared.RichText.Helpers;
+using FluentFeeds.Shared.RichText.Json;
+
 namespace FluentFeeds.Shared.RichText.Inlines;
 
 /// <summary>
 /// An inline for making text underlined.
 /// </summary>
+[JsonConverter(typeof(InlineJsonConverter<UnderlineInline>))]
 public sealed class UnderlineInline : SpanInline
 {
 	/// <summary>
@@ -22,6 +27,7 @@ public sealed class UnderlineInline : SpanInline
 	public override InlineType Type => InlineType.Underline;
 
 	public override void Accept(IInlineVisitor visitor) => visitor.Visit(this);
+	public override string ToString() => $"UnderlineInline {{ Inlines = {Inlines.SequenceString()} }}";
 	
 	public override bool Equals(Inline? other)
 	{

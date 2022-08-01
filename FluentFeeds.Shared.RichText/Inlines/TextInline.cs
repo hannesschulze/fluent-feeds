@@ -1,10 +1,13 @@
 using System;
+using System.Text.Json.Serialization;
+using FluentFeeds.Shared.RichText.Json;
 
 namespace FluentFeeds.Shared.RichText.Inlines;
 
 /// <summary>
 /// Inline for defining plain-text runs.
 /// </summary>
+[JsonConverter(typeof(InlineJsonConverter<TextInline>))]
 public sealed class TextInline : Inline
 {
 	/// <summary>
@@ -31,6 +34,7 @@ public sealed class TextInline : Inline
 	public override InlineType Type => InlineType.Text;
 
 	public override void Accept(IInlineVisitor visitor) => visitor.Visit(this);
+	public override string ToString() => $"TextInline {{ Text = {Text} }}";
 	
 	public override bool Equals(Inline? other)
 	{

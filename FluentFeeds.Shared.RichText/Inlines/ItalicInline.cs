@@ -1,8 +1,13 @@
+using System.Text.Json.Serialization;
+using FluentFeeds.Shared.RichText.Helpers;
+using FluentFeeds.Shared.RichText.Json;
+
 namespace FluentFeeds.Shared.RichText.Inlines;
 
 /// <summary>
 /// An inline for making text italic.
 /// </summary>
+[JsonConverter(typeof(InlineJsonConverter<ItalicInline>))]
 public sealed class ItalicInline : SpanInline
 {
 	/// <summary>
@@ -22,6 +27,7 @@ public sealed class ItalicInline : SpanInline
 	public override InlineType Type => InlineType.Italic;
 
 	public override void Accept(IInlineVisitor visitor) => visitor.Visit(this);
+	public override string ToString() => $"ItalicInline {{ Inlines = {Inlines.SequenceString()} }}";
 	
 	public override bool Equals(Inline? other)
 	{

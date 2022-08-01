@@ -1,8 +1,13 @@
+using System.Text.Json.Serialization;
+using FluentFeeds.Shared.RichText.Helpers;
+using FluentFeeds.Shared.RichText.Json;
+
 namespace FluentFeeds.Shared.RichText.Inlines;
 
 /// <summary>
 /// An inline for formatting text as code.
 /// </summary>
+[JsonConverter(typeof(InlineJsonConverter<CodeInline>))]
 public sealed class CodeInline : SpanInline
 {
 	/// <summary>
@@ -22,6 +27,7 @@ public sealed class CodeInline : SpanInline
 	public override InlineType Type => InlineType.Code;
 
 	public override void Accept(IInlineVisitor visitor) => visitor.Visit(this);
+	public override string ToString() => $"CodeInline {{ Inlines = {Inlines.SequenceString()} }}";
 	
 	public override bool Equals(Inline? other)
 	{

@@ -1,12 +1,15 @@
 using System;
 using System.Linq;
+using System.Text.Json.Serialization;
 using FluentFeeds.Shared.RichText.Helpers;
+using FluentFeeds.Shared.RichText.Json;
 
 namespace FluentFeeds.Shared.RichText.Inlines;
 
 /// <summary>
 /// An inline for linking to a URI.
 /// </summary>
+[JsonConverter(typeof(InlineJsonConverter<HyperlinkInline>))]
 public sealed class HyperlinkInline : SpanInline
 {
 	/// <summary>
@@ -31,6 +34,8 @@ public sealed class HyperlinkInline : SpanInline
 	public override InlineType Type => InlineType.Hyperlink;
 
 	public override void Accept(IInlineVisitor visitor) => visitor.Visit(this);
+	public override string ToString() =>
+		$"HyperlinkInline {{ Inlines = {Inlines.SequenceString()}, Target = {Target?.ToString() ?? "[null]"} }}";
 	
 	public override bool Equals(Inline? other)
 	{
