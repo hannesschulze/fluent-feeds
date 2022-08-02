@@ -19,7 +19,7 @@ public class DefaultNavigationService : INavigationService
 	protected virtual void OnBackStackChanged() => BackStackChanged?.Invoke(this, EventArgs.Empty);
 
 	public IReadOnlyList<NavigationRoute> BackStack => _backStack;
-	public NavigationRoute CurrentRoute => BackStack[BackStack.Count - 1];
+	public NavigationRoute CurrentRoute => BackStack[^1];
 	public bool CanGoBack => BackStack.Count > 1;
 
 	public void GoBack()
@@ -40,5 +40,5 @@ public class DefaultNavigationService : INavigationService
 		OnBackStackChanged();
 	}
 
-	private List<NavigationRoute> _backStack = new();
+	private readonly List<NavigationRoute> _backStack = new();
 }
