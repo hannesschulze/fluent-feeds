@@ -9,6 +9,7 @@ using FluentFeeds.Shared.Documents.Blocks;
 using FluentFeeds.Shared.Documents.Html;
 using FluentFeeds.Shared.Documents.Json;
 using FluentFeeds.Shared.Documents.Helpers;
+using FluentFeeds.Shared.Documents.PlainText;
 
 namespace FluentFeeds.Shared.Documents;
 
@@ -88,6 +89,17 @@ public sealed class RichText : IEquatable<RichText>
 	public string ToHtml(HtmlWritingOptions? options = null)
 	{
 		var writer = new HtmlWriter(options ?? new HtmlWritingOptions());
+		foreach (var block in Blocks)
+			block.Accept(writer);
+		return writer.GetResult();
+	}
+
+	/// <summary>
+	/// Extract the plain text from this rich text object.
+	/// </summary>
+	public string ToPlainText()
+	{
+		var writer = new PlainTextWriter();
 		foreach (var block in Blocks)
 			block.Accept(writer);
 		return writer.GetResult();

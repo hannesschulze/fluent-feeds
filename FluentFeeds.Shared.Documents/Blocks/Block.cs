@@ -2,6 +2,7 @@ using System;
 using System.Text.Json.Serialization;
 using FluentFeeds.Shared.Documents.Html;
 using FluentFeeds.Shared.Documents.Json;
+using FluentFeeds.Shared.Documents.PlainText;
 
 namespace FluentFeeds.Shared.Documents.Blocks;
 
@@ -30,6 +31,16 @@ public abstract class Block : IEquatable<Block>
 	public string ToHtml(HtmlWritingOptions? options = null)
 	{
 		var writer = new HtmlWriter(options ?? new HtmlWritingOptions());
+		Accept(writer);
+		return writer.GetResult();
+	}
+
+	/// <summary>
+	/// Extract the plain text from this rich text block.
+	/// </summary>
+	public string ToPlainText()
+	{
+		var writer = new PlainTextWriter();
 		Accept(writer);
 		return writer.GetResult();
 	}
