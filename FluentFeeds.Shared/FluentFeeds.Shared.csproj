@@ -10,6 +10,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\FluentFeeds.Shared.RichText\FluentFeeds.Shared.RichText.csproj" />
+		<ProjectReference Include="..\FluentFeeds.Shared.Documents\FluentFeeds.Shared.Documents.csproj" />
 	</ItemGroup>
 </Project>
