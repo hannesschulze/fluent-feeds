@@ -1,11 +1,11 @@
-﻿using FluentFeeds.Shared.Services;
-using FluentFeeds.Shared.Services.Default;
-using FluentFeeds.Shared.ViewModels;
+﻿using FluentFeeds.App.Shared.Services;
+using FluentFeeds.App.Shared.Services.Default;
+using FluentFeeds.App.Shared.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 
-namespace FluentFeeds.WinUI;
+namespace FluentFeeds.App.WinUI;
 
 public partial class App : Application
 {

@@ -3,7 +3,7 @@
 		<OutputType>WinExe</OutputType>
 		<TargetFramework>net6.0-windows10.0.19041.0</TargetFramework>
 		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
-		<RootNamespace>FluentFeeds.WinUI</RootNamespace>
+		<RootNamespace>FluentFeeds.App.WinUI</RootNamespace>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<Platforms>x86;x64;arm64</Platforms>
 		<RuntimeIdentifiers>win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
@@ -14,9 +14,6 @@
 		<Nullable>enable</Nullable>
 		<AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
 	</PropertyGroup>
-	<ItemGroup>
-	  <None Remove="Controls\RichTextViewer.xaml" />
-	</ItemGroup>
 	
 	<ItemGroup>
 		<Content Include="Assets\Large310x310Logo.scale-100.png" />
@@ -75,7 +72,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\FluentFeeds.Shared\FluentFeeds.Shared.csproj" />
+		<ProjectReference Include="..\FluentFeeds.App.Shared\FluentFeeds.App.Shared.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -107,7 +104,7 @@
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
 		<Page Update="Themes\Generic.xaml">
-		  <Generator>MSBuild:Compile</Generator>
+			<Generator>MSBuild:Compile</Generator>
 		</Page>
 	</ItemGroup>
 </Project>

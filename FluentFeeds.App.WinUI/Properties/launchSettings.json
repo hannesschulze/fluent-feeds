@@ -1,9 +1,9 @@
 {
 	"profiles": {
-		"FluentFeeds.WinUI (Package)": {
+		"FluentFeeds.App.WinUI (Package)": {
 			"commandName": "MsixPackage"
 		},
-		"FluentFeeds.WinUI (Unpackaged)": {
+		"FluentFeeds.App.WinUI (Unpackaged)": {
 			"commandName": "Project"
 		}
 	}

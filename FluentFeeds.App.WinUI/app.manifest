@@ -5,7 +5,7 @@
 	
 	<assemblyIdentity 
 		version="1.0.0.0"
-		name="FluentFeeds.WinUI.app" />
+		name="FluentFeeds.App.WinUI.app" />
 
 	<application xmlns="urn:schemas-microsoft-com:asm.v3">
 		<windowsSettings>

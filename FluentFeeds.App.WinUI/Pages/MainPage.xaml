@@ -1,11 +1,11 @@
 ﻿<Page
-    x:Class="FluentFeeds.WinUI.Pages.MainPage"
+    x:Class="FluentFeeds.App.WinUI.Pages.MainPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-	xmlns:vm="using:FluentFeeds.Shared.ViewModels" 
-	xmlns:helpers="using:FluentFeeds.WinUI.Helpers" 
+	xmlns:vm="using:FluentFeeds.App.Shared.ViewModels" 
+	xmlns:helpers="using:FluentFeeds.App.WinUI.Helpers" 
 	d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
 	mc:Ignorable="d">
 

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using FluentFeeds.Shared.RichText.Blocks;
-using FluentFeeds.Shared.RichText.Blocks.Heading;
-using FluentFeeds.Shared.RichText.Blocks.List;
-using FluentFeeds.Shared.RichText.Inlines;
+using FluentFeeds.Documents.Blocks;
+using FluentFeeds.Documents.Blocks.Heading;
+using FluentFeeds.Documents.Blocks.List;
+using FluentFeeds.Documents.Inlines;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Shapes;
@@ -13,7 +13,7 @@ using Windows.Foundation;
 using Windows.UI.Text;
 using MUXD = Microsoft.UI.Xaml.Documents;
 
-namespace FluentFeeds.WinUI.Controls;
+namespace FluentFeeds.App.WinUI.Controls;
 
 public partial class RichTextViewer
 {

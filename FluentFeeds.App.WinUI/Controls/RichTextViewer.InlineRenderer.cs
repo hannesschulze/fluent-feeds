@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using FluentFeeds.Shared.RichText.Inlines;
+using FluentFeeds.Documents.Inlines;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
@@ -8,7 +8,7 @@ using Microsoft.UI.Xaml.Media.Imaging;
 using Windows.UI.Text;
 using MUXD = Microsoft.UI.Xaml.Documents;
 
-namespace FluentFeeds.WinUI.Controls;
+namespace FluentFeeds.App.WinUI.Controls;
 
 public partial class RichTextViewer
 {

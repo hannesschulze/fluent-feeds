@@ -1,16 +1,16 @@
 ﻿using System;
-using FluentFeeds.Shared.RichText;
-using FluentFeeds.Shared.RichText.Blocks;
-using FluentFeeds.Shared.RichText.Blocks.Heading;
-using FluentFeeds.Shared.RichText.Blocks.List;
-using FluentFeeds.Shared.RichText.Blocks.Table;
-using FluentFeeds.Shared.RichText.Inlines;
-using FluentFeeds.Shared.Services;
+using FluentFeeds.Documents;
+using FluentFeeds.Documents.Blocks;
+using FluentFeeds.Documents.Blocks.Heading;
+using FluentFeeds.Documents.Blocks.List;
+using FluentFeeds.Documents.Blocks.Table;
+using FluentFeeds.Documents.Inlines;
+using FluentFeeds.App.Shared.Services;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 
-namespace FluentFeeds.WinUI.Pages;
+namespace FluentFeeds.App.WinUI.Pages;
 
 public sealed partial class FeedPage : Page
 {

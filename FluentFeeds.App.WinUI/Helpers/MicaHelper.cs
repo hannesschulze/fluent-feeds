@@ -6,7 +6,7 @@ using Microsoft.UI.Xaml;
 using Windows.System;
 using WinRT;
 
-namespace FluentFeeds.WinUI.Helpers;
+namespace FluentFeeds.App.WinUI.Helpers;
 
 /// <summary>
 /// Helper class which applies a Mica backdrop to a window.

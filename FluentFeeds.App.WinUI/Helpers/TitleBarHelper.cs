@@ -8,7 +8,7 @@ using Windows.Graphics;
 using Windows.UI;
 using WinRT.Interop;
 
-namespace FluentFeeds.WinUI.Helpers;
+namespace FluentFeeds.App.WinUI.Helpers;
 
 /// <summary>
 /// Helper class which initializes a tall title bar for a window which extends into the window region and sets up 

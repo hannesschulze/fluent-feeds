@@ -1,4 +1,4 @@
-﻿namespace FluentFeeds.WinUI.Helpers;
+﻿namespace FluentFeeds.App.WinUI.Helpers;
 
 /// <summary>
 /// Structure defining the draggable regions of a titlebar.

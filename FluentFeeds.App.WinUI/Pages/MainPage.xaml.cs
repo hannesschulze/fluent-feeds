@@ -2,15 +2,15 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
-using FluentFeeds.Shared.ViewModels;
-using FluentFeeds.WinUI.Helpers;
+using FluentFeeds.App.Shared.ViewModels;
+using FluentFeeds.App.WinUI.Helpers;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
 using Windows.ApplicationModel;
 
-namespace FluentFeeds.WinUI.Pages;
+namespace FluentFeeds.App.WinUI.Pages;
 
 /// <summary>
 /// The main page of the app managing the navigation view and the titlebar.

@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32602.215
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentFeeds.WinUI", "FluentFeeds.WinUI\FluentFeeds.WinUI.csproj", "{24F20570-2E47-41C6-8498-A8A4229E48C4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentFeeds.App.WinUI", "FluentFeeds.App.WinUI\FluentFeeds.App.WinUI.csproj", "{24F20570-2E47-41C6-8498-A8A4229E48C4}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentFeeds.App.Shared", "FluentFeeds.App.Shared\FluentFeeds.App.Shared.csproj", "{BDE87B3C-1897-49E7-B365-F9F7BB6270E1}"
 EndProject
@@ -16,13 +16,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluentFeeds.Documents", "FluentFeeds.Documents\FluentFeeds.Documents.csproj", "{445BC747-4555-4E35-BA66-21FB6E051407}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentFeeds.Documents", "FluentFeeds.Documents\FluentFeeds.Documents.csproj", "{445BC747-4555-4E35-BA66-21FB6E051407}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluentFeeds.Documents.Tests", "FluentFeeds.Documents.Tests\FluentFeeds.Documents.Tests.csproj", "{BD2F61C7-C626-44E9-8945-B83767B63408}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentFeeds.Documents.Tests", "FluentFeeds.Documents.Tests\FluentFeeds.Documents.Tests.csproj", "{BD2F61C7-C626-44E9-8945-B83767B63408}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluentFeeds.Feeds.Base", "FluentFeeds.Feeds.Base\FluentFeeds.Feeds.Base.csproj", "{72A3D85B-3BF5-4BFC-BFCE-995A34B999FA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentFeeds.Feeds.Base", "FluentFeeds.Feeds.Base\FluentFeeds.Feeds.Base.csproj", "{72A3D85B-3BF5-4BFC-BFCE-995A34B999FA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluentFeeds.Feeds.Base.Tests", "FluentFeeds.Feeds.Base.Tests\FluentFeeds.Feeds.Base.Tests.csproj", "{FDBC1996-544F-45BC-8B69-C56584A80181}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentFeeds.Feeds.Base.Tests", "FluentFeeds.Feeds.Base.Tests\FluentFeeds.Feeds.Base.Tests.csproj", "{FDBC1996-544F-45BC-8B69-C56584A80181}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

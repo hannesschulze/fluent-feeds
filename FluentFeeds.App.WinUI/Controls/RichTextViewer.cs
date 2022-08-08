@@ -1,4 +1,4 @@
-using FluentFeeds.Shared.RichText;
+using FluentFeeds.Documents;
 using Microsoft.UI.Text;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -6,7 +6,7 @@ using Microsoft.UI.Xaml.Markup;
 using Microsoft.UI.Xaml.Media;
 using Windows.UI.Text;
 
-namespace FluentFeeds.WinUI.Controls;
+namespace FluentFeeds.App.WinUI.Controls;
 
 /// <summary>
 /// A control which displays a generic <see cref="RichText"/> object.

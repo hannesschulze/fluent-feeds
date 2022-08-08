@@ -1,10 +1,10 @@
 ﻿using System;
-using FluentFeeds.Shared.Models;
+using FluentFeeds.App.Shared.Models;
 using Microsoft.UI.Xaml.Controls.AnimatedVisuals;
 using Microsoft.UI.Xaml.Media;
 using MUXC = Microsoft.UI.Xaml.Controls;
 
-namespace FluentFeeds.WinUI.Helpers;
+namespace FluentFeeds.App.WinUI.Helpers;
 
 public static class SymbolHelper
 {

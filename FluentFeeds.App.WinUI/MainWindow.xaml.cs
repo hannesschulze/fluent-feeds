@@ -1,9 +1,9 @@
-﻿using FluentFeeds.WinUI.Helpers;
+﻿using FluentFeeds.App.WinUI.Helpers;
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 
-namespace FluentFeeds.WinUI;
+namespace FluentFeeds.App.WinUI;
 
 public sealed partial class MainWindow : Window
 {

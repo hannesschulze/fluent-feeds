@@ -1,6 +1,6 @@
 ﻿using Microsoft.UI.Xaml.Controls;
 
-namespace FluentFeeds.WinUI.Pages;
+namespace FluentFeeds.App.WinUI.Pages;
 
 public sealed partial class ItemListPage : Page
 {

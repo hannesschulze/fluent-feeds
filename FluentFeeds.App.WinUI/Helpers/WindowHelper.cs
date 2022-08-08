@@ -3,7 +3,7 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using WinRT.Interop;
 
-namespace FluentFeeds.WinUI.Helpers;
+namespace FluentFeeds.App.WinUI.Helpers;
 
 public static class WindowHelper
 {
