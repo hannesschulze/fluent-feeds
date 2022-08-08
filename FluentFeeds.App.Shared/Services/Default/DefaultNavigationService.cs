@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using FluentFeeds.App.Shared.Models;
-using FluentFeeds.App.Shared.Models.Feeds;
 using FluentFeeds.App.Shared.Models.Nodes;
+using FluentFeeds.Feeds.Base;
 
 namespace FluentFeeds.App.Shared.Services.Default;
 

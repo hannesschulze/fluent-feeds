@@ -1,4 +1,4 @@
-using FluentFeeds.App.Shared.Models.Feeds;
+using FluentFeeds.Feeds.Base;
 
 namespace FluentFeeds.App.Shared.Models.Nodes;
 

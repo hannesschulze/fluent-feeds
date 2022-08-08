@@ -1,39 +1,42 @@
 using System;
+using System.ComponentModel;
 
-namespace FluentFeeds.App.Shared.Models.Items;
+namespace FluentFeeds.Feeds.Base.Items;
 
 /// <summary>
-/// An item is part of a feed and provides content in a particular form.
+/// Read-only view into an <see cref="Item"/>.
 /// </summary>
-public abstract class Item
+public interface IReadOnlyItem : INotifyPropertyChanging, INotifyPropertyChanged
 {
-	public Item(
-		DateTimeOffset timestamp, string title, string author, Uri url,
-		string? summary = null, Uri? contentUrl = null, bool isRead = false)
-	{
-		Timestamp = timestamp;
-		Title = title;
-		Author = author;
-		Summary = summary;
-		Url = url;
-		ContentUrl = contentUrl;
-		IsRead = isRead;
-	}
-
 	/// <summary>
 	/// Accept a visitor for this item object.
 	/// </summary>
-	public abstract void Accept(IItemVisitor visitor);
+	public void Accept(IItemVisitor visitor);
 	
 	/// <summary>
 	/// The type of this item.
 	/// </summary>
-	public abstract ItemType Type { get; }
+	public ItemType Type { get; }
+	
+	/// <summary>
+	/// Unique identifier for this item.
+	/// </summary>
+	public Guid Identifier { get; }
+	
+	/// <summary>
+	/// URL to the item itself.
+	/// </summary>
+	public Uri Url { get; }
 
 	/// <summary>
 	/// The timestamp at which the item was published.
 	/// </summary>
-	public DateTimeOffset Timestamp { get; }
+	public DateTimeOffset PublishedTimestamp { get; }
+
+	/// <summary>
+	/// The timestamp at which the item was last modified.
+	/// </summary>
+	public DateTimeOffset ModifiedTimestamp { get; }
 	
 	/// <summary>
 	/// Title of the item.
@@ -44,11 +47,6 @@ public abstract class Item
 	/// Name of the author who published the item.
 	/// </summary>
 	public string Author { get; }
-	
-	/// <summary>
-	/// URL to the item itself.
-	/// </summary>
-	public Uri Url { get; }
 	
 	/// <summary>
 	/// Summary of the article (usually a short excerpt formatted as plain text).

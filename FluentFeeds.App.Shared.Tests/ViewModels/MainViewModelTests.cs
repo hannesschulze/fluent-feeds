@@ -1,10 +1,9 @@
-﻿using System.ComponentModel;
-using FluentFeeds.App.Shared.Models;
-using FluentFeeds.App.Shared.Models.Feeds;
+﻿using FluentFeeds.App.Shared.Models;
 using FluentFeeds.App.Shared.Models.Nodes;
 using FluentFeeds.App.Shared.Services;
 using FluentFeeds.App.Shared.Services.Default;
 using FluentFeeds.App.Shared.ViewModels;
+using FluentFeeds.Feeds.Base;
 using Xunit;
 
 namespace FluentFeeds.App.Shared.Tests.ViewModels;

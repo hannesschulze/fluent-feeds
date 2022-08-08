@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
-using FluentFeeds.App.Shared.Models.Items;
+using FluentFeeds.Feeds.Base.Items;
 
-namespace FluentFeeds.App.Shared.Models.Feeds;
+namespace FluentFeeds.Feeds.Base;
 
 /// <summary>
 /// A feed which manages a set of items and can be synchronized with a remote server.
@@ -23,7 +23,7 @@ public abstract class Feed
 	/// <summary>
 	/// Current snapshot of items provided by the feed.
 	/// </summary>
-	public ImmutableHashSet<Item> Items { get; private set; } = ImmutableHashSet<Item>.Empty;
+	public ImmutableHashSet<IReadOnlyItem> Items { get; private set; } = ImmutableHashSet<IReadOnlyItem>.Empty;
 
 	/// <summary>
 	/// Asynchronously load the initial selection of items. The result might be out of date and need to be synchronized.
@@ -59,18 +59,18 @@ public abstract class Feed
 	/// <summary>
 	/// Asynchronously return the initial selection of items which might be out of date.
 	/// </summary>
-	protected abstract Task<IEnumerable<Item>> DoLoadAsync();
+	protected abstract Task<IEnumerable<IReadOnlyItem>> DoLoadAsync();
 	
 	/// <summary>
 	/// Return a list of up to date items fetched from a remote server. It is ensured that <see cref="DoLoadAsync"/> has
 	/// been called before this method.
 	/// </summary>
-	protected abstract Task<IEnumerable<Item>> DoSynchronizeAsync();
+	protected abstract Task<IEnumerable<IReadOnlyItem>> DoSynchronizeAsync();
 	
 	/// <summary>
 	/// Manually update the list of items.
 	/// </summary>
-	protected void UpdateItems(IEnumerable<Item> items)
+	protected void UpdateItems(IEnumerable<IReadOnlyItem> items)
 	{
 		Items = items.ToImmutableHashSet();
 		ItemsUpdated?.Invoke(this, EventArgs.Empty);

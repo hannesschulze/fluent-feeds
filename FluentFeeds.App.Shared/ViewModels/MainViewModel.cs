@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using FluentFeeds.App.Shared.Models;
-using FluentFeeds.App.Shared.Models.Feeds;
 using FluentFeeds.App.Shared.Models.Nodes;
 using FluentFeeds.App.Shared.Services;
+using FluentFeeds.Feeds.Base;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
 

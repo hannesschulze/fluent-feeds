@@ -1,5 +1,5 @@
 using System;
-using FluentFeeds.App.Shared.Models.Feeds;
+using FluentFeeds.Feeds.Base;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 
 namespace FluentFeeds.App.Shared.Models.Nodes;
