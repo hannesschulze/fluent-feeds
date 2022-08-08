@@ -9,12 +9,12 @@ jobs:
       - uses: actions/setup-dotnet@v2
         with:
           dotnet-version: 6.0.x
-      - name: Install dependencies (Shared.RichText)
-        run: cd FluentFeeds.Shared.RichText.Tests; dotnet restore
-      - name: Build (Shared.RichText)
-        run: cd FluentFeeds.Shared.RichText.Tests; dotnet build --no-restore
-      - name: Test (Shared.RichText)
-        run: cd FluentFeeds.Shared.RichText.Tests; dotnet test --no-restore --verbosity normal --collect:"XPlat Code Coverage"
+      - name: Install dependencies (Shared.Documents)
+        run: cd FluentFeeds.Shared.Documents.Tests; dotnet restore
+      - name: Build (Shared.Documents)
+        run: cd FluentFeeds.Shared.Documents.Tests; dotnet build --no-restore
+      - name: Test (Shared.Documents)
+        run: cd FluentFeeds.Shared.Documents.Tests; dotnet test --no-restore --verbosity normal --collect:"XPlat Code Coverage"
       - name: Install dependencies (Shared)
         run: cd FluentFeeds.Shared.Tests; dotnet restore
       - name: Build (Shared)
