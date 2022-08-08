@@ -7,5 +7,5 @@ public interface IReadOnlyArticleItem : IReadOnlyItem
 	/// <summary>
 	/// Content of the article.
 	/// </summary>
-	public RichText Content { get; }
+	RichText Content { get; }
 }

@@ -11,14 +11,14 @@ namespace FluentFeeds.Feeds.Base.Storage;
 public interface IItemStorage
 {
 	/// <summary>
-	/// Return all saved items associated with the specified feed identifier.
+	/// Return all saved items.
 	/// </summary>
-	Task<IEnumerable<IReadOnlyItem>> GetItemsAsync(Guid feedIdentifier);
+	Task<IEnumerable<IReadOnlyItem>> GetItemsAsync();
 
 	/// <summary>
-	/// Save the provided set of items and associate them with the specified feed identifier.
+	/// Save the provided set of items.
 	/// </summary>
-	Task AddItemsAsync(IEnumerable<Item> items, Guid feedIdentifier);
+	Task AddItemsAsync(IEnumerable<Item> items);
 
 	/// <summary>
 	/// Update a saved item with the specified item to match <c>updatedItem</c>.

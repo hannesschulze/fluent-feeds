@@ -1,31 +1,33 @@
+using System;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Linq;
-using FluentFeeds.Feeds.Base;
+using FluentFeeds.Common;
 
-namespace FluentFeeds.App.Shared.Models.Nodes;
+namespace FluentFeeds.Feeds.Base.Nodes;
 
 /// <summary>
 /// A node in the tree of feeds which can contain other nodes.
 /// </summary>
-public sealed class FeedGroup : FeedNode
+public sealed class FeedGroupNode : FeedNode, IReadOnlyFeedGroupNode
 {
-	public FeedGroup(
-		string title, Symbol symbol = Symbol.Directory, bool isUserCustomizable = false, params FeedNode[] children) 
-		: base(title, symbol)
+	public FeedGroupNode(
+		Guid identifier, string title, Symbol symbol = Symbol.Directory, bool isUserCustomizable = false,
+		params IReadOnlyFeedNode[] children) 
+		: base(identifier, title, symbol)
 	{
+		Children = new ObservableCollection<IReadOnlyFeedNode>(children);
+		_readOnlyChildren = new ReadOnlyObservableCollection<IReadOnlyFeedNode>(Children);
 		_isUserCustomizable = isUserCustomizable;
-		Children = new ObservableCollection<FeedNode>(children);
 	}
 
 	/// <summary>
 	/// Child nodes of this group.
 	/// </summary>
-	public ObservableCollection<FeedNode> Children { get; }
+	public ObservableCollection<IReadOnlyFeedNode> Children { get; }
 
-	/// <summary>
-	/// Flag indicating if the user can customize this group (i.e. rename it, drag nodes from it, drop nodes onto it). 
-	/// </summary>
+	ReadOnlyObservableCollection<IReadOnlyFeedNode> IReadOnlyFeedGroupNode.Children => _readOnlyChildren;
+
 	public bool IsUserCustomizable
 	{
 		get => _isUserCustomizable;
@@ -44,5 +46,6 @@ public sealed class FeedGroup : FeedNode
 
 	public override FeedNodeType Type => FeedNodeType.Group;
 
+	private readonly ReadOnlyObservableCollection<IReadOnlyFeedNode> _readOnlyChildren;
 	private bool _isUserCustomizable;
 }

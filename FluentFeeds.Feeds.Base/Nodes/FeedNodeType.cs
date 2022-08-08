@@ -1,4 +1,4 @@
-namespace FluentFeeds.App.Shared.Models.Nodes;
+namespace FluentFeeds.Feeds.Base.Nodes;
 
 /// <summary>
 /// Type of a <see cref="FeedNode"/>.
@@ -6,11 +6,11 @@ namespace FluentFeeds.App.Shared.Models.Nodes;
 public enum FeedNodeType
 {
 	/// <summary>
-	/// <see cref="FeedGroup"/>
+	/// <see cref="FeedGroupNode"/>
 	/// </summary>
 	Group,
 	/// <summary>
-	/// <see cref="FeedItem"/>
+	/// <see cref="FeedLeafNode"/>
 	/// </summary>
-	Item
+	Leaf
 }

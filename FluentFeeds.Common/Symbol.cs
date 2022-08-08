@@ -1,7 +1,7 @@
-﻿namespace FluentFeeds.App.Shared.Models;
+﻿namespace FluentFeeds.Common;
 
 /// <summary>
-/// A symbol which can be used in the UI.
+/// A symbol abstraction used throughout the app.
 /// </summary>
 public enum Symbol
 {

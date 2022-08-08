@@ -11,16 +11,10 @@ namespace FluentFeeds.Feeds.Base;
 /// </summary>
 public abstract class CachedFeed : Feed
 {
-	protected CachedFeed(Guid identifier, IItemStorage storage)
+	protected CachedFeed(IItemStorage storage)
 	{
-		Identifier = identifier;
 		Storage = storage;
 	}
-	
-	/// <summary>
-	/// Cache identifier for this feed.
-	/// </summary>
-	public Guid Identifier { get; }
 	
 	/// <summary>
 	/// Object which stores items.
@@ -29,7 +23,7 @@ public abstract class CachedFeed : Feed
 
 	protected sealed override async Task<IEnumerable<IReadOnlyItem>> DoLoadAsync()
 	{
-		foreach (var item in await Storage.GetItemsAsync(Identifier))
+		foreach (var item in await Storage.GetItemsAsync())
 		{
 			_cache.Add(item.Url, item);
 		}
@@ -60,7 +54,7 @@ public abstract class CachedFeed : Feed
 			}
 		}
 
-		await Storage.AddItemsAsync(added, Identifier);
+		await Storage.AddItemsAsync(added);
 
 		return _cache.Values;
 	}

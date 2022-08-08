@@ -1,5 +1,5 @@
 ﻿using System;
-using FluentFeeds.App.Shared.Models.Nodes;
+using FluentFeeds.Feeds.Base.Nodes;
 
 namespace FluentFeeds.App.Shared.Models;
 
@@ -16,7 +16,7 @@ public readonly struct NavigationRoute : IEquatable<NavigationRoute>
 	/// <summary>
 	/// Navigation entry for a feed.
 	/// </summary>
-	public static NavigationRoute Feed(FeedItem item) => new(NavigationRouteType.Feed, item);
+	public static NavigationRoute Feed(IReadOnlyFeedNode node) => new(NavigationRouteType.Feed, node);
 
 	/// <summary>
 	/// The type of this route.
@@ -26,25 +26,25 @@ public readonly struct NavigationRoute : IEquatable<NavigationRoute>
 	/// <summary>
 	/// The feed item of this entry (only available for <see cref="NavigationRouteType.Feed"/> routes).
 	/// </summary>
-	public FeedItem? FeedItem { get; }
+	public IReadOnlyFeedNode? FeedNode { get; }
 
-	private NavigationRoute(NavigationRouteType type, FeedItem? feedItem)
+	private NavigationRoute(NavigationRouteType type, IReadOnlyFeedNode? feedNode)
 	{
 		Type = type;
-		FeedItem = feedItem;
+		FeedNode = feedNode;
 	}
 
 	public override string ToString() =>
 		Type switch
 		{
 			NavigationRouteType.Settings => "Settings",
-			NavigationRouteType.Feed=> $"Feed {{ FeedItem = {FeedItem} }}",
+			NavigationRouteType.Feed=> $"Feed {{ FeedNode = {FeedNode} }}",
 			_ => throw new IndexOutOfRangeException()
 		};
 
-	public override int GetHashCode() => HashCode.Combine(Type, FeedItem);
+	public override int GetHashCode() => HashCode.Combine(Type, FeedNode);
 	public override bool Equals(object? other) => other is NavigationRoute casted && Equals(casted);
-	public bool Equals(NavigationRoute other) => Type == other.Type && FeedItem == other.FeedItem;
+	public bool Equals(NavigationRoute other) => Type == other.Type && FeedNode == other.FeedNode;
 
 	public static bool operator ==(NavigationRoute left, NavigationRoute right) => left.Equals(right);
 	public static bool operator !=(NavigationRoute left, NavigationRoute right) => !left.Equals(right);

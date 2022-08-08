@@ -13,4 +13,8 @@
 		<ProjectReference Include="..\FluentFeeds.Documents\FluentFeeds.Documents.csproj" />
 		<ProjectReference Include="..\FluentFeeds.Feeds.Base\FluentFeeds.Feeds.Base.csproj" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Models\FeedProviders" />
+	</ItemGroup>
 </Project>

@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using FluentFeeds.App.Shared.Models;
+using FluentFeeds.Common;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 
 namespace FluentFeeds.App.Shared.ViewModels;
@@ -16,7 +17,7 @@ public abstract class NavigationItemViewModel : ObservableObject
 		_symbol = symbol;
 		IsExpandable = isExpandable;
 		Destination = destination;
-		Children = new(MutableChildren);
+		Children = new ReadOnlyObservableCollection<NavigationItemViewModel>(MutableChildren);
 	}
 
 	/// <summary>
