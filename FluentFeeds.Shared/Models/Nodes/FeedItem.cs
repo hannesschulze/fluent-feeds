@@ -1,8 +1,22 @@
+using FluentFeeds.Shared.Models.Feeds;
+
 namespace FluentFeeds.Shared.Models.Nodes;
 
-public abstract class FeedItem : FeedNode
+/// <summary>
+/// A leaf node in the tree of feeds representing a single feed.
+/// </summary>
+public sealed class FeedItem : FeedNode
 {
-	public Feed Feed { get; }
-	
-	protected abstract Feed DoCreateFeed();
+	public FeedItem(string title, Symbol symbol, Feed feed) : base(title, symbol)
+	{
+		_feed = feed;
+	}
+
+	public override void Accept(IFeedNodeVisitor visitor) => visitor.Visit(this);
+
+	protected override Feed DoCreateFeed() => _feed;
+
+	public override FeedNodeType Type => FeedNodeType.Item;
+
+	private readonly Feed _feed;
 }

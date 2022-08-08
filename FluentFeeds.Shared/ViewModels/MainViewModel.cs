@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using FluentFeeds.Shared.Models;
+using FluentFeeds.Shared.Models.Feeds;
+using FluentFeeds.Shared.Models.Nodes;
 using FluentFeeds.Shared.Services;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
@@ -39,13 +41,13 @@ public class MainViewModel : ObservableObject
 
 	public class FeedItemViewModel : NavigationItemViewModel
 	{
-		public FeedItemViewModel(Feed feed)
-			: base(feed.Name, feed.Symbol, isExpandable: false, NavigationRoute.Feed(feed))
+		public FeedItemViewModel(FeedItem item)
+			: base(item.Title, item.Symbol, isExpandable: false, NavigationRoute.Feed(item))
 		{
-			Feed = feed;
+			Item = item;
 		}
 
-		public Feed Feed { get; }
+		public FeedItem Item { get; }
 	}
 
 	public MainViewModel(INavigationService navigationService)
@@ -54,8 +56,9 @@ public class MainViewModel : ObservableObject
 		_navigationService.BackStackChanged += HandleBackStackChanged;
 
 		_goBackCommand = new RelayCommand(() => _navigationService.GoBack(), () => _navigationService.CanGoBack);
-		var overviewFeed = _navigationService.BackStack[0].FeedSource ?? new Feed("Overview", Symbol.Home);
-		var unreadFeed = new Feed("Unread", Symbol.Sparkle);
+		var overviewFeed = 
+			_navigationService.BackStack[0].FeedItem ?? new FeedItem("Overview", Symbol.Home, new EmptyFeed());
+		var unreadFeed = new FeedItem("Unread", Symbol.Sparkle, new EmptyFeed());
 		_feedItems.Add(RegisterFeedItem(new FeedItemViewModel(overviewFeed)));
 		_feedItems.Add(RegisterFeedItem(new FeedItemViewModel(unreadFeed)));
 		_visiblePage = GetVisiblePage();
@@ -132,14 +135,14 @@ public class MainViewModel : ObservableObject
 		{
 			NavigationRouteType.Settings => SettingsItem,
 			NavigationRouteType.Feed =>
-				_feedItemRegistry.GetValueOrDefault(_navigationService.CurrentRoute.FeedSource!),
+				_feedItemRegistry.GetValueOrDefault(_navigationService.CurrentRoute.FeedItem!),
 			_ => null
 		};
 
 	private FeedItemViewModel RegisterFeedItem(FeedItemViewModel item)
 	{
-		_feedItemRegistry.Add(item.Feed, item);
-		if (item.Feed == _navigationService.CurrentRoute.FeedSource)
+		_feedItemRegistry.Add(item.Item, item);
+		if (item.Item == _navigationService.CurrentRoute.FeedItem)
 		{
 			_isChangingSelection = true;
 			SelectedItem = item;
@@ -152,7 +155,7 @@ public class MainViewModel : ObservableObject
 	private readonly RelayCommand _goBackCommand;
 	private readonly ObservableCollection<NavigationItemViewModel> _feedItems = new();
 	private readonly SettingsItemViewModel _settingsItem = new();
-	private readonly Dictionary<Feed, FeedItemViewModel> _feedItemRegistry = new();
+	private readonly Dictionary<FeedItem, FeedItemViewModel> _feedItemRegistry = new();
 	private Page _visiblePage;
 	private NavigationItemViewModel? _selectedItem;
 	private bool _isChangingSelection;

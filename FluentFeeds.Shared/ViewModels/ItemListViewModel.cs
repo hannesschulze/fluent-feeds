@@ -8,7 +8,7 @@ namespace FluentFeeds.Shared.ViewModels;
 
 public class ItemListViewModel
 {
-	protected void UpdateItems(IEnumerable<Item> newItems, bool computeDifference = true)
+	/*protected void UpdateItems(IEnumerable<Item> newItems, bool computeDifference = true)
 	{
 		var newUniqueItems = newItems.Distinct().ToList();
 		if (computeDifference)
@@ -67,5 +67,5 @@ public class ItemListViewModel
 		}
 	}
 
-	private readonly ObservableCollection<Item> _items = new();
+	private readonly ObservableCollection<Item> _items = new();*/
 }

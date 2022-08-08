@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentFeeds.Shared.Models.Items;
 
 namespace FluentFeeds.Shared.Models.Feeds;
 
@@ -13,7 +14,7 @@ public sealed class CompositeFeed : Feed
 {
 	public CompositeFeed(IEnumerable<Feed> feeds)
 	{
-		Feeds = feeds.ToImmutableArray();
+		_feeds = feeds.ToImmutableHashSet();
 
 		foreach (var feed in Feeds)
 		{
@@ -25,7 +26,38 @@ public sealed class CompositeFeed : Feed
 	{
 	}
 
-	public IReadOnlyList<Feed> Feeds { get; }
+	public ImmutableHashSet<Feed> Feeds
+	{
+		get => _feeds;
+		set
+		{
+			var added = value.Except(_feeds);
+			var removed = _feeds.Except(value);
+			_feeds = value;
+
+			foreach (var feed in removed)
+			{
+				feed.ItemsUpdated -= HandleItemsUpdated;
+			}
+			
+			foreach (var feed in added)
+			{
+				feed.ItemsUpdated += HandleItemsUpdated;
+			}
+			
+			UpdateItems(GetAllItems());
+			AddFeeds(added);
+		}
+	}
+
+	private async void AddFeeds(IEnumerable<Feed> feeds)
+	{
+		_ignoreUpdates = true;
+		await Task.WhenAll(feeds.Select(feed => feed.LoadAsync()));
+		_ignoreUpdates = false;
+		
+		UpdateItems(GetAllItems());
+	}
 
 	protected override async Task<IEnumerable<Item>> DoLoadAsync()
 	{
@@ -57,4 +89,5 @@ public sealed class CompositeFeed : Feed
 	private IEnumerable<Item> GetAllItems() => Feeds.SelectMany(feed => feed.Items);
 
 	private bool _ignoreUpdates;
+	private ImmutableHashSet<Feed> _feeds;
 }

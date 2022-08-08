@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using FluentFeeds.Shared.Models;
+using FluentFeeds.Shared.Models.Feeds;
+using FluentFeeds.Shared.Models.Nodes;
 
 namespace FluentFeeds.Shared.Services.Default;
 
@@ -11,7 +13,7 @@ public class DefaultNavigationService : INavigationService
 {
 	public DefaultNavigationService()
 	{
-		_backStack.Add(NavigationRoute.Feed(new Feed("Overview", Symbol.Home)));
+		_backStack.Add(NavigationRoute.Feed(new FeedItem("Overview", Symbol.Home, new EmptyFeed())));
 	}
 
 	public event EventHandler<EventArgs>? BackStackChanged;

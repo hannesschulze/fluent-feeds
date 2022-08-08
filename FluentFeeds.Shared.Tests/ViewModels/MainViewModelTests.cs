@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel;
 using FluentFeeds.Shared.Models;
+using FluentFeeds.Shared.Models.Feeds;
+using FluentFeeds.Shared.Models.Nodes;
 using FluentFeeds.Shared.Services;
 using FluentFeeds.Shared.Services.Default;
 using FluentFeeds.Shared.ViewModels;
@@ -70,7 +72,7 @@ public class MainViewModelTests
 	public void UpdatesSelectionWhenPageChanges_ToUnknownRoute()
 	{
 		Assert.Equal(ViewModel.FeedItems[0], ViewModel.SelectedItem);
-		NavigationService.Navigate(NavigationRoute.Feed(new Feed("Foo", Symbol.Rss)));
+		NavigationService.Navigate(NavigationRoute.Feed(new FeedItem("Foo", Symbol.Rss, new EmptyFeed())));
 		Assert.Null(ViewModel.SelectedItem);
 	}
 

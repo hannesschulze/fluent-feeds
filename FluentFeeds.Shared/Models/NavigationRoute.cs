@@ -1,4 +1,5 @@
 ﻿using System;
+using FluentFeeds.Shared.Models.Nodes;
 
 namespace FluentFeeds.Shared.Models;
 
@@ -15,7 +16,7 @@ public readonly struct NavigationRoute : IEquatable<NavigationRoute>
 	/// <summary>
 	/// Navigation entry for a feed.
 	/// </summary>
-	public static NavigationRoute Feed(Feed source) => new(NavigationRouteType.Feed, source);
+	public static NavigationRoute Feed(FeedItem item) => new(NavigationRouteType.Feed, item);
 
 	/// <summary>
 	/// The type of this route.
@@ -23,27 +24,27 @@ public readonly struct NavigationRoute : IEquatable<NavigationRoute>
 	public NavigationRouteType Type { get; }
 
 	/// <summary>
-	/// The source feed of this entry (only available for <see cref="NavigationRouteType.Feed"/> routes).
+	/// The feed item of this entry (only available for <see cref="NavigationRouteType.Feed"/> routes).
 	/// </summary>
-	public Feed? FeedSource { get; }
+	public FeedItem? FeedItem { get; }
 
-	private NavigationRoute(NavigationRouteType type, Feed? feedSource)
+	private NavigationRoute(NavigationRouteType type, FeedItem? feedItem)
 	{
 		Type = type;
-		FeedSource = feedSource;
+		FeedItem = feedItem;
 	}
 
 	public override string ToString() =>
 		Type switch
 		{
 			NavigationRouteType.Settings => "Settings",
-			NavigationRouteType.Feed=> $"Feed {{ FeedSource = {FeedSource} }}",
+			NavigationRouteType.Feed=> $"Feed {{ FeedItem = {FeedItem} }}",
 			_ => throw new IndexOutOfRangeException()
 		};
 
-	public override int GetHashCode() => HashCode.Combine(Type, FeedSource);
+	public override int GetHashCode() => HashCode.Combine(Type, FeedItem);
 	public override bool Equals(object? other) => other is NavigationRoute casted && Equals(casted);
-	public bool Equals(NavigationRoute other) => Type == other.Type && FeedSource == other.FeedSource;
+	public bool Equals(NavigationRoute other) => Type == other.Type && FeedItem == other.FeedItem;
 
 	public static bool operator ==(NavigationRoute left, NavigationRoute right) => left.Equals(right);
 	public static bool operator !=(NavigationRoute left, NavigationRoute right) => !left.Equals(right);

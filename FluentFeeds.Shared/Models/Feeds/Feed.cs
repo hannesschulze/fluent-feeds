@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
+using FluentFeeds.Shared.Models.Items;
 
 namespace FluentFeeds.Shared.Models.Feeds;
 
@@ -22,7 +23,7 @@ public abstract class Feed
 	/// <summary>
 	/// Current snapshot of items provided by the feed.
 	/// </summary>
-	public IReadOnlySet<Item> Items => _items;
+	public ImmutableHashSet<Item> Items { get; private set; } = ImmutableHashSet<Item>.Empty;
 
 	/// <summary>
 	/// Asynchronously load the initial selection of items. The result might be out of date and need to be synchronized.
@@ -71,7 +72,7 @@ public abstract class Feed
 	/// </summary>
 	protected void UpdateItems(IEnumerable<Item> items)
 	{
-		_items = items.ToImmutableHashSet();
+		Items = items.ToImmutableHashSet();
 		ItemsUpdated?.Invoke(this, EventArgs.Empty);
 	}
 
@@ -91,7 +92,6 @@ public abstract class Feed
 		_isSynchronizing = false;
 	}
 
-	private ImmutableHashSet<Item> _items = ImmutableHashSet<Item>.Empty;
 	private bool _isLoaded;
 	private bool _isSynchronizing;
 	private Task? _loadTask;
