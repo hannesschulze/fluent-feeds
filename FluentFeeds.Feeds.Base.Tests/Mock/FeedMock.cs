@@ -9,7 +9,6 @@ namespace FluentFeeds.Feeds.Base.Tests.Mock;
 
 public sealed class FeedMock : Feed
 {
-	
 	public void CompleteLoad(IEnumerable<IReadOnlyStoredItem> items) => _loadCompletionSource?.TrySetResult(items);
 	public void CompleteLoad(params IReadOnlyStoredItem[] items) => CompleteLoad(items.AsEnumerable());
 	public void CompleteLoad(Exception exception) => _loadCompletionSource?.TrySetException(exception);
