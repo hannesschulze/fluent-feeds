@@ -18,10 +18,10 @@ public interface IItemStorage
 	/// <summary>
 	/// Save the provided set of items.
 	/// </summary>
-	Task AddItemsAsync(IEnumerable<Item> items);
+	Task<IEnumerable<IReadOnlyItem>> AddItemsAsync(IEnumerable<Item> items);
 
 	/// <summary>
 	/// Update a saved item with the specified item to match <c>updatedItem</c>.
 	/// </summary>
-	Task UpdateItemAsync(Guid identifier, Item updatedItem);
+	Task<IReadOnlyItem> UpdateItemAsync(Guid identifier, Item updatedItem);
 }

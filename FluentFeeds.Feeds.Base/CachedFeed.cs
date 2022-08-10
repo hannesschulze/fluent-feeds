@@ -50,11 +50,13 @@ public abstract class CachedFeed : Feed
 			{
 				// This is a new item.
 				added.Add(item);
-				_cache.Add(item.Url, item);
 			}
 		}
 
-		await Storage.AddItemsAsync(added);
+		foreach (var item in await Storage.AddItemsAsync(added))
+		{
+			_cache.Add(item.Url, item);
+		}
 
 		return _cache.Values;
 	}

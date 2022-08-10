@@ -1,5 +1,4 @@
 using System;
-using System.Threading.Tasks;
 using FluentFeeds.Feeds.Base.Factories;
 using FluentFeeds.Feeds.Base.Nodes;
 using FluentFeeds.Feeds.Base.Storage;
@@ -20,11 +19,11 @@ public abstract class FeedProvider
 	/// Persistent feed storage for this feed provider.
 	/// </summary>
 	public IFeedStorage Storage { get; }
-	
+
 	/// <summary>
 	/// Factory for creating feeds from URLs.
 	/// </summary>
-	public abstract IUrlFeedFactory? UrlFeedFactory { get; }
+	public IUrlFeedFactory? UrlFeedFactory { get; protected set; }
 	
 	/// <summary>
 	/// Create the initial set of nodes presented when the user adds this provider and there is no saved structure.
