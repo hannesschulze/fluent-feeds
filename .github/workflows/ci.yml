@@ -10,11 +10,11 @@ jobs:
         with:
           dotnet-version: 6.0.x
       - name: Test FluentFeeds.Documents
-        run: cd FluentFeeds.Documents.Tests; dotnet test --verbosity normal --collect:"XPlat Code Coverage"
+        run: cd FluentFeeds.Documents.Tests; dotnet test --collect:"XPlat Code Coverage"
       - name: Test FluentFeeds.Feeds.Base
-        run: cd FluentFeeds.Feeds.Base.Tests; dotnet test --verbosity normal --collect:"XPlat Code Coverage"
+        run: cd FluentFeeds.Feeds.Base.Tests; dotnet test --collect:"XPlat Code Coverage"
       - name: Test FluentFeeds.App.Shared
-        run: cd FluentFeeds.App.Shared.Tests; dotnet test --verbosity normal --collect:"XPlat Code Coverage"
+        run: cd FluentFeeds.App.Shared.Tests; dotnet test --collect:"XPlat Code Coverage"
       - uses: codecov/codecov-action@v2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
