@@ -74,7 +74,7 @@ public class MainViewModelTests
 	{
 		Assert.Equal(ViewModel.FeedItems[0], ViewModel.SelectedItem);
 		NavigationService.Navigate(NavigationRoute.Feed(
-			new FeedLeafNode(Guid.NewGuid(), "Foo", Symbol.Rss, new EmptyFeed())));
+			FeedNode.Custom(new EmptyFeed(), "Foo", Symbol.Rss, false)));
 		Assert.Null(ViewModel.SelectedItem);
 	}
 

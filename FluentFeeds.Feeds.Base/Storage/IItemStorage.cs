@@ -11,17 +11,16 @@ namespace FluentFeeds.Feeds.Base.Storage;
 public interface IItemStorage
 {
 	/// <summary>
-	/// Return all saved items.
+	/// Return all saved items in the specified collection.
 	/// </summary>
-	Task<IEnumerable<IReadOnlyStoredItem>> GetItemsAsync();
+	Task<IEnumerable<IReadOnlyStoredItem>> GetItemsAsync(Guid collectionIdentifier);
 
 	/// <summary>
-	/// Save the provided set of items.
+	/// Save the provided set of items to the specified collection or update them if they are already saved in the
+	/// storage and have changed.
 	/// </summary>
-	Task<IEnumerable<IReadOnlyStoredItem>> AddItemsAsync(IEnumerable<IReadOnlyItem> items);
-
-	/// <summary>
-	/// Update a saved item with the specified item to match <c>updatedItem</c>.
-	/// </summary>
-	Task<IReadOnlyStoredItem> UpdateItemAsync(Guid identifier, IReadOnlyItem updatedItem);
+	/// <returns>
+	/// Stored representations of all items.
+	/// </returns>
+	Task<IEnumerable<IReadOnlyStoredItem>> AddItemsAsync(IEnumerable<IReadOnlyItem> items, Guid collectionIdentifier);
 }

@@ -8,7 +8,7 @@ namespace FluentFeeds.Feeds.Base.Storage;
 public interface IFeedStorage
 {
 	/// <summary>
-	/// Return a storage object containing the items for a feed.
+	/// Return the item storage with the specified identifier.
 	/// </summary>
 	IItemStorage GetItemStorage(Guid identifier);
 }

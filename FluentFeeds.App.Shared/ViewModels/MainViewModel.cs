@@ -43,7 +43,7 @@ public class MainViewModel : ObservableObject
 	public class FeedItemViewModel : NavigationItemViewModel
 	{
 		public FeedItemViewModel(IReadOnlyFeedNode item)
-			: base(item.Title, item.Symbol, isExpandable: false, NavigationRoute.Feed(item))
+			: base(item.Title ?? "Unnamed", item.Symbol ?? Symbol.Rss, isExpandable: false, NavigationRoute.Feed(item))
 		{
 			Item = item;
 		}
@@ -57,10 +57,10 @@ public class MainViewModel : ObservableObject
 		_navigationService.BackStackChanged += HandleBackStackChanged;
 
 		_goBackCommand = new RelayCommand(() => _navigationService.GoBack(), () => _navigationService.CanGoBack);
-		var overviewFeed = 
+		var overviewFeed =
 			_navigationService.BackStack[0].FeedNode ??
-			new FeedLeafNode(Guid.NewGuid(), "Overview", Symbol.Home, new EmptyFeed());
-		var unreadFeed = new FeedLeafNode(Guid.NewGuid(), "Unread", Symbol.Sparkle, new EmptyFeed());
+			FeedNode.Custom(new EmptyFeed(), "Overview", Symbol.Home, false);
+		var unreadFeed = FeedNode.Custom(new EmptyFeed(), "Unread", Symbol.Sparkle, false);
 		_feedItems.Add(RegisterFeedItem(new FeedItemViewModel(overviewFeed)));
 		_feedItems.Add(RegisterFeedItem(new FeedItemViewModel(unreadFeed)));
 		_visiblePage = GetVisiblePage();

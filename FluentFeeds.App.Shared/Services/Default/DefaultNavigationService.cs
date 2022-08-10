@@ -14,8 +14,7 @@ public class DefaultNavigationService : INavigationService
 {
 	public DefaultNavigationService()
 	{
-		_backStack.Add(NavigationRoute.Feed(
-			new FeedLeafNode(Guid.NewGuid(), "Overview", Symbol.Home, new EmptyFeed())));
+		_backStack.Add(NavigationRoute.Feed(FeedNode.Custom(new EmptyFeed(), "Overview", Symbol.Home, false)));
 	}
 
 	public event EventHandler<EventArgs>? BackStackChanged;
