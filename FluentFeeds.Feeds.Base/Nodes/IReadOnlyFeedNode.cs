@@ -1,4 +1,4 @@
-using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using FluentFeeds.Common;
 
@@ -10,32 +10,32 @@ namespace FluentFeeds.Feeds.Base.Nodes;
 public interface IReadOnlyFeedNode : INotifyPropertyChanged, INotifyPropertyChanging
 {
 	/// <summary>
-	/// Accept a visitor for this node.
-	/// </summary>
-	void Accept(IFeedNodeVisitor visitor);
-
-	/// <summary>
 	/// The type of this node.
 	/// </summary>
 	FeedNodeType Type { get; }
 	
 	/// <summary>
-	/// Unique identifier for this node.
-	/// </summary>
-	Guid Identifier { get; }
-
-	/// <summary>
-	/// The feed object.
+	/// The feed object for this node.
 	/// </summary>
 	Feed Feed { get; }
 	
 	/// <summary>
-	/// The title of this node.
+	/// Child nodes of this node. A <c>null</c> value indicates that this node is a leaf node.
 	/// </summary>
-	string Title { get; }
+	ReadOnlyObservableCollection<IReadOnlyFeedNode>? Children { get; }
+	
+	/// <summary>
+	/// Custom title of the node. If set to <c>null</c>, the feed's name is used.
+	/// </summary>
+	string? Title { get; }
 
 	/// <summary>
-	/// Symbol representing this node.
+	/// Custom symbol for the node. If set to <c>null</c>, the feed's symbol is used.
 	/// </summary>
-	Symbol Symbol { get; }
+	Symbol? Symbol { get; }
+
+	/// <summary>
+	/// Flag indicating whether the user should be able to customize this node.
+	/// </summary>
+	bool IsUserCustomizable { get; }
 }

@@ -26,17 +26,17 @@ public abstract class FeedProvider
 	public IUrlFeedFactory? UrlFeedFactory { get; protected set; }
 	
 	/// <summary>
-	/// Create the initial set of nodes presented when the user adds this provider and there is no saved structure.
+	/// Create the initial set of feed nodes presented when the user adds this provider and there is no saved tree.
 	/// </summary>
-	public abstract FeedGroupNode CreateInitialGroup();
+	public abstract IReadOnlyFeedNode CreateInitialTree();
 	
 	/// <summary>
 	/// Load a serialized feed as returned by <see cref="StoreFeed"/>.
 	/// </summary>
-	public abstract FeedLeafNode LoadFeed(Guid identifier, string serialized);
+	public abstract Feed LoadFeed(string serialized);
 	
 	/// <summary>
 	/// Serialize a feed so it can be loaded using <see cref="LoadFeed"/>.
 	/// </summary>
-	public abstract string StoreFeed(IReadOnlyFeedLeafNode node);
+	public abstract string StoreFeed(Feed feed);
 }

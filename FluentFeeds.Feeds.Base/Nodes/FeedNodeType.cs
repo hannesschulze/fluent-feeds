@@ -1,16 +1,17 @@
 namespace FluentFeeds.Feeds.Base.Nodes;
 
 /// <summary>
-/// Type of a <see cref="FeedNode"/>.
+/// The type of a feed node.
 /// </summary>
 public enum FeedNodeType
 {
 	/// <summary>
-	/// <see cref="FeedGroupNode"/>
+	/// Group node, the node provides a composite feed combining all child feeds of the node.
 	/// </summary>
 	Group,
 	/// <summary>
-	/// <see cref="FeedLeafNode"/>
+	/// Node with a custom feed provided by a <see cref="FeedProvider"/>. The feed provider must be able to serialize
+	/// and deserialize the feed.
 	/// </summary>
-	Leaf
+	Custom
 }

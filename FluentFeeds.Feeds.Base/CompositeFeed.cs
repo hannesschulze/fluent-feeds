@@ -45,7 +45,7 @@ public sealed class CompositeFeed : Feed
 				feed.ItemsUpdated += HandleItemsUpdated;
 			}
 			
-			UpdateItems(GetAllItems());
+			Items = GetAllItems().ToImmutableHashSet();
 			AddFeeds(added);
 		}
 	}
@@ -56,7 +56,7 @@ public sealed class CompositeFeed : Feed
 		await Task.WhenAll(feeds.Select(feed => feed.LoadAsync()));
 		_ignoreUpdates = false;
 		
-		UpdateItems(GetAllItems());
+		Items = GetAllItems().ToImmutableHashSet();
 	}
 
 	protected override async Task<IEnumerable<IReadOnlyStoredItem>> DoLoadAsync()
@@ -83,7 +83,7 @@ public sealed class CompositeFeed : Feed
 		if (_ignoreUpdates)
 			return;
 		
-		UpdateItems(GetAllItems());
+		Items = GetAllItems().ToImmutableHashSet();
 	}
 
 	private IEnumerable<IReadOnlyStoredItem> GetAllItems() => Feeds.SelectMany(feed => feed.Items);

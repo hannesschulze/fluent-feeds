@@ -15,16 +15,41 @@ namespace FluentFeeds.Feeds.Base;
 public abstract class Feed
 {
 	/// <summary>
-	/// Event called when <see cref="Items"/> has been updated. This event is only raised after calling either
+	/// Event called when <see cref="Items"/> has been updated. This event is usually raised after calling either
 	/// <see cref="LoadAsync"/> or <see cref="SynchronizeAsync"/>.
 	/// </summary>
 	public event EventHandler? ItemsUpdated;
 
 	/// <summary>
+	/// Event called when <see cref="Metadata"/> has been updated.
+	/// </summary>
+	public event EventHandler? MetadataUpdated;
+
+	/// <summary>
 	/// Current snapshot of items provided by the feed.
 	/// </summary>
-	public ImmutableHashSet<IReadOnlyStoredItem> Items { get; private set; } =
-		ImmutableHashSet<IReadOnlyStoredItem>.Empty;
+	public ImmutableHashSet<IReadOnlyStoredItem> Items
+	{
+		get => _items;
+		protected set
+		{
+			_items = value;
+			ItemsUpdated?.Invoke(this, EventArgs.Empty);
+		}
+	}
+
+	/// <summary>
+	/// Metadata for the feed.
+	/// </summary>
+	public FeedMetadata? Metadata
+	{
+		get => _metadata;
+		protected set
+		{
+			_metadata = value;
+			MetadataUpdated?.Invoke(this, EventArgs.Empty);
+		}
+	}
 
 	/// <summary>
 	/// Asynchronously load the initial selection of items. The result might be out of date and need to be synchronized.
@@ -67,19 +92,10 @@ public abstract class Feed
 	/// been called before this method.
 	/// </summary>
 	protected abstract Task<IEnumerable<IReadOnlyStoredItem>> DoSynchronizeAsync();
-	
-	/// <summary>
-	/// Manually update the list of items.
-	/// </summary>
-	protected void UpdateItems(IEnumerable<IReadOnlyStoredItem> items)
-	{
-		Items = items.ToImmutableHashSet();
-		ItemsUpdated?.Invoke(this, EventArgs.Empty);
-	}
 
 	private async Task LoadAsyncCore()
 	{
-		UpdateItems(await DoLoadAsync());
+		Items = (await DoLoadAsync()).ToImmutableHashSet();
 		
 		_isLoaded = true;
 	}
@@ -88,11 +104,13 @@ public abstract class Feed
 	{
 		await LoadAsync();
 
-		UpdateItems(await DoSynchronizeAsync());
+		Items = (await DoSynchronizeAsync()).ToImmutableHashSet();
 
 		_isSynchronizing = false;
 	}
 
+	private ImmutableHashSet<IReadOnlyStoredItem> _items = ImmutableHashSet<IReadOnlyStoredItem>.Empty;
+	private FeedMetadata? _metadata;
 	private bool _isLoaded;
 	private bool _isSynchronizing;
 	private Task? _loadTask;
