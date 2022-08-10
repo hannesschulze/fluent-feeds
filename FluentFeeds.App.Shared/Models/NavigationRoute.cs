@@ -24,7 +24,7 @@ public readonly struct NavigationRoute : IEquatable<NavigationRoute>
 	public NavigationRouteType Type { get; }
 
 	/// <summary>
-	/// The feed item of this entry (only available for <see cref="NavigationRouteType.Feed"/> routes).
+	/// The feed node of this entry (only available for <see cref="NavigationRouteType.Feed"/> routes).
 	/// </summary>
 	public IReadOnlyFeedNode? FeedNode { get; }
 

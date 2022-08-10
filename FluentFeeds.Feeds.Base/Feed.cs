@@ -7,10 +7,10 @@ using FluentFeeds.Feeds.Base.Items;
 namespace FluentFeeds.Feeds.Base;
 
 /// <summary>
-/// A feed which manages a set of items and can be synchronized with a remote server.
+/// <para>A feed which manages a set of items and can be synchronized with a remote server.</para>
 ///
-/// The items in the feed are not sorted. This is to allow for easy chaining of feeds without needing to keep track of
-/// the order. The set is sorted and converted to a list only in the final stage.
+/// <para>The items in the feed are not sorted. This is to allow for easy chaining of feeds without needing to keep
+/// track of the order. The set is sorted and converted to a list only in the final stage.</para>
 /// </summary>
 public abstract class Feed
 {
@@ -52,10 +52,11 @@ public abstract class Feed
 	}
 
 	/// <summary>
-	/// Asynchronously load the initial selection of items. The result might be out of date and need to be synchronized.
+	/// <para>Asynchronously load the initial selection of items. The result might be out of date and need to be
+	/// synchronized.</para>
 	///
-	/// This class ensures that there is only one load request for the whole lifetime of the feed. Subsequent calls
-	/// either return the same task or a completed task.
+	/// <para>This class ensures that there is only one load request for the whole lifetime of the feed. Subsequent
+	/// calls either return the same task or a completed task.</para>
 	/// </summary>
 	public Task LoadAsync()
 	{
@@ -67,9 +68,9 @@ public abstract class Feed
 	}
 
 	/// <summary>
-	/// Fetch an up to date list of items from a remote server and update <see cref="Items"/>.
+	/// <para>Fetch an up to date list of items from a remote server and update <see cref="Items"/>.</para>
 	///
-	/// This class ensures that there is only one synchronization operation at a time.
+	/// <para>This class ensures that there is only one synchronization operation at a time.</para>
 	/// </summary>
 	public Task SynchronizeAsync()
 	{

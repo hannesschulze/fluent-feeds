@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 namespace FluentFeeds.Feeds.Base.Factories;
 
 /// <summary>
-/// A factory for creating feed items from a URL.
+/// A factory for creating feeds from a URL.
 /// </summary>
 public interface IUrlFeedFactory
 {

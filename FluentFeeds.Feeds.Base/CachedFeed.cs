@@ -50,10 +50,6 @@ public abstract class CachedFeed : Feed
 	/// is already cached, its modified timestamp is checked and if this version is newer than the cached one, the
 	/// cached item is updated.</para>
 	/// </summary>
-	/// <remarks>
-	/// After returning from this method, all items returned are owned by the cache and should not be modified directly
-	/// anymore.
-	/// </remarks>
 	protected abstract Task<IEnumerable<IReadOnlyItem>> DoFetchAsync();
 
 	private ImmutableHashSet<IReadOnlyStoredItem> _items = ImmutableHashSet<IReadOnlyStoredItem>.Empty;
