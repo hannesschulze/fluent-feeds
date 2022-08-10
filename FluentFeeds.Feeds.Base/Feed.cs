@@ -18,12 +18,12 @@ public abstract class Feed
 	/// Event called when <see cref="Items"/> has been updated. This event is usually raised after calling either
 	/// <see cref="LoadAsync"/> or <see cref="SynchronizeAsync"/>.
 	/// </summary>
-	public event EventHandler? ItemsUpdated;
+	public event EventHandler<EventArgs>? ItemsUpdated;
 
 	/// <summary>
 	/// Event called when <see cref="Metadata"/> has been updated.
 	/// </summary>
-	public event EventHandler? MetadataUpdated;
+	public event EventHandler<EventArgs>? MetadataUpdated;
 
 	/// <summary>
 	/// Current snapshot of items provided by the feed.
