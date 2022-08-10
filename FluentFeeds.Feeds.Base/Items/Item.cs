@@ -1,37 +1,45 @@
 using System;
+using FluentFeeds.Feeds.Base.Items.Content;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 
 namespace FluentFeeds.Feeds.Base.Items;
 
 /// <summary>
-/// An item is part of a feed and provides content in a particular form.
+/// A mutable item.
 /// </summary>
-public abstract class Item : ObservableObject, IReadOnlyItem
+public class Item : ObservableObject, IReadOnlyItem
 {
-	protected Item(
-		Guid identifier, Uri url, DateTimeOffset publishedTimestamp, DateTimeOffset modifiedTimestamp, string title,
-		string author, string? summary = null, Uri? contentUrl = null, bool isRead = false)
+	public Item(
+		Uri url, Uri? contentUrl, DateTimeOffset publishedTimestamp, DateTimeOffset modifiedTimestamp, string title,
+		string author, string? summary, ItemContent content)
 	{
-		Identifier = identifier;
-		Url = url;
-		PublishedTimestamp = publishedTimestamp;
+		_url = url;
+		_contentUrl = contentUrl;
+		_publishedTimestamp = publishedTimestamp;
 		_modifiedTimestamp = modifiedTimestamp;
 		_title = title;
 		_author = author;
 		_summary = summary;
-		_contentUrl = contentUrl;
-		_isRead = isRead;
+		_content = content;
 	}
 
-	public abstract void Accept(IItemVisitor visitor);
-	
-	public abstract ItemType Type { get; }
-	
-	public Guid Identifier { get; }
-	
-	public Uri Url { get; }
+	public Uri Url
+	{
+		get => _url;
+		set => SetProperty(ref _url, value);
+	}
 
-	public DateTimeOffset PublishedTimestamp { get; }
+	public Uri? ContentUrl
+	{
+		get => _contentUrl;
+		set => SetProperty(ref _contentUrl, value);
+	}
+
+	public DateTimeOffset PublishedTimestamp
+	{
+		get => _publishedTimestamp;
+		set => SetProperty(ref _publishedTimestamp, value);
+	}
 
 	public DateTimeOffset ModifiedTimestamp
 	{
@@ -57,22 +65,18 @@ public abstract class Item : ObservableObject, IReadOnlyItem
 		set => SetProperty(ref _summary, value);
 	}
 
-	public Uri? ContentUrl
+	public ItemContent Content
 	{
-		get => _contentUrl;
-		set => SetProperty(ref _contentUrl, value);
+		get => _content;
+		set => SetProperty(ref _content, value);
 	}
 
-	public bool IsRead
-	{
-		get => _isRead;
-		set => SetProperty(ref _isRead, value);
-	}
-
+	private Uri _url;
+	private Uri? _contentUrl;
+	private DateTimeOffset _publishedTimestamp;
 	private DateTimeOffset _modifiedTimestamp;
 	private string _title;
 	private string _author;
 	private string? _summary;
-	private Uri? _contentUrl;
-	private bool _isRead;
+	private ItemContent _content;
 }

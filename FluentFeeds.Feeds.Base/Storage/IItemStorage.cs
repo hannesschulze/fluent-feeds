@@ -6,22 +6,22 @@ using FluentFeeds.Feeds.Base.Items;
 namespace FluentFeeds.Feeds.Base.Storage;
 
 /// <summary>
-/// Storage abstraction for caching <see cref="Item"/> objects.
+/// Storage abstraction for caching <see cref="IReadOnlyItem"/> objects.
 /// </summary>
 public interface IItemStorage
 {
 	/// <summary>
 	/// Return all saved items.
 	/// </summary>
-	Task<IEnumerable<IReadOnlyItem>> GetItemsAsync();
+	Task<IEnumerable<IReadOnlyStoredItem>> GetItemsAsync();
 
 	/// <summary>
 	/// Save the provided set of items.
 	/// </summary>
-	Task<IEnumerable<IReadOnlyItem>> AddItemsAsync(IEnumerable<Item> items);
+	Task<IEnumerable<IReadOnlyStoredItem>> AddItemsAsync(IEnumerable<IReadOnlyItem> items);
 
 	/// <summary>
 	/// Update a saved item with the specified item to match <c>updatedItem</c>.
 	/// </summary>
-	Task<IReadOnlyItem> UpdateItemAsync(Guid identifier, Item updatedItem);
+	Task<IReadOnlyStoredItem> UpdateItemAsync(Guid identifier, IReadOnlyItem updatedItem);
 }

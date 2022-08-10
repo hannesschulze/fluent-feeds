@@ -23,7 +23,8 @@ public abstract class Feed
 	/// <summary>
 	/// Current snapshot of items provided by the feed.
 	/// </summary>
-	public ImmutableHashSet<IReadOnlyItem> Items { get; private set; } = ImmutableHashSet<IReadOnlyItem>.Empty;
+	public ImmutableHashSet<IReadOnlyStoredItem> Items { get; private set; } =
+		ImmutableHashSet<IReadOnlyStoredItem>.Empty;
 
 	/// <summary>
 	/// Asynchronously load the initial selection of items. The result might be out of date and need to be synchronized.
@@ -59,18 +60,18 @@ public abstract class Feed
 	/// <summary>
 	/// Asynchronously return the initial selection of items which might be out of date.
 	/// </summary>
-	protected abstract Task<IEnumerable<IReadOnlyItem>> DoLoadAsync();
+	protected abstract Task<IEnumerable<IReadOnlyStoredItem>> DoLoadAsync();
 	
 	/// <summary>
 	/// Return a list of up to date items fetched from a remote server. It is ensured that <see cref="DoLoadAsync"/> has
 	/// been called before this method.
 	/// </summary>
-	protected abstract Task<IEnumerable<IReadOnlyItem>> DoSynchronizeAsync();
+	protected abstract Task<IEnumerable<IReadOnlyStoredItem>> DoSynchronizeAsync();
 	
 	/// <summary>
 	/// Manually update the list of items.
 	/// </summary>
-	protected void UpdateItems(IEnumerable<IReadOnlyItem> items)
+	protected void UpdateItems(IEnumerable<IReadOnlyStoredItem> items)
 	{
 		Items = items.ToImmutableHashSet();
 		ItemsUpdated?.Invoke(this, EventArgs.Empty);

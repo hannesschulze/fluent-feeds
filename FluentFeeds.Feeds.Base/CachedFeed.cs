@@ -21,7 +21,7 @@ public abstract class CachedFeed : Feed
 	/// </summary>
 	public IItemStorage Storage { get; }
 
-	protected sealed override async Task<IEnumerable<IReadOnlyItem>> DoLoadAsync()
+	protected sealed override async Task<IEnumerable<IReadOnlyStoredItem>> DoLoadAsync()
 	{
 		foreach (var item in await Storage.GetItemsAsync())
 		{
@@ -31,9 +31,9 @@ public abstract class CachedFeed : Feed
 		return _cache.Values;
 	}
 
-	protected sealed override async Task<IEnumerable<IReadOnlyItem>> DoSynchronizeAsync()
+	protected sealed override async Task<IEnumerable<IReadOnlyStoredItem>> DoSynchronizeAsync()
 	{
-		var added = new List<Item>();
+		var added = new List<IReadOnlyItem>();
 		
 		foreach (var item in await DoFetchAsync())
 		{
@@ -82,7 +82,7 @@ public abstract class CachedFeed : Feed
 	/// After returning from this method, all items returned are owned by the cache and should not be modified directly
 	/// anymore.
 	/// </remarks>
-	protected abstract Task<IEnumerable<Item>> DoFetchAsync();
+	protected abstract Task<IEnumerable<IReadOnlyItem>> DoFetchAsync();
 
-	private readonly Dictionary<Uri, IReadOnlyItem> _cache = new();
+	private readonly Dictionary<Uri, IReadOnlyStoredItem> _cache = new();
 }

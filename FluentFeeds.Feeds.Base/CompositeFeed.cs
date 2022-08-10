@@ -59,7 +59,7 @@ public sealed class CompositeFeed : Feed
 		UpdateItems(GetAllItems());
 	}
 
-	protected override async Task<IEnumerable<IReadOnlyItem>> DoLoadAsync()
+	protected override async Task<IEnumerable<IReadOnlyStoredItem>> DoLoadAsync()
 	{
 		_ignoreUpdates = true;
 		await Task.WhenAll(Feeds.Select(feed => feed.LoadAsync()));
@@ -68,7 +68,7 @@ public sealed class CompositeFeed : Feed
 		return GetAllItems();
 	}
 
-	protected override async Task<IEnumerable<IReadOnlyItem>> DoSynchronizeAsync()
+	protected override async Task<IEnumerable<IReadOnlyStoredItem>> DoSynchronizeAsync()
 	{
 		_ignoreUpdates = true;
 		await Task.WhenAll(Feeds.Select(feed => feed.SynchronizeAsync()));
@@ -86,7 +86,7 @@ public sealed class CompositeFeed : Feed
 		UpdateItems(GetAllItems());
 	}
 
-	private IEnumerable<IReadOnlyItem> GetAllItems() => Feeds.SelectMany(feed => feed.Items);
+	private IEnumerable<IReadOnlyStoredItem> GetAllItems() => Feeds.SelectMany(feed => feed.Items);
 
 	private bool _ignoreUpdates;
 	private ImmutableHashSet<Feed> _feeds;
