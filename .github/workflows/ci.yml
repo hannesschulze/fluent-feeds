@@ -13,6 +13,8 @@ jobs:
         run: cd FluentFeeds.Documents.Tests; dotnet test --collect:"XPlat Code Coverage"
       - name: Test FluentFeeds.Feeds.Base
         run: cd FluentFeeds.Feeds.Base.Tests; dotnet test --collect:"XPlat Code Coverage"
+      - name: Test FluentFeeds.Feeds.Syndication
+        run: cd FluentFeeds.Feeds.Syndication.Tests; dotnet test --collect:"XPlat Code Coverage"
       - name: Test FluentFeeds.App.Shared
         run: cd FluentFeeds.App.Shared.Tests; dotnet test --collect:"XPlat Code Coverage"
       - uses: codecov/codecov-action@v2

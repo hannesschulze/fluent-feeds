@@ -10,11 +10,11 @@ public class FeedNodeTests
 	public void CustomNode()
 	{
 		var feed = new EmptyFeed();
-		var node = FeedNode.Custom(feed, "feed", Symbol.Rss, false);
+		var node = FeedNode.Custom(feed, "feed", Symbol.Feed, false);
 		Assert.Equal(FeedNodeType.Custom, node.Type);
 		Assert.Equal(feed, node.Feed);
 		Assert.Equal("feed", node.Title);
-		Assert.Equal(Symbol.Rss, node.Symbol);
+		Assert.Equal(Symbol.Feed, node.Symbol);
 		Assert.False(node.IsUserCustomizable);
 		Assert.Null(node.Children);
 		Assert.Null((node as IReadOnlyFeedNode).Children);
