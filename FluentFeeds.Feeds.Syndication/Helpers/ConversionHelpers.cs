@@ -46,7 +46,7 @@ public static class ConversionHelpers
 	{
 		if (item.Content != null)
 		{
-			var content = await TextContent.LoadAsync(item.Content);
+			var content = await TextContent.LoadAsync(item.Content).ConfigureAwait(false);
 			return content.ToRichText();
 		}
 
@@ -54,7 +54,7 @@ public static class ConversionHelpers
 			item.ElementExtensions.ReadElementExtensions<string>("encoded", "http://purl.org/rss/1.0/modules/content/");
 		if (encodedContent != null && encodedContent.Count != 0)
 		{
-			var content = await TextContent.LoadAsync(encodedContent.Last());
+			var content = await TextContent.LoadAsync(encodedContent.Last()).ConfigureAwait(false);
 			return content.ToRichText();
 		}
 
@@ -66,10 +66,10 @@ public static class ConversionHelpers
 	/// </summary>
 	public static async Task<IReadOnlyItem> ConvertItemAsync(SyndicationItem item)
 	{
-		var title = item.Title != null ? await TextContent.LoadAsync(item.Title) : null;
+		var title = item.Title != null ? await TextContent.LoadAsync(item.Title).ConfigureAwait(false) : null;
 		var author = item.Authors != null ? ConvertAuthor(item.Authors) : null;
-		var summary = item.Summary != null ? await TextContent.LoadAsync(item.Summary) : null;
-		var content = await ConvertItemContentAsync(item, summary);
+		var summary = item.Summary != null ? await TextContent.LoadAsync(item.Summary).ConfigureAwait(false) : null;
+		var content = await ConvertItemContentAsync(item, summary).ConfigureAwait(false);
 		var url = ConvertItemUrl(item);
 		return new Item(
 			url, contentUrl: null, publishedTimestamp: item.PublishDate, modifiedTimestamp: item.LastUpdatedTime,
@@ -82,9 +82,10 @@ public static class ConversionHelpers
 	/// </summary>
 	public static async Task<FeedMetadata> ConvertFeedMetadataAsync(SysSyndicationFeed feed)
 	{
-		var title = feed.Title != null ? await TextContent.LoadAsync(feed.Title) : null;
+		var title = feed.Title != null ? await TextContent.LoadAsync(feed.Title).ConfigureAwait(false) : null;
 		var authors = feed.Authors != null ? ConvertAuthor(feed.Authors) : null;
-		var description = feed.Description != null ? await TextContent.LoadAsync(feed.Description) : null;
+		var description =
+			feed.Description != null ? await TextContent.LoadAsync(feed.Description).ConfigureAwait(false) : null;
 		return new FeedMetadata(title?.ToPlainText(), authors, description?.ToPlainText(), Symbol.Web);
 	}
 }

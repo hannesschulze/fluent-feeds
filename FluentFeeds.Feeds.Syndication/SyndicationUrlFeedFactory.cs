@@ -23,7 +23,7 @@ public sealed class SyndicationUrlFeedFactory : IUrlFeedFactory
 		var downloader = new FeedDownloader(url);
 		var itemStorage = _feedStorage.GetItemStorage(identifier);
 		var feed = new SyndicationFeed(downloader, itemStorage, identifier, url);
-		await feed.LoadMetadataAsync();
+		await feed.LoadMetadataAsync().ConfigureAwait(false);
 		return feed;
 	}
 

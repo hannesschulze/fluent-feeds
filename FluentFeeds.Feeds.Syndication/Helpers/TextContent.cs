@@ -65,7 +65,7 @@ public abstract class TextContent
 	/// </param>
 	public static async Task<TextContent> LoadAsync(string content, bool isKnownHtml = false) =>
 		isKnownHtml || IsHtml(content)
-			? new RichTextContent(await RichText.ParseHtmlAsync(content))
+			? new RichTextContent(await RichText.ParseHtmlAsync(content).ConfigureAwait(false))
 			: new PlainTextContent(content);
 
 	/// <summary>
