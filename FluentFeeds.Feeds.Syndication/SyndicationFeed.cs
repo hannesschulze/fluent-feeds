@@ -16,16 +16,31 @@ namespace FluentFeeds.Feeds.Syndication;
 /// </summary>
 public sealed class SyndicationFeed : CachedFeed
 {
-	public SyndicationFeed(IFeedDownloader downloader, IItemStorage storage, Guid collectionIdentifier)
-		: base(storage, collectionIdentifier)
+	public SyndicationFeed(
+		IFeedDownloader downloader, IItemStorage storage, Guid identifier, Uri url, 
+		FeedMetadata? initialMetadata = null)
+		: base(storage, identifier)
 	{
 		Downloader = downloader;
+		Identifier = identifier;
+		Url = url;
+		Metadata = initialMetadata;
 	}
 
 	/// <summary>
 	/// Object used to download the feed.
 	/// </summary>
 	public IFeedDownloader Downloader { get; }
+	
+	/// <summary>
+	/// Unique identifier for the feed.
+	/// </summary>
+	public Guid Identifier { get; }
+	
+	/// <summary>
+	/// URL of the feed.
+	/// </summary>
+	public Uri Url { get; }
 
 	/// <summary>
 	/// Pre-fetch the feed ahead of time and populate its metadata.
