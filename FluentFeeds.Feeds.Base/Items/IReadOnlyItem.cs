@@ -12,7 +12,7 @@ public interface IReadOnlyItem : INotifyPropertyChanging, INotifyPropertyChanged
 	/// <summary>
 	/// URL to the item itself.
 	/// </summary>
-	Uri Url { get; }
+	Uri? Url { get; }
 	
 	/// <summary>
 	/// URL to the content of the item (if the content is not part of the item).
@@ -37,7 +37,7 @@ public interface IReadOnlyItem : INotifyPropertyChanging, INotifyPropertyChanged
 	/// <summary>
 	/// Name of the author who published the item.
 	/// </summary>
-	string Author { get; }
+	string? Author { get; }
 	
 	/// <summary>
 	/// Summary of the item content (usually a short excerpt formatted as plain text).

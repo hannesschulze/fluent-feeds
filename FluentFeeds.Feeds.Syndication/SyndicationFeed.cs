@@ -1,88 +1,58 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
-using System.ServiceModel.Syndication;
 using System.Threading.Tasks;
-using System.Xml;
-using FluentFeeds.Common;
-using FluentFeeds.Documents;
-using FluentFeeds.Documents.Blocks;
-using FluentFeeds.Documents.Inlines;
 using FluentFeeds.Feeds.Base;
 using FluentFeeds.Feeds.Base.Items;
-using FluentFeeds.Feeds.Base.Items.Content;
 using FluentFeeds.Feeds.Base.Storage;
+using FluentFeeds.Feeds.Syndication.Download;
+using FluentFeeds.Feeds.Syndication.Helpers;
 using SysSyndicationFeed = System.ServiceModel.Syndication.SyndicationFeed;
 
 namespace FluentFeeds.Feeds.Syndication;
 
+/// <summary>
+/// Feed implementation processing data from a <see cref="System.ServiceModel.Syndication.SyndicationFeed"/>.
+/// </summary>
 public sealed class SyndicationFeed : CachedFeed
 {
-	public SyndicationFeed(IItemStorage storage, Guid collectionIdentifier, Uri url)
+	public SyndicationFeed(IFeedDownloader downloader, IItemStorage storage, Guid collectionIdentifier)
 		: base(storage, collectionIdentifier)
 	{
-		Url = url;
+		Downloader = downloader;
 	}
 
-	public Uri Url { get; }
+	/// <summary>
+	/// Object used to download the feed.
+	/// </summary>
+	public IFeedDownloader Downloader { get; }
 
-	private static async Task<string> ExtractPlainTextAsync(TextSyndicationContent content) =>
-		content.Type switch
-		{
-			"html" or "xhtml" => (await RichText.ParseHtmlAsync(content.Text)).ToPlainText(),
-			"text" or _ => content.Text
-		};
-
-	private static Task<RichText> ExtractRichTextAsync(SyndicationContent content) =>
-		content switch
-		{
-			TextSyndicationContent textContent =>
-				textContent.Type switch
-				{
-					"html" or "xhtml" => RichText.ParseHtmlAsync(textContent.Text),
-					"text" or _ => Task.FromResult(new RichText(new GenericBlock(new TextInline(textContent.Text))))
-				},
-			UrlSyndicationContent urlContent =>
-				Task.FromResult(new RichText(new GenericBlock(
-					new HyperlinkInline(new TextInline(urlContent.Url.ToString())) { Target = urlContent.Url }))),
-			_ => throw new NotSupportedException()
-		};
-
-	private static string ConvertAuthors(IEnumerable<SyndicationPerson> authors) =>
-		String.Join(", ", authors.Select(author => author.Name));
-
-	private static async Task<IReadOnlyItem> ConvertItemAsync(SyndicationItem item)
+	/// <summary>
+	/// Pre-fetch the feed ahead of time and populate its metadata.
+	/// </summary>
+	public async Task LoadMetadataAsync()
 	{
-		var title = await ExtractPlainTextAsync(item.Title);
-		var authors = ConvertAuthors(item.Authors);
-		var summary = await ExtractPlainTextAsync(item.Summary);
-		var content = await ExtractRichTextAsync(item.Content);
-		return new Item(
-			url: item.BaseUri, contentUrl: null, publishedTimestamp: item.PublishDate,
-			modifiedTimestamp: item.LastUpdatedTime, title, authors, summary, new ArticleItemContent(content));
-	}
-	
-	private async Task<SysSyndicationFeed> FetchSyndicationFeedAsync()
-	{
-		await using var stream = await _httpClient.GetStreamAsync(Url);
-		using var xmlReader = XmlReader.Create(stream);
-		return SysSyndicationFeed.Load(xmlReader);
+		var feed = _prefetchedFeed = await Downloader.DownloadAsync();
+		Metadata = await ConversionHelpers.ConvertFeedMetadataAsync(feed);
 	}
 
 	protected override async Task<IEnumerable<IReadOnlyItem>> DoFetchAsync()
 	{
-		var feed = await FetchSyndicationFeedAsync();
-		
-		// Update feed metadata
-		var title = await ExtractPlainTextAsync(feed.Title);
-		var authors = ConvertAuthors(feed.Authors);
-		var description = await ExtractPlainTextAsync(feed.Description);
-		Metadata = new FeedMetadata(title, authors, description, Symbol.Web);
-		
-		// Convert items in parallel
-		return await Task.WhenAll(feed.Items.Select(ConvertItemAsync));
+		SysSyndicationFeed feed;
+		if (_prefetchedFeed != null)
+		{
+			feed = _prefetchedFeed;
+			_prefetchedFeed = null;
+		}
+		else
+		{
+			feed = await Downloader.DownloadAsync();
+			Metadata = await ConversionHelpers.ConvertFeedMetadataAsync(feed);
+		}
+
+		// Process all items in parallel.
+		return await Task.WhenAll(feed.Items.Select(ConversionHelpers.ConvertItemAsync));
 	}
 
-	private readonly HttpClient _httpClient = new();
+	private SysSyndicationFeed? _prefetchedFeed;
 }

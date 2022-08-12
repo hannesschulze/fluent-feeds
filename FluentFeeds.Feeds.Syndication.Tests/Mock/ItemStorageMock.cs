@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentFeeds.Feeds.Base.Items;
 using FluentFeeds.Feeds.Base.Storage;
@@ -9,39 +10,11 @@ namespace FluentFeeds.Feeds.Syndication.Tests.Mock;
 public sealed class ItemStorageMock : IItemStorage
 {
 	public Task<IEnumerable<IReadOnlyStoredItem>> GetItemsAsync(Guid collectionIdentifier) =>
-		Task.FromResult(GetItems(collectionIdentifier));
+		Task.FromResult(Enumerable.Empty<IReadOnlyStoredItem>());
 
 	public Task<IEnumerable<IReadOnlyStoredItem>> AddItemsAsync(
 		IEnumerable<IReadOnlyItem> items, Guid collectionIdentifier) =>
-		Task.FromResult(AddItems(items, collectionIdentifier));
-
-	public IEnumerable<IReadOnlyStoredItem> GetItems(Guid collectionIdentifier)
-	{
-		return GetCollection(collectionIdentifier);
-	}
-
-	public IEnumerable<IReadOnlyStoredItem> AddItems(IEnumerable<IReadOnlyItem> items, Guid collectionIdentifier)
-	{
-		var collection = GetCollection(collectionIdentifier);
-		foreach (var item in items)
-		{
-			var stored = new StoredItem(
-				Guid.NewGuid(), item.Url, item.ContentUrl, item.PublishedTimestamp, item.ModifiedTimestamp, item.Title,
-				item.Author, item.Summary, item.Content, false);
-			collection.Add(stored);
-			yield return stored;
-		}
-	}
-
-	private List<IReadOnlyStoredItem> GetCollection(Guid identifier)
-	{
-		if (_collections.TryGetValue(identifier, out var existing))
-			return existing;
-
-		var collection = new List<IReadOnlyStoredItem>();
-		_collections.Add(identifier, collection);
-		return collection;
-	}
-
-	private readonly Dictionary<Guid, List<IReadOnlyStoredItem>> _collections = new();
+		Task.FromResult<IEnumerable<IReadOnlyStoredItem>>(items.Select(item => new StoredItem(
+			Guid.NewGuid(), item.Url, item.ContentUrl, item.PublishedTimestamp, item.ModifiedTimestamp, item.Title,
+			item.Author, item.Summary, item.Content, false)));
 }
