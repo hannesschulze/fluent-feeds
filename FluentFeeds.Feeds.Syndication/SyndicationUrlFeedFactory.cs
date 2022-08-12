@@ -10,22 +10,24 @@ namespace FluentFeeds.Feeds.Syndication;
 /// <summary>
 /// URL feed factory for creating syndication feeds.
 /// </summary>
-public sealed class SyndicationUrlFeedFactory : IUrlFeedFactory
+public class SyndicationUrlFeedFactory : IUrlFeedFactory
 {
 	public SyndicationUrlFeedFactory(IFeedStorage feedStorage)
 	{
-		_feedStorage = feedStorage;
+		FeedStorage = feedStorage;
 	}
+	
+	public IFeedStorage FeedStorage { get; }
 	
 	public async Task<Feed> CreateAsync(Uri url)
 	{
 		var identifier = Guid.NewGuid();
-		var downloader = new FeedDownloader(url);
-		var itemStorage = _feedStorage.GetItemStorage(identifier);
+		var downloader = CreateDownloader(url);
+		var itemStorage = FeedStorage.GetItemStorage(identifier);
 		var feed = new SyndicationFeed(downloader, itemStorage, identifier, url);
 		await feed.LoadMetadataAsync().ConfigureAwait(false);
 		return feed;
 	}
 
-	private readonly IFeedStorage _feedStorage;
+	protected virtual IFeedDownloader CreateDownloader(Uri url) => new FeedDownloader(url);
 }
