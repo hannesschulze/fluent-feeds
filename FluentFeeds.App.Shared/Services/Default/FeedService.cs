@@ -86,7 +86,7 @@ public class FeedService : IFeedService
 	/// <summary>
 	/// Store a new feed node and all its children, returning its stored representation.
 	/// </summary>
-	private async Task<IReadOnlyStoredFeedNode> StoreFeedNodeAsync(
+	private async Task<(IReadOnlyStoredFeedNode Stored, FeedNodeDb Db)> StoreFeedNodeAsync(
 		AppDbContext database, IReadOnlyFeedNode node, FeedProvider provider, FeedNodeDb? parent)
 	{
 		var identifier = Guid.NewGuid();
@@ -108,7 +108,8 @@ public class FeedService : IFeedService
 		if (node.Children != null)
 		{
 			var childTasks = node.Children.Select(child => StoreFeedNodeAsync(database, child, provider, dbNode));
-			children = await Task.WhenAll(childTasks);
+			var result = await Task.WhenAll(childTasks);
+			children = result.Select(t => t.Stored);
 		}
 		var storedNode =
 			node.Type switch
@@ -121,14 +122,7 @@ public class FeedService : IFeedService
 				_ => throw new IndexOutOfRangeException()
 			};
 		_feedNodes.Add(identifier, storedNode);
-
-		if (parent == null)
-		{
-			// This is the root node for the feed provider.
-			database.FeedProviders.Add(
-				new FeedProviderDb { Identifier = provider.Metadata.Identifier, RootNode = dbNode });
-		}
-		return storedNode;
+		return (storedNode, dbNode);
 	}
 
 	private async Task LoadFeedProvidersAsyncCore()
@@ -144,9 +138,20 @@ public class FeedService : IFeedService
 				.Select(p => p.RootNode)
 				.FirstOrDefaultAsync();
 			var storage = new FeedStorage(this, identifier);
-			var rootNode = existingRootNode != null
-				? await LoadFeedNodeAsync(database, existingRootNode, provider, storage)
-				: await StoreFeedNodeAsync(database, provider.CreateInitialTree(), provider, null);
+			
+			IReadOnlyStoredFeedNode rootNode;
+			if (existingRootNode != null)
+			{
+				rootNode = await LoadFeedNodeAsync(database, existingRootNode, provider, storage);
+			}
+			else
+			{
+				var (storedNode, dbNode) =
+					await StoreFeedNodeAsync(database, provider.CreateInitialTree(), provider, null); 
+				database.FeedProviders.Add(
+					new FeedProviderDb { Identifier = provider.Metadata.Identifier, RootNode = dbNode });
+				rootNode = storedNode;
+			}
 
 			_feedProviders.Add(new LoadedFeedProvider(
 				Provider: provider, RootNode: rootNode, FeedStorage: storage));
