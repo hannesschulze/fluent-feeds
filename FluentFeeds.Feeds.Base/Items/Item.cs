@@ -10,8 +10,8 @@ namespace FluentFeeds.Feeds.Base.Items;
 public class Item : ObservableObject, IReadOnlyItem
 {
 	public Item(
-		Uri url, Uri? contentUrl, DateTimeOffset publishedTimestamp, DateTimeOffset modifiedTimestamp, string title,
-		string author, string? summary, ItemContent content)
+		Uri? url, Uri? contentUrl, DateTimeOffset publishedTimestamp, DateTimeOffset modifiedTimestamp, string title,
+		string? author, string? summary, ItemContent content)
 	{
 		_url = url;
 		_contentUrl = contentUrl;
@@ -23,7 +23,7 @@ public class Item : ObservableObject, IReadOnlyItem
 		_content = content;
 	}
 
-	public Uri Url
+	public Uri? Url
 	{
 		get => _url;
 		set => SetProperty(ref _url, value);
@@ -53,7 +53,7 @@ public class Item : ObservableObject, IReadOnlyItem
 		set => SetProperty(ref _title, value);
 	}
 
-	public string Author
+	public string? Author
 	{
 		get => _author;
 		set => SetProperty(ref _author, value);
@@ -71,7 +71,7 @@ public class Item : ObservableObject, IReadOnlyItem
 		set => SetProperty(ref _content, value);
 	}
 
-	private Uri _url;
+	private Uri? _url;
 	private Uri? _contentUrl;
 	private DateTimeOffset _publishedTimestamp;
 	private DateTimeOffset _modifiedTimestamp;

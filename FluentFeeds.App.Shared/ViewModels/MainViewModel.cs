@@ -43,7 +43,7 @@ public class MainViewModel : ObservableObject
 	public class FeedItemViewModel : NavigationItemViewModel
 	{
 		public FeedItemViewModel(IReadOnlyFeedNode item)
-			: base(item.Title ?? "Unnamed", item.Symbol ?? Symbol.Rss, isExpandable: false, NavigationRoute.Feed(item))
+			: base(item.Title ?? "Unnamed", item.Symbol ?? Symbol.Feed, isExpandable: false, NavigationRoute.Feed(item))
 		{
 			Item = item;
 		}

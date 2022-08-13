@@ -7,7 +7,7 @@ public enum Symbol
 {
 	Home,
 	Sparkle,
-	Rss,
+	Feed,
 	Directory,
 	Web,
 	Settings

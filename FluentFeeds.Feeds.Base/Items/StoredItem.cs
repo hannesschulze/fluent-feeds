@@ -12,8 +12,8 @@ namespace FluentFeeds.Feeds.Base.Items;
 public class StoredItem : Item, IReadOnlyStoredItem
 {
 	public StoredItem(
-		Guid identifier, Uri url, Uri? contentUrl, DateTimeOffset publishedTimestamp, DateTimeOffset modifiedTimestamp,
-		string title, string author, string? summary, ItemContent content, bool isRead)
+		Guid identifier, Uri? url, Uri? contentUrl, DateTimeOffset publishedTimestamp, DateTimeOffset modifiedTimestamp,
+		string title, string? author, string? summary, ItemContent content, bool isRead)
 		: base(url, contentUrl, publishedTimestamp, modifiedTimestamp, title, author, summary, content)
 	{
 		Identifier = identifier;
