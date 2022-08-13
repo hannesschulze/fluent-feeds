@@ -3,6 +3,7 @@ using System.ServiceModel.Syndication;
 using System.Threading.Tasks;
 using FluentFeeds.Documents;
 using FluentFeeds.Documents.Blocks;
+using FluentFeeds.Documents.Html;
 using FluentFeeds.Documents.Inlines;
 
 namespace FluentFeeds.Feeds.Syndication.Helpers;
@@ -60,29 +61,31 @@ public abstract class TextContent
 	/// <param name="content">
 	/// The content (either HTML or plain text).
 	/// </param>
+	/// <param name="options">HTML parsing options if the content contains HTML.</param>
 	/// <param name="isKnownHtml">
 	/// If set to true, the automatic detection is skipped and <c>content</c> is treated as HTML.
 	/// </param>
-	public static async Task<TextContent> LoadAsync(string content, bool isKnownHtml = false) =>
+	public static async Task<TextContent> LoadAsync(
+		string content, HtmlParsingOptions htmlOptions, bool isKnownHtml = false) =>
 		isKnownHtml || IsHtml(content)
-			? new RichTextContent(await RichText.ParseHtmlAsync(content).ConfigureAwait(false))
+			? new RichTextContent(await RichText.ParseHtmlAsync(content, htmlOptions).ConfigureAwait(false))
 			: new PlainTextContent(content);
 
 	/// <summary>
 	/// Create a text content object from text syndication content.
 	/// </summary>
-	public static Task<TextContent> LoadAsync(TextSyndicationContent content) =>
+	public static Task<TextContent> LoadAsync(TextSyndicationContent content, HtmlParsingOptions htmlOptions) =>
 		content.Text != null
-			? LoadAsync(content.Text, content.Type is "html" or "xhtml")
+			? LoadAsync(content.Text, htmlOptions, content.Type is "html" or "xhtml")
 			: Task.FromResult<TextContent>(PlainTextContent.Empty);
 	
 	/// <summary>
 	/// Create a text content object from syndication content.
 	/// </summary>
-	public static Task<TextContent> LoadAsync(SyndicationContent content) =>
+	public static Task<TextContent> LoadAsync(SyndicationContent content, HtmlParsingOptions htmlOptions) =>
 		content switch
 		{
-			TextSyndicationContent textContent => LoadAsync(textContent),
+			TextSyndicationContent textContent => LoadAsync(textContent, htmlOptions),
 			UrlSyndicationContent urlContent when urlContent.Url != null =>
 				Task.FromResult<TextContent>(RichTextContent.Hyperlink(urlContent.Url)),
 			_ => Task.FromResult<TextContent>(PlainTextContent.Empty)

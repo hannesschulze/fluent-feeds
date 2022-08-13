@@ -5,6 +5,7 @@ using System.ServiceModel.Syndication;
 using System.Threading.Tasks;
 using FluentFeeds.Common;
 using FluentFeeds.Documents;
+using FluentFeeds.Documents.Html;
 using FluentFeeds.Feeds.Base;
 using FluentFeeds.Feeds.Base.Items;
 using FluentFeeds.Feeds.Base.Items.Content;
@@ -42,11 +43,12 @@ public static class ConversionHelpers
 	/// <summary>
 	/// Convert a syndication item's content if the item has the provided summary.
 	/// </summary>
-	public static async Task<RichText> ConvertItemContentAsync(SyndicationItem item, TextContent? summary)
+	public static async Task<RichText> ConvertItemContentAsync(
+		SyndicationItem item, TextContent? summary, HtmlParsingOptions htmlOptions)
 	{
 		if (item.Content != null)
 		{
-			var content = await TextContent.LoadAsync(item.Content).ConfigureAwait(false);
+			var content = await TextContent.LoadAsync(item.Content, htmlOptions).ConfigureAwait(false);
 			return content.ToRichText();
 		}
 
@@ -54,7 +56,7 @@ public static class ConversionHelpers
 			item.ElementExtensions.ReadElementExtensions<string>("encoded", "http://purl.org/rss/1.0/modules/content/");
 		if (encodedContent != null && encodedContent.Count != 0)
 		{
-			var content = await TextContent.LoadAsync(encodedContent.Last()).ConfigureAwait(false);
+			var content = await TextContent.LoadAsync(encodedContent.Last(), htmlOptions).ConfigureAwait(false);
 			return content.ToRichText();
 		}
 
@@ -64,12 +66,15 @@ public static class ConversionHelpers
 	/// <summary>
 	/// Convert a syndication item into a generic <see cref="Item"/> object.
 	/// </summary>
-	public static async Task<IReadOnlyItem> ConvertItemAsync(SyndicationItem item)
+	public static async Task<IReadOnlyItem> ConvertItemAsync(SyndicationItem item, Uri feedUrl)
 	{
-		var title = item.Title != null ? await TextContent.LoadAsync(item.Title).ConfigureAwait(false) : null;
+		var htmlOptions = new HtmlParsingOptions { BaseUri = item.BaseUri ?? feedUrl };
+		var title = 
+			item.Title != null ? await TextContent.LoadAsync(item.Title, htmlOptions).ConfigureAwait(false) : null;
 		var author = item.Authors != null ? ConvertAuthor(item.Authors) : null;
-		var summary = item.Summary != null ? await TextContent.LoadAsync(item.Summary).ConfigureAwait(false) : null;
-		var content = await ConvertItemContentAsync(item, summary).ConfigureAwait(false);
+		var summary =
+			item.Summary != null ? await TextContent.LoadAsync(item.Summary, htmlOptions).ConfigureAwait(false) : null;
+		var content = await ConvertItemContentAsync(item, summary, htmlOptions).ConfigureAwait(false);
 		var url = ConvertItemUrl(item);
 		return new Item(
 			url, contentUrl: null, publishedTimestamp: item.PublishDate, modifiedTimestamp: item.LastUpdatedTime,
@@ -80,12 +85,15 @@ public static class ConversionHelpers
 	/// <summary>
 	/// Convert the metadata of a syndication feed into a generic <see cref="FeedMetadata"/> object.
 	/// </summary>
-	public static async Task<FeedMetadata> ConvertFeedMetadataAsync(SysSyndicationFeed feed)
+	public static async Task<FeedMetadata> ConvertFeedMetadataAsync(SysSyndicationFeed feed, Uri feedUrl)
 	{
-		var title = feed.Title != null ? await TextContent.LoadAsync(feed.Title).ConfigureAwait(false) : null;
+		var htmlOptions = new HtmlParsingOptions { BaseUri = feed.BaseUri ?? feedUrl };
+		var title =
+			feed.Title != null ? await TextContent.LoadAsync(feed.Title, htmlOptions).ConfigureAwait(false) : null;
 		var authors = feed.Authors != null ? ConvertAuthor(feed.Authors) : null;
-		var description =
-			feed.Description != null ? await TextContent.LoadAsync(feed.Description).ConfigureAwait(false) : null;
+		var description = feed.Description != null
+			? await TextContent.LoadAsync(feed.Description, htmlOptions).ConfigureAwait(false)
+			: null;
 		return new FeedMetadata(title?.ToPlainText(), authors, description?.ToPlainText(), Symbol.Web);
 	}
 }

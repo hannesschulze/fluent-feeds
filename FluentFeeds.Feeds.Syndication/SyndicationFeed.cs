@@ -48,7 +48,7 @@ public sealed class SyndicationFeed : CachedFeed
 	public async Task LoadMetadataAsync()
 	{
 		var feed = _prefetchedFeed = await Downloader.DownloadAsync().ConfigureAwait(false);
-		Metadata = await ConversionHelpers.ConvertFeedMetadataAsync(feed).ConfigureAwait(false);
+		Metadata = await ConversionHelpers.ConvertFeedMetadataAsync(feed, Url).ConfigureAwait(false);
 	}
 
 	protected override async Task<IEnumerable<IReadOnlyItem>> DoFetchAsync()
@@ -62,11 +62,12 @@ public sealed class SyndicationFeed : CachedFeed
 		else
 		{
 			feed = await Downloader.DownloadAsync().ConfigureAwait(false);
-			Metadata = await ConversionHelpers.ConvertFeedMetadataAsync(feed).ConfigureAwait(false);
+			Metadata = await ConversionHelpers.ConvertFeedMetadataAsync(feed, Url).ConfigureAwait(false);
 		}
 
 		// Process all items in parallel.
-		return await Task.WhenAll(feed.Items.Select(ConversionHelpers.ConvertItemAsync)).ConfigureAwait(false);
+		var tasks = feed.Items.Select(item => ConversionHelpers.ConvertItemAsync(item, Url));
+		return await Task.WhenAll(tasks).ConfigureAwait(false);
 	}
 
 	private SysSyndicationFeed? _prefetchedFeed;
