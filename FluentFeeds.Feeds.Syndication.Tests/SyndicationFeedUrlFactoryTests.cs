@@ -15,7 +15,7 @@ public class SyndicationFeedUrlFactoryTests
 {
 	private sealed class CustomFactory : SyndicationUrlFeedFactory
 	{
-		public CustomFactory(IFeedStorage feedStorage, Uri url, SysSyndicationFeed feed) : base(feedStorage)
+		public CustomFactory(Uri url, SysSyndicationFeed feed)
 		{
 			_url = url;
 			_feed = feed;
@@ -41,8 +41,8 @@ public class SyndicationFeedUrlFactoryTests
 				Items = new[] { new SyndicationItem() }
 			};
 		var url = new Uri("https://www.example.com");
-		var factory = new CustomFactory(new FeedStorageMock(), url, source);
-		var feed = Assert.IsType<SyndicationFeed>(await factory.CreateAsync(url));
+		var factory = new CustomFactory(url, source);
+		var feed = Assert.IsType<SyndicationFeed>(await factory.CreateAsync(new FeedStorageMock(), url));
 		Assert.Equal(new FeedMetadata(Name: "My blog", null, null, Symbol.Web), feed.Metadata);
 		Assert.Equal(feed.Identifier, feed.CollectionIdentifier);
 		var storage = Assert.IsType<ItemStorageMock>(feed.Storage);

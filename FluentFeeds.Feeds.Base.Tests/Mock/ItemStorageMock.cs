@@ -25,9 +25,7 @@ public sealed class ItemStorageMock : IItemStorage
 		var collection = GetCollection(collectionIdentifier);
 		foreach (var item in items)
 		{
-			var stored = new StoredItem(
-				Guid.NewGuid(), item.Url, item.ContentUrl, item.PublishedTimestamp, item.ModifiedTimestamp, item.Title,
-				item.Author, item.Summary, item.Content, false);
+			var stored = new StoredItem(item, Guid.NewGuid(), false);
 			collection.Add(stored);
 			yield return stored;
 		}

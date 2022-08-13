@@ -6,11 +6,17 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.8">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.8" />
 		<PackageReference Include="Microsoft.Toolkit.Mvvm" Version="7.1.2" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\FluentFeeds.Documents\FluentFeeds.Documents.csproj" />
 		<ProjectReference Include="..\FluentFeeds.Feeds.Base\FluentFeeds.Feeds.Base.csproj" />
+		<ProjectReference Include="..\FluentFeeds.Feeds.Syndication\FluentFeeds.Feeds.Syndication.csproj" />
 	</ItemGroup>
 </Project>

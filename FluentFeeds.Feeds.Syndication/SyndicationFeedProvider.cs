@@ -14,10 +14,14 @@ namespace FluentFeeds.Feeds.Syndication;
 public sealed class SyndicationFeedProvider : FeedProvider
 {
 	private record FeedDescription(Guid Identifier, Uri Url, string? Name, string? Author, string? Description);
-	
-	public SyndicationFeedProvider(IFeedStorage storage) : base(storage)
+
+	public SyndicationFeedProvider()
+		: base(new FeedProviderMetadata(
+			Identifier: Guid.Parse("8d468d92-4b69-41e3-8fac-28c99fc923a2"),
+			Name: "Syndication Feed Provider",
+			Description: "Feed provider for RSS and Atom feeds."))
 	{
-		UrlFeedFactory = new SyndicationUrlFeedFactory(Storage);
+		UrlFeedFactory = new SyndicationUrlFeedFactory();
 	}
 
 	public override IReadOnlyFeedNode CreateInitialTree()
@@ -25,11 +29,11 @@ public sealed class SyndicationFeedProvider : FeedProvider
 		return FeedNode.Group(title: "RSS/Atom feeds", symbol: Symbol.Feed, isUserCustomizable: true);
 	}
 
-	public override Feed LoadFeed(string serialized)
+	public override Feed LoadFeed(IFeedStorage feedStorage, string serialized)
 	{
 		var description = JsonSerializer.Deserialize<FeedDescription>(serialized) ?? throw new JsonException();
 		var downloader = new FeedDownloader(description.Url);
-		var itemStorage = Storage.GetItemStorage(description.Identifier);
+		var itemStorage = feedStorage.GetItemStorage(description.Identifier);
 		return new SyndicationFeed(
 			downloader, itemStorage, description.Identifier, description.Url,
 			new FeedMetadata(description.Name, description.Author, description.Description, Symbol.Web));

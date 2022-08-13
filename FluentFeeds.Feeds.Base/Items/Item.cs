@@ -76,7 +76,7 @@ public class Item : ObservableObject, IReadOnlyItem
 	private DateTimeOffset _publishedTimestamp;
 	private DateTimeOffset _modifiedTimestamp;
 	private string _title;
-	private string _author;
+	private string? _author;
 	private string? _summary;
 	private ItemContent _content;
 }

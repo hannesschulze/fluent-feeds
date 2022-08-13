@@ -13,7 +13,7 @@ namespace FluentFeeds.Feeds.Base.Nodes;
 /// </summary>
 public class FeedNode : ObservableObject, IReadOnlyFeedNode
 {
-	protected FeedNode(
+	internal FeedNode(
 		FeedNodeType type, Feed? feed, string? title, Symbol? symbol, bool isUserCustomizable,
 		IEnumerable<IReadOnlyFeedNode>? children)
 	{

@@ -20,6 +20,15 @@ public class StoredItem : Item, IReadOnlyStoredItem
 		_isRead = isRead;
 	}
 	
+	/// <summary>
+	/// Create a stored item from a base item.
+	/// </summary>
+	public StoredItem(IReadOnlyItem item, Guid identifier, bool isRead) : this(
+		identifier, item.Url, item.ContentUrl, item.PublishedTimestamp, item.ModifiedTimestamp, item.Title, item.Author,
+		item.Summary,item.Content, isRead)
+	{
+	}
+	
 	public Guid Identifier { get; }
 
 	public bool IsRead

@@ -21,7 +21,6 @@ public sealed class ItemStorageMock : IItemStorage
 
 	public Task<IEnumerable<IReadOnlyStoredItem>> AddItemsAsync(
 		IEnumerable<IReadOnlyItem> items, Guid collectionIdentifier) =>
-		Task.FromResult<IEnumerable<IReadOnlyStoredItem>>(items.Select(item => new StoredItem(
-			Guid.NewGuid(), item.Url, item.ContentUrl, item.PublishedTimestamp, item.ModifiedTimestamp, item.Title,
-			item.Author, item.Summary, item.Content, false)));
+		Task.FromResult<IEnumerable<IReadOnlyStoredItem>>(
+			items.Select(item => new StoredItem(item, Guid.NewGuid(), false)));
 }

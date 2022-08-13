@@ -1,20 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using FluentFeeds.App.Shared.Models;
-using FluentFeeds.Common;
-using FluentFeeds.Feeds.Base;
-using FluentFeeds.Feeds.Base.Nodes;
 
 namespace FluentFeeds.App.Shared.Services.Default;
 
-/// <summary>
-/// Default implementation of the navigation service interface.
-/// </summary>
-public class DefaultNavigationService : INavigationService
+public class NavigationService : INavigationService
 {
-	public DefaultNavigationService()
+	public NavigationService(IFeedService feedService)
 	{
-		_backStack.Add(NavigationRoute.Feed(FeedNode.Custom(new EmptyFeed(), "Overview", Symbol.Home, false)));
+		_backStack.Add(NavigationRoute.Feed(feedService.OverviewFeed));
 	}
 
 	public event EventHandler<EventArgs>? BackStackChanged;

@@ -1,7 +1,6 @@
-﻿using System;
-using FluentFeeds.App.Shared.Models;
-using FluentFeeds.App.Shared.Services;
+﻿using FluentFeeds.App.Shared.Models;
 using FluentFeeds.App.Shared.Services.Default;
+using FluentFeeds.App.Shared.Tests.Services.Mock;
 using FluentFeeds.App.Shared.ViewModels;
 using FluentFeeds.Common;
 using FluentFeeds.Feeds.Base;
@@ -12,21 +11,22 @@ namespace FluentFeeds.App.Shared.Tests.ViewModels;
 
 public class MainViewModelTests
 {
-	public INavigationService NavigationService { get; }
-	public MainViewModel ViewModel { get; }
+	public FeedServiceMock FeedService { get; }
+	public NavigationService NavigationService { get; }
 
 	public MainViewModelTests()
 	{
-		NavigationService = new DefaultNavigationService();
-		ViewModel = new MainViewModel(NavigationService);
+		FeedService = new FeedServiceMock();
+		NavigationService = new NavigationService(FeedService);
 	}
 
 	[Fact]
 	public void HasDefaultNavigationItems()
 	{
-		Assert.Equal(2, ViewModel.FeedItems.Count);
+		var viewModel = new MainViewModel(NavigationService);
+		Assert.Equal(2, viewModel.FeedItems.Count);
 
-		var overview = ViewModel.FeedItems[0];
+		var overview = viewModel.FeedItems[0];
 		Assert.Equal("Overview", overview.Title);
 		Assert.Equal(Symbol.Home, overview.Symbol);
 		Assert.Equal(NavigationRouteType.Feed, overview.Destination?.Type);
@@ -35,7 +35,7 @@ public class MainViewModelTests
 		Assert.True(overview.IsSelectable);
 		Assert.Empty(overview.Children);
 
-		var unread = ViewModel.FeedItems[1];
+		var unread = viewModel.FeedItems[1];
 		Assert.Equal("Unread", unread.Title);
 		Assert.Equal(Symbol.Sparkle, unread.Symbol);
 		Assert.Equal(NavigationRouteType.Feed, unread.Destination?.Type);
@@ -43,7 +43,7 @@ public class MainViewModelTests
 		Assert.True(unread.IsSelectable);
 		Assert.Empty(unread.Children);
 
-		var settings = ViewModel.SettingsItem;
+		var settings = viewModel.SettingsItem;
 		Assert.Equal("Settings", settings.Title);
 		Assert.Equal(Symbol.Settings, settings.Symbol);
 		Assert.Equal(NavigationRoute.Settings, settings.Destination);
@@ -55,71 +55,79 @@ public class MainViewModelTests
 	[Fact]
 	public void UpdatesSelectionWhenPageChanges_ToOtherFeed()
 	{
-		Assert.Equal(ViewModel.FeedItems[0], ViewModel.SelectedItem);
-		var unread = ViewModel.FeedItems[1];
+		var viewModel = new MainViewModel(NavigationService);
+		Assert.Equal(viewModel.FeedItems[0], viewModel.SelectedItem);
+		var unread = viewModel.FeedItems[1];
 		NavigationService.Navigate(unread.Destination!.Value);
-		Assert.Equal(unread, ViewModel.SelectedItem);
+		Assert.Equal(unread, viewModel.SelectedItem);
 	}
 
 	[Fact]
 	public void UpdatesSelectionWhenPageChanges_ToSettings()
 	{
-		Assert.Equal(ViewModel.FeedItems[0], ViewModel.SelectedItem);
+		var viewModel = new MainViewModel(NavigationService);
+		Assert.Equal(viewModel.FeedItems[0], viewModel.SelectedItem);
 		NavigationService.Navigate(NavigationRoute.Settings);
-		Assert.Equal(ViewModel.SettingsItem, ViewModel.SelectedItem);
+		Assert.Equal(viewModel.SettingsItem, viewModel.SelectedItem);
 	}
 
 	[Fact]
 	public void UpdatesSelectionWhenPageChanges_ToUnknownRoute()
 	{
-		Assert.Equal(ViewModel.FeedItems[0], ViewModel.SelectedItem);
+		var viewModel = new MainViewModel(NavigationService);
+		Assert.Equal(viewModel.FeedItems[0], viewModel.SelectedItem);
 		NavigationService.Navigate(NavigationRoute.Feed(
 			FeedNode.Custom(new EmptyFeed(), "Foo", Symbol.Feed, false)));
-		Assert.Null(ViewModel.SelectedItem);
+		Assert.Null(viewModel.SelectedItem);
 	}
 
 	[Fact]
 	public void UpdatesPageWhenSelectionChanges()
 	{
-		ViewModel.SelectedItem = ViewModel.SettingsItem;
-		Assert.Equal(ViewModel.SettingsItem, ViewModel.SelectedItem);
+		var viewModel = new MainViewModel(NavigationService);
+		viewModel.SelectedItem = viewModel.SettingsItem;
+		Assert.Equal(viewModel.SettingsItem, viewModel.SelectedItem);
 		Assert.Equal(NavigationRoute.Settings, NavigationService.CurrentRoute);
 	}
 
 	[Fact]
 	public void UpdatesVisiblePage()
 	{
-		Assert.Equal(MainViewModel.Page.Feed, ViewModel.VisiblePage);
+		var viewModel = new MainViewModel(NavigationService);
+		Assert.Equal(MainViewModel.Page.Feed, viewModel.VisiblePage);
 		NavigationService.Navigate(NavigationRoute.Settings);
-		Assert.Equal(MainViewModel.Page.Settings, ViewModel.VisiblePage);
+		Assert.Equal(MainViewModel.Page.Settings, viewModel.VisiblePage);
 	}
 
 	[Fact]
 	public void UpdatesVisiblePage_OnlyForDifferentRouteType()
 	{
-		ViewModel.PropertyChanged +=
+		var viewModel = new MainViewModel(NavigationService);
+		viewModel.PropertyChanged +=
 			(s, e) => Assert.NotEqual(nameof(MainViewModel.VisiblePage), e.PropertyName);
-		NavigationService.Navigate(ViewModel.FeedItems[1].Destination!.Value);
-		Assert.Equal(MainViewModel.Page.Feed, ViewModel.VisiblePage);
+		NavigationService.Navigate(viewModel.FeedItems[1].Destination!.Value);
+		Assert.Equal(MainViewModel.Page.Feed, viewModel.VisiblePage);
 	}
 
 	[Fact]
 	public void GoBack_UpdatesAvailability()
 	{
-		Assert.False(ViewModel.GoBackCommand.CanExecute(null));
+		var viewModel = new MainViewModel(NavigationService);
+		Assert.False(viewModel.GoBackCommand.CanExecute(null));
 		var changed = false;
-		ViewModel.GoBackCommand.CanExecuteChanged += (s, e) => changed = true;
+		viewModel.GoBackCommand.CanExecuteChanged += (s, e) => changed = true;
 		NavigationService.Navigate(NavigationRoute.Settings);
 		Assert.True(changed);
-		Assert.True(ViewModel.GoBackCommand.CanExecute(null));
+		Assert.True(viewModel.GoBackCommand.CanExecute(null));
 	}
 
 	[Fact]
 	public void GoBack_ExecuteCommand()
 	{
+		var viewModel = new MainViewModel(NavigationService);
 		NavigationService.Navigate(NavigationRoute.Settings);
-		ViewModel.GoBackCommand.Execute(null);
-		Assert.Equal(ViewModel.FeedItems[0].Destination, NavigationService.CurrentRoute);
-		Assert.False(ViewModel.GoBackCommand.CanExecute(null));
+		viewModel.GoBackCommand.Execute(null);
+		Assert.Equal(viewModel.FeedItems[0].Destination, NavigationService.CurrentRoute);
+		Assert.False(viewModel.GoBackCommand.CanExecute(null));
 	}
 }

@@ -10,15 +10,15 @@ namespace FluentFeeds.Feeds.Base;
 /// </summary>
 public abstract class FeedProvider
 {
-	protected FeedProvider(IFeedStorage storage)
+	protected FeedProvider(FeedProviderMetadata metadata)
 	{
-		Storage = storage;
+		Metadata = metadata;
 	}
 	
 	/// <summary>
-	/// Persistent feed storage for this feed provider.
+	/// Metadata for this feed provider.
 	/// </summary>
-	public IFeedStorage Storage { get; }
+	public FeedProviderMetadata Metadata { get; }
 
 	/// <summary>
 	/// Factory for creating feeds from URLs.
@@ -33,7 +33,7 @@ public abstract class FeedProvider
 	/// <summary>
 	/// Load a serialized feed as returned by <see cref="StoreFeed"/>.
 	/// </summary>
-	public abstract Feed LoadFeed(string serialized);
+	public abstract Feed LoadFeed(IFeedStorage feedStorage, string serialized);
 	
 	/// <summary>
 	/// Serialize a feed so it can be loaded using <see cref="LoadFeed"/>.
