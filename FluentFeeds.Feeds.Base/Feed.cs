@@ -40,14 +40,11 @@ public abstract class Feed
 	/// <summary>
 	/// Metadata for the feed.
 	/// </summary>
-	public FeedMetadata? Metadata
+	public FeedMetadata Metadata
 	{
 		get => _metadata;
 		protected set
 		{
-			if (_metadata == value)
-				return;
-			
 			_metadata = value;
 			MetadataUpdated?.Invoke(this, EventArgs.Empty);
 		}
@@ -112,7 +109,7 @@ public abstract class Feed
 	}
 
 	private ImmutableHashSet<IReadOnlyStoredItem> _items = ImmutableHashSet<IReadOnlyStoredItem>.Empty;
-	private FeedMetadata? _metadata;
+	private FeedMetadata _metadata = new();
 	private bool _isLoaded;
 	private bool _isSynchronizing;
 	private Task? _loadTask;

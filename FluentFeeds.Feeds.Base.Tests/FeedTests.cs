@@ -150,8 +150,8 @@ public class FeedTests
 	public void UpdateMetadata()
 	{
 		var feed = new FeedMock();
-		Assert.Null(feed.Metadata);
-		var metadata = new FeedMetadata("feed", "author", "description", null);
+		Assert.Equal(new FeedMetadata(), feed.Metadata);
+		var metadata = new FeedMetadata { Name = "feed", Author = "author", Description = "description" };
 		Assert.Raises<EventArgs>(
 			h => feed.MetadataUpdated += h,
 			h => feed.MetadataUpdated -= h,

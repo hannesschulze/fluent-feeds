@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using FluentFeeds.Feeds.Base.Tests.Mock;
 using Xunit;
 
@@ -8,31 +9,30 @@ namespace FluentFeeds.Feeds.Base.Tests;
 public class CachedFeedTests
 {
 	[Fact]
-	public void LoadItems()
+	public async Task LoadItems()
 	{
 		var storage = new ItemStorageMock();
 		_ = storage.AddItems(new[] { TestHelpers.CreateItem(Guid.Empty), TestHelpers.CreateItem(Guid.Empty) }).ToList();
 		var feed = new CachedFeedMock(storage);
-		var task = feed.LoadAsync();
-		Assert.True(task.IsCompleted);
+		await feed.LoadAsync();
 		Assert.Equal(2, feed.Items.Count);
 	}
 
 	[Fact]
-	public void SynchronizeItems()
+	public async Task SynchronizeItems()
 	{
 		var storage = new ItemStorageMock();
 		var feed = new CachedFeedMock(storage);
-		feed.LoadAsync();
+		_ = feed.LoadAsync();
 		var taskA = feed.SynchronizeAsync();
 		Assert.False(taskA.IsCompleted);
 		feed.CompleteFetch(TestHelpers.CreateItem(Guid.NewGuid()));
-		Assert.True(taskA.IsCompleted);
+		await taskA;
 		Assert.Single(feed.Items);
 		var taskB = feed.SynchronizeAsync();
 		Assert.False(taskB.IsCompleted);
 		feed.CompleteFetch(TestHelpers.CreateItem(Guid.NewGuid()));
-		Assert.True(taskB.IsCompleted);
+		await taskB;
 		Assert.Equal(2, feed.Items.Count);
 	}
 }

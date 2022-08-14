@@ -89,6 +89,13 @@ public static class ConversionHelpers
 		var title = feed.Title != null ? await TextContent.LoadAsync(feed.Title, htmlOptions) : null;
 		var authors = feed.Authors != null ? ConvertAuthor(feed.Authors) : null;
 		var description = feed.Description != null ? await TextContent.LoadAsync(feed.Description, htmlOptions) : null;
-		return new FeedMetadata(title?.ToPlainText(), authors, description?.ToPlainText(), Symbol.Web);
+		return
+			new FeedMetadata
+			{
+				Name = title?.ToPlainText(),
+				Author = authors,
+				Description = description?.ToPlainText(),
+				Symbol = Symbol.Web
+			};
 	}
 }

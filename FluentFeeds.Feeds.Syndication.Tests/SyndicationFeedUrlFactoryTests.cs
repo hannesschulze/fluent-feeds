@@ -3,7 +3,6 @@ using System.ServiceModel.Syndication;
 using System.Threading.Tasks;
 using FluentFeeds.Common;
 using FluentFeeds.Feeds.Base;
-using FluentFeeds.Feeds.Base.Storage;
 using FluentFeeds.Feeds.Syndication.Download;
 using FluentFeeds.Feeds.Syndication.Tests.Mock;
 using Xunit;
@@ -43,7 +42,7 @@ public class SyndicationFeedUrlFactoryTests
 		var url = new Uri("https://www.example.com");
 		var factory = new CustomFactory(url, source);
 		var feed = Assert.IsType<SyndicationFeed>(await factory.CreateAsync(new FeedStorageMock(), url));
-		Assert.Equal(new FeedMetadata(Name: "My blog", null, null, Symbol.Web), feed.Metadata);
+		Assert.Equal(new FeedMetadata { Name = "My blog", Symbol = Symbol.Web }, feed.Metadata);
 		var storage = Assert.IsType<ItemStorageMock>(feed.Storage);
 		Assert.Equal(feed.Identifier, storage.Identifier);
 		Assert.Equal(url, feed.Url);

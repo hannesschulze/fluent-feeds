@@ -36,7 +36,13 @@ public sealed class SyndicationFeedProvider : FeedProvider
 		var itemStorage = feedStorage.GetItemStorage(description.Identifier);
 		return new SyndicationFeed(
 			downloader, itemStorage, description.Identifier, description.Url,
-			new FeedMetadata(description.Name, description.Author, description.Description, Symbol.Web));
+			new FeedMetadata
+			{
+				Name = description.Name,
+				Author = description.Author,
+				Description = description.Description,
+				Symbol = Symbol.Web
+			});
 	}
 
 	public override string StoreFeed(Feed feed)
@@ -45,9 +51,9 @@ public sealed class SyndicationFeedProvider : FeedProvider
 		var description = new FeedDescription(
 			Identifier: syndicationFeed.Identifier,
 			Url: syndicationFeed.Url,
-			Name: syndicationFeed.Metadata?.Name,
-			Author: syndicationFeed.Metadata?.Author,
-			Description: syndicationFeed.Metadata?.Description);
+			Name: syndicationFeed.Metadata.Name,
+			Author: syndicationFeed.Metadata.Author,
+			Description: syndicationFeed.Metadata.Description);
 		return JsonSerializer.Serialize(description);
 	}
 }

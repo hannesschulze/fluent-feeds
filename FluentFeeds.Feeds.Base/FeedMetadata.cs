@@ -5,8 +5,25 @@ namespace FluentFeeds.Feeds.Base;
 /// <summary>
 /// Metadata for a <see cref="Feed"/>.
 /// </summary>
-/// <param name="Name">Name of the feed, used as the fallback title for a node.</param>
-/// <param name="Author">Author of the feed's content.</param>
-/// <param name="Description">Short description of the feed's content.</param>
-/// <param name="Symbol">Symbol representing the feed.</param>
-public record FeedMetadata(string? Name, string? Author, string? Description, Symbol? Symbol);
+public record FeedMetadata
+{
+	/// <summary>
+	/// Name of the feed, used as the fallback title for a node.
+	/// </summary>
+	public string? Name { get; init; }
+	
+	/// <summary>
+	/// Author of the feed's content.
+	/// </summary>
+	public string? Author { get; init; }
+	
+	/// <summary>
+	/// Short description of the feed's content.
+	/// </summary>
+	public string? Description { get; init; }
+	
+	/// <summary>
+	/// Symbol representing the feed.
+	/// </summary>
+	public Symbol? Symbol { get; init; }
+}

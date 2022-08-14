@@ -13,14 +13,15 @@ public sealed class CachedFeedMock : CachedFeed
 	{
 	}
 	
-	public void CompleteFetch(IEnumerable<IReadOnlyItem> items) => _fetchCompletionSource?.TrySetResult(items);
+	public void CompleteFetch(IEnumerable<IReadOnlyItem> items) => _fetchCompletionSource.TrySetResult(items);
 	public void CompleteFetch(params IReadOnlyItem[] items) => CompleteFetch(items.AsEnumerable());
 
-	protected override Task<IEnumerable<IReadOnlyItem>> DoFetchAsync()
+	protected override async Task<FetchResult> DoFetchAsync()
 	{
-		var completionSource = _fetchCompletionSource = new TaskCompletionSource<IEnumerable<IReadOnlyItem>>();
-		return completionSource.Task;
+		var items = await _fetchCompletionSource.Task;
+		_fetchCompletionSource = new TaskCompletionSource<IEnumerable<IReadOnlyItem>>();
+		return new FetchResult(items);
 	}
 
-	private TaskCompletionSource<IEnumerable<IReadOnlyItem>>? _fetchCompletionSource;
+	private TaskCompletionSource<IEnumerable<IReadOnlyItem>> _fetchCompletionSource = new();
 }

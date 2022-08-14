@@ -38,7 +38,8 @@ public class SyndicationFeedProviderTests
 		var feedStorage = new FeedStorageMock();
 		var itemStorage = feedStorage.GetItemStorage(identifier);
 		var url = new Uri("https://www.example.com/");
-		var metadata = new FeedMetadata("name", "author", "description", Symbol.Web);
+		var metadata =
+			new FeedMetadata { Name = "name", Author = "author", Description = "description", Symbol = Symbol.Web };
 		var feed = new SyndicationFeed(downloader, itemStorage, identifier, url, metadata);
 		var serialized = Provider.StoreFeed(feed);
 		var deserialized = Assert.IsType<SyndicationFeed>(Provider.LoadFeed(feedStorage, serialized));

@@ -48,40 +48,41 @@ public sealed class SyndicationFeed : CachedFeed
 	/// </summary>
 	public async Task LoadMetadataAsync()
 	{
-		(Metadata, _prefetchedFeed) = await Task.Run(
+		Metadata = await Task.Run(
 			async () =>
 			{
 				var feed = await Downloader.DownloadAsync();
-				var metadata = await ConversionHelpers.ConvertFeedMetadataAsync(feed, Url);
-				return (metadata, feed);
+				lock (this)
+				{
+					_prefetchedFeed = feed;
+				}
+				return await ConversionHelpers.ConvertFeedMetadataAsync(feed, Url);
 			});
 	}
 
-	protected override async Task<IEnumerable<IReadOnlyItem>> DoFetchAsync()
+	protected override async Task<FetchResult> DoFetchAsync()
 	{
-		var feed = _prefetchedFeed;
-		_prefetchedFeed = null;
-		var updatedMetadata = null as FeedMetadata;
-		var result = await Task.Run(
-			async () =>
-			{
-				if (feed == null)
-				{
-					feed = await Downloader.DownloadAsync();
-					updatedMetadata = await ConversionHelpers.ConvertFeedMetadataAsync(feed, Url);
-				}
+		SysSyndicationFeed? feed;
+		lock (this)
+		{
+			feed = _prefetchedFeed;
+			_prefetchedFeed = null;
+		}
+	
+		FeedMetadata? updatedMetadata = null;	
+		if (feed == null)
+		{
+			feed = await Downloader.DownloadAsync();
+			updatedMetadata = await ConversionHelpers.ConvertFeedMetadataAsync(feed, Url);
+		}
 
-				// Process all items in parallel.
-				var result = new ConcurrentBag<IReadOnlyItem>();
-				var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = ItemProcessingMaxDegreeOfParallelism };
-				await Parallel.ForEachAsync(
-					feed.Items, parallelOptions,
-					async (item, _) => result.Add(await ConversionHelpers.ConvertItemAsync(item, Url)));
-				return result.ToArray();
-			});
-		if (updatedMetadata != null)
-			Metadata = updatedMetadata;
-		return result;
+		// Process all items in parallel.
+		var result = new ConcurrentBag<IReadOnlyItem>();
+		var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = ItemProcessingMaxDegreeOfParallelism };
+		await Parallel.ForEachAsync(
+			feed.Items, parallelOptions,
+			async (item, _) => result.Add(await ConversionHelpers.ConvertItemAsync(item, Url)));
+		return new FetchResult(result.ToArray()) { UpdatedMetadata = updatedMetadata };
 	}
 
 	private SysSyndicationFeed? _prefetchedFeed;

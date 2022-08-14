@@ -12,6 +12,17 @@ namespace FluentFeeds.Feeds.Base;
 /// </summary>
 public abstract class CachedFeed : Feed
 {
+	/// <summary>
+	/// Result of a fetch request.
+	/// </summary>
+	public record FetchResult(IEnumerable<IReadOnlyItem> Items)
+	{
+		/// <summary>
+		/// Updated metadata (if the metadata has changed).
+		/// </summary>
+		public FeedMetadata? UpdatedMetadata { get; init; }
+	}
+	
 	protected CachedFeed(IItemStorage storage)
 	{
 		Storage = storage;
@@ -30,9 +41,18 @@ public abstract class CachedFeed : Feed
 
 	protected sealed override async Task DoSynchronizeAsync()
 	{
-		var fetchedItems = await DoFetchAsync();
-		var newItems = await Storage.AddItemsAsync(fetchedItems);
-		Items = Items.Union(newItems);
+		var (items, metadata) = await Task.Run(
+			async () =>
+			{
+				var fetchResult = await DoFetchAsync();
+				var newItems = await Storage.AddItemsAsync(fetchResult.Items);
+				return (newItems, fetchResult.UpdatedMetadata);
+			});
+		Items = Items.Union(items);
+		if (metadata != null && metadata != Metadata)
+		{
+			Metadata = metadata;
+		}
 	}
 
 	/// <summary>
@@ -42,5 +62,9 @@ public abstract class CachedFeed : Feed
 	/// is already cached, its modified timestamp is checked and if this version is newer than the cached one, the
 	/// cached item is updated.</para>
 	/// </summary>
-	protected abstract Task<IEnumerable<IReadOnlyItem>> DoFetchAsync();
+	/// <remarks>
+	/// This method is called on the thread pool. The implementation should not update properties like metadata or
+	/// items.
+	/// </remarks>
+	protected abstract Task<FetchResult> DoFetchAsync();
 }
