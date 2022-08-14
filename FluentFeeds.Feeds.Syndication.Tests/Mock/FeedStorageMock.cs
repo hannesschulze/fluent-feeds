@@ -5,5 +5,6 @@ namespace FluentFeeds.Feeds.Syndication.Tests.Mock;
 
 public sealed class FeedStorageMock : IFeedStorage
 {
-	public IItemStorage GetItemStorage(Guid identifier) => new ItemStorageMock(identifier);
+	public IItemStorage GetItemStorage(Guid identifier, IItemContentSerializer? contentSerializer = null) =>
+		new ItemStorageMock(identifier);
 }

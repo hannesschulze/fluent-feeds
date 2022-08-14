@@ -10,5 +10,7 @@ public interface IFeedStorage
 	/// <summary>
 	/// Return the item storage with the specified identifier.
 	/// </summary>
-	IItemStorage GetItemStorage(Guid identifier);
+	/// <param name="identifier">Storage identifier.</param>
+	/// <param name="contentSerializer">Custom serializer for item content loaders.</param>
+	IItemStorage GetItemStorage(Guid identifier, IItemContentSerializer? contentSerializer = null);
 }

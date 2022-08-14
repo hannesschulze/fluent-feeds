@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 using FluentFeeds.App.Shared.Models;
 using FluentFeeds.App.Shared.Models.Database;
 using FluentFeeds.Common;
-using FluentFeeds.Documents;
 using FluentFeeds.Feeds.Base;
 using FluentFeeds.Feeds.Base.Items;
 using FluentFeeds.Feeds.Base.Items.Content;
+using FluentFeeds.Feeds.Base.Items.ContentLoaders;
 using FluentFeeds.Feeds.Base.Nodes;
 using FluentFeeds.Feeds.Base.Storage;
 using Microsoft.EntityFrameworkCore;
@@ -19,30 +19,64 @@ namespace FluentFeeds.App.Shared.Services.Default;
 
 public class FeedService : IFeedService
 {
+	private sealed class ItemContentLoader : IItemContentLoader
+	{
+		public ItemContentLoader(IDatabaseService databaseService, IItemContentSerializer serializer, Guid identifier)
+		{
+			_databaseService = databaseService;
+			_serializer = serializer;
+			_identifier = identifier;
+			_fetchFromDatabaseTask = new Lazy<Task<IItemContentLoader>>(FetchFromDatabaseAsync, isThreadSafe: false);
+		}
+		
+		private async Task<IItemContentLoader> FetchFromDatabaseAsync()
+		{
+			await using var database = _databaseService.CreateContext();
+			var serialized = await database.Items
+				.Where(i => i.Identifier == _identifier)
+				.Select(i => i.Content)
+				.FirstAsync();
+			return await _serializer.LoadAsync(serialized);
+		}
+		
+		public async Task<ItemContent> LoadAsync(bool reload = false)
+		{
+			var loader = await _fetchFromDatabaseTask.Value;
+			return await loader.LoadAsync(reload);
+		}
+
+		private readonly IDatabaseService _databaseService;
+		private readonly IItemContentSerializer _serializer;
+		private readonly Guid _identifier;
+		private readonly Lazy<Task<IItemContentLoader>> _fetchFromDatabaseTask;
+	}
+	
 	private sealed class ItemStorage : IItemStorage
 	{
-		public ItemStorage(FeedService feedService, Guid providerIdentifier, Guid storageIdentifier)
+		public ItemStorage(
+			FeedService feedService, Guid providerIdentifier, Guid storageIdentifier,
+			IItemContentSerializer contentSerializer)
 		{
 			_feedService = feedService;
 			_providerIdentifier = providerIdentifier;
 			_storageIdentifier = storageIdentifier;
+			_contentSerializer = contentSerializer;
 		}
 		
-		private static async Task UpdateItemAsync(AppDbContext context, StoredItem item, IReadOnlyItem updated)
+		private async Task UpdateItemAsync(AppDbContext context, StoredItem item, IReadOnlyItem updated)
 		{
 			var identifier = item.Identifier;
 			var dbItem = await context.Items.Where(i => i.Identifier == identifier).FirstOrDefaultAsync();
 			if (dbItem == null)
 				return;
-			
+
 			dbItem.ContentUrl = item.ContentUrl = updated.ContentUrl;
 			dbItem.ModifiedTimestamp = item.ModifiedTimestamp = updated.ModifiedTimestamp;
 			dbItem.Title = item.Title = updated.Title;
 			dbItem.Author = item.Author = updated.Author;
 			dbItem.Summary = item.Summary = updated.Summary;
-			dbItem.ContentType = updated.Content.Type;
-			dbItem.ArticleContentBody = (item.Content as ArticleItemContent)?.Body;
-			item.Content = updated.Content;
+			dbItem.Content = await _contentSerializer.StoreAsync(updated.ContentLoader);
+			item.ContentLoader = updated.ContentLoader;
 		}
 
 		private void AddItemToCache(StoredItem item)
@@ -51,30 +85,6 @@ public class FeedService : IFeedService
 				_urlItems.Add(item.Url, item);
 			_feedService._items.Add(item.Identifier, item);
 			_items.Add(item);
-		}
-
-		private StoredItem LoadItem(ItemDb dbItem)
-		{
-			var content =
-				dbItem.ContentType switch
-				{
-					ItemContentType.Article =>
-						new ArticleItemContent(dbItem.ArticleContentBody ?? new RichText()),
-					_ => throw new IndexOutOfRangeException()
-				};
-			var item = new StoredItem(
-				identifier: dbItem.Identifier,
-				url: dbItem.Url,
-				contentUrl: dbItem.ContentUrl,
-				publishedTimestamp: dbItem.PublishedTimestamp,
-				modifiedTimestamp: dbItem.ModifiedTimestamp,
-				title: dbItem.Title,
-				author: dbItem.Author,
-				summary: dbItem.Summary,
-				content: content,
-				isRead: dbItem.IsRead);
-			AddItemToCache(item);
-			return item;
 		}
 
 		private async Task<StoredItem> StoreItemAsync(AppDbContext database, IReadOnlyItem item)
@@ -93,8 +103,7 @@ public class FeedService : IFeedService
 					Title = storedItem.Title,
 					Author = storedItem.Author,
 					Summary = storedItem.Summary,
-					ContentType = storedItem.Content.Type,
-					ArticleContentBody = (storedItem.Content as ArticleItemContent)?.Body,
+					Content = await _contentSerializer.StoreAsync(item.ContentLoader),
 					IsRead = storedItem.IsRead
 				});
 			AddItemToCache(storedItem);
@@ -115,11 +124,36 @@ public class FeedService : IFeedService
 			await using var database = _feedService._databaseService.CreateContext();
 			var dbItems = await database.Items
 				.Where(i => i.ProviderIdentifier == _providerIdentifier && i.StorageIdentifier == _storageIdentifier)
+				.Select(i =>
+					new
+					{
+						i.Identifier,
+						i.Url,
+						i.ContentUrl,
+						i.PublishedTimestamp,
+						i.ModifiedTimestamp,
+						i.Title,
+						i.Author,
+						i.Summary,
+						i.IsRead
+					})
 				.ToListAsync();
 			_items.EnsureCapacity(dbItems.Count);
 			foreach (var dbItem in dbItems)
 			{
-				LoadItem(dbItem);
+				var item = new StoredItem(
+					identifier: dbItem.Identifier,
+					url: dbItem.Url,
+					contentUrl: dbItem.ContentUrl,
+					publishedTimestamp: dbItem.PublishedTimestamp,
+					modifiedTimestamp: dbItem.ModifiedTimestamp,
+					title: dbItem.Title,
+					author: dbItem.Author,
+					summary: dbItem.Summary,
+					contentLoader: new ItemContentLoader(
+						_feedService._databaseService, _contentSerializer, dbItem.Identifier),
+					isRead: dbItem.IsRead);
+				AddItemToCache(item);
 			}
 
 			_isLoaded = true;
@@ -161,8 +195,9 @@ public class FeedService : IFeedService
 		private readonly FeedService _feedService;
 		private readonly Guid _providerIdentifier;
 		private readonly Guid _storageIdentifier;
-		private Dictionary<Uri, StoredItem> _urlItems = new();
-		private List<StoredItem> _items = new();
+		private readonly IItemContentSerializer _contentSerializer;
+		private readonly Dictionary<Uri, StoredItem> _urlItems = new();
+		private readonly List<StoredItem> _items = new();
 		private bool _isLoaded;
 		private Task? _loadTask;
 	}
@@ -175,12 +210,13 @@ public class FeedService : IFeedService
 			_providerIdentifier = providerIdentifier;
 		}
 		
-		public IItemStorage GetItemStorage(Guid identifier)
+		public IItemStorage GetItemStorage(Guid identifier, IItemContentSerializer? contentSerializer = null)
 		{
 			if (_itemStorages.TryGetValue(identifier, out var existing))
 				return existing;
 
-			var itemStorage = new ItemStorage(_feedService, _providerIdentifier, identifier);
+			var itemStorage = new ItemStorage(
+				_feedService, _providerIdentifier, identifier, contentSerializer ?? new DefaultItemContentSerializer());
 			_itemStorages.Add(identifier, itemStorage);
 			return itemStorage;
 		}
@@ -236,8 +272,8 @@ public class FeedService : IFeedService
 					node.Identifier, node.Title, node.Symbol, node.IsUserCustomizable,
 					children ?? Enumerable.Empty<IReadOnlyFeedNode>()),
 				FeedNodeType.Custom => StoredFeedNode.Custom(
-					node.Identifier, provider.LoadFeed(storage, node.CustomSerialized ?? String.Empty), node.Title,
-					node.Symbol, node.IsUserCustomizable, children),
+					node.Identifier, await provider.LoadFeedAsync(storage, node.CustomSerialized ?? String.Empty),
+					node.Title, node.Symbol, node.IsUserCustomizable, children),
 				_ => throw new IndexOutOfRangeException()
 			};
 		_feedNodes.Add(storedNode.Identifier, storedNode);
@@ -258,7 +294,7 @@ public class FeedService : IFeedService
 				Parent = parent,
 				HasChildren = node.Children != null,
 				Type = node.Type,
-				CustomSerialized = node.Type == FeedNodeType.Custom ? provider.StoreFeed(node.Feed) : null,
+				CustomSerialized = node.Type == FeedNodeType.Custom ? await provider.StoreFeedAsync(node.Feed) : null,
 				Title = node.Title,
 				Symbol = node.Symbol,
 				IsUserCustomizable = node.IsUserCustomizable

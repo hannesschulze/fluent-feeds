@@ -1,6 +1,5 @@
 using System;
-using FluentFeeds.Feeds.Base.Items.Content;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
+using FluentFeeds.Feeds.Base.Items.ContentLoaders;
 
 namespace FluentFeeds.Feeds.Base.Items;
 
@@ -13,8 +12,8 @@ public class StoredItem : Item, IReadOnlyStoredItem
 {
 	public StoredItem(
 		Guid identifier, Uri? url, Uri? contentUrl, DateTimeOffset publishedTimestamp, DateTimeOffset modifiedTimestamp,
-		string title, string? author, string? summary, ItemContent content, bool isRead)
-		: base(url, contentUrl, publishedTimestamp, modifiedTimestamp, title, author, summary, content)
+		string title, string? author, string? summary, IItemContentLoader contentLoader, bool isRead)
+		: base(url, contentUrl, publishedTimestamp, modifiedTimestamp, title, author, summary, contentLoader)
 	{
 		Identifier = identifier;
 		_isRead = isRead;
@@ -25,7 +24,7 @@ public class StoredItem : Item, IReadOnlyStoredItem
 	/// </summary>
 	public StoredItem(IReadOnlyItem item, Guid identifier, bool isRead) : this(
 		identifier, item.Url, item.ContentUrl, item.PublishedTimestamp, item.ModifiedTimestamp, item.Title, item.Author,
-		item.Summary,item.Content, isRead)
+		item.Summary,item.ContentLoader, isRead)
 	{
 	}
 	

@@ -1,5 +1,7 @@
 using System;
+using System.Threading.Tasks;
 using FluentFeeds.Feeds.Base.Items.Content;
+using FluentFeeds.Feeds.Base.Items.ContentLoaders;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 
 namespace FluentFeeds.Feeds.Base.Items;
@@ -11,7 +13,7 @@ public class Item : ObservableObject, IReadOnlyItem
 {
 	public Item(
 		Uri? url, Uri? contentUrl, DateTimeOffset publishedTimestamp, DateTimeOffset modifiedTimestamp, string title,
-		string? author, string? summary, ItemContent content)
+		string? author, string? summary, IItemContentLoader contentLoader)
 	{
 		_url = url;
 		_contentUrl = contentUrl;
@@ -20,7 +22,7 @@ public class Item : ObservableObject, IReadOnlyItem
 		_title = title;
 		_author = author;
 		_summary = summary;
-		_content = content;
+		_contentLoader = contentLoader;
 	}
 
 	public Uri? Url
@@ -65,11 +67,13 @@ public class Item : ObservableObject, IReadOnlyItem
 		set => SetProperty(ref _summary, value);
 	}
 
-	public ItemContent Content
+	public IItemContentLoader ContentLoader
 	{
-		get => _content;
-		set => SetProperty(ref _content, value);
+		get => _contentLoader;
+		set => SetProperty(ref _contentLoader, value);
 	}
+
+	public Task<ItemContent> LoadContentAsync(bool reload = false) => ContentLoader.LoadAsync(reload);
 
 	private Uri? _url;
 	private Uri? _contentUrl;
@@ -78,5 +82,5 @@ public class Item : ObservableObject, IReadOnlyItem
 	private string _title;
 	private string? _author;
 	private string? _summary;
-	private ItemContent _content;
+	private IItemContentLoader _contentLoader;
 }

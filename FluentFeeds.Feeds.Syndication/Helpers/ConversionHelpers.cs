@@ -9,6 +9,7 @@ using FluentFeeds.Documents.Html;
 using FluentFeeds.Feeds.Base;
 using FluentFeeds.Feeds.Base.Items;
 using FluentFeeds.Feeds.Base.Items.Content;
+using FluentFeeds.Feeds.Base.Items.ContentLoaders;
 using SysSyndicationFeed = System.ServiceModel.Syndication.SyndicationFeed;
 
 namespace FluentFeeds.Feeds.Syndication.Helpers;
@@ -77,7 +78,7 @@ public static class ConversionHelpers
 		return new Item(
 			url, contentUrl: null, publishedTimestamp: item.PublishDate, modifiedTimestamp: item.LastUpdatedTime,
 			title?.ToPlainText() ?? String.Empty, author, summary?.ToPlainText() ?? content.ToPlainText(),
-			new ArticleItemContent(content));
+			new StaticItemContentLoader(new ArticleItemContent(content)));
 	}
 
 	/// <summary>

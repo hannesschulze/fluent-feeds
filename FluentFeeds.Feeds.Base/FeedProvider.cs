@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using FluentFeeds.Feeds.Base.Factories;
 using FluentFeeds.Feeds.Base.Nodes;
 using FluentFeeds.Feeds.Base.Storage;
@@ -31,12 +32,12 @@ public abstract class FeedProvider
 	public abstract IReadOnlyFeedNode CreateInitialTree();
 	
 	/// <summary>
-	/// Load a serialized feed as returned by <see cref="StoreFeed"/>.
+	/// Load a serialized feed as returned by <see cref="StoreFeedAsync"/>.
 	/// </summary>
-	public abstract Feed LoadFeed(IFeedStorage feedStorage, string serialized);
+	public abstract Task<Feed> LoadFeedAsync(IFeedStorage feedStorage, string serialized);
 	
 	/// <summary>
-	/// Serialize a feed so it can be loaded using <see cref="LoadFeed"/>.
+	/// Serialize a feed so it can be loaded using <see cref="LoadFeedAsync"/>.
 	/// </summary>
-	public abstract string StoreFeed(Feed feed);
+	public abstract Task<string> StoreFeedAsync(Feed feed);
 }

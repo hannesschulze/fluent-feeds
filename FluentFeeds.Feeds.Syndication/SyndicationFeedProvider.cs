@@ -1,5 +1,6 @@
 using System;
 using System.Text.Json;
+using System.Threading.Tasks;
 using FluentFeeds.Common;
 using FluentFeeds.Feeds.Base;
 using FluentFeeds.Feeds.Base.Nodes;
@@ -29,12 +30,12 @@ public sealed class SyndicationFeedProvider : FeedProvider
 		return FeedNode.Group(title: "RSS/Atom feeds", symbol: Symbol.Feed, isUserCustomizable: true);
 	}
 
-	public override Feed LoadFeed(IFeedStorage feedStorage, string serialized)
+	public override Task<Feed> LoadFeedAsync(IFeedStorage feedStorage, string serialized)
 	{
 		var description = JsonSerializer.Deserialize<FeedDescription>(serialized) ?? throw new JsonException();
 		var downloader = new FeedDownloader(description.Url);
 		var itemStorage = feedStorage.GetItemStorage(description.Identifier);
-		return new SyndicationFeed(
+		return Task.FromResult<Feed>(new SyndicationFeed(
 			downloader, itemStorage, description.Identifier, description.Url,
 			new FeedMetadata
 			{
@@ -42,10 +43,10 @@ public sealed class SyndicationFeedProvider : FeedProvider
 				Author = description.Author,
 				Description = description.Description,
 				Symbol = Symbol.Web
-			});
+			}));
 	}
 
-	public override string StoreFeed(Feed feed)
+	public override Task<string> StoreFeedAsync(Feed feed)
 	{
 		var syndicationFeed = (SyndicationFeed)feed;
 		var description = new FeedDescription(
@@ -54,6 +55,6 @@ public sealed class SyndicationFeedProvider : FeedProvider
 			Name: syndicationFeed.Metadata.Name,
 			Author: syndicationFeed.Metadata.Author,
 			Description: syndicationFeed.Metadata.Description);
-		return JsonSerializer.Serialize(description);
+		return Task.FromResult(JsonSerializer.Serialize(description));
 	}
 }

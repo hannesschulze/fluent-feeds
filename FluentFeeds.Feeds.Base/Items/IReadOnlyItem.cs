@@ -1,6 +1,8 @@
 using System;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using FluentFeeds.Feeds.Base.Items.Content;
+using FluentFeeds.Feeds.Base.Items.ContentLoaders;
 
 namespace FluentFeeds.Feeds.Base.Items;
 
@@ -45,7 +47,12 @@ public interface IReadOnlyItem : INotifyPropertyChanging, INotifyPropertyChanged
 	string? Summary { get; }
 	
 	/// <summary>
-	/// Content of the item.
+	/// An object used to dynamically load the item's content.
 	/// </summary>
-	ItemContent Content { get; }
+	IItemContentLoader ContentLoader { get; }
+
+	/// <summary>
+	/// Asynchronously load the item's content.
+	/// </summary>
+	Task<ItemContent> LoadContentAsync(bool reload = false);
 }

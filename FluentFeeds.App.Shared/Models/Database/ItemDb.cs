@@ -21,7 +21,6 @@ public class ItemDb
 	public string Title { get; set; } = String.Empty;
 	public string? Author { get; set; }
 	public string? Summary { get; set; }
-	public ItemContentType ContentType { get; set; }
-	public RichText? ArticleContentBody { get; set; }
+	public string Content { get; set; } = String.Empty;
 	public bool IsRead { get; set; }
 }

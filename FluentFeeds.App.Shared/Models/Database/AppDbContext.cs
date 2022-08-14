@@ -13,16 +13,6 @@ public sealed class AppDbContext : DbContext
 	{
 	}
 
-	protected override void OnModelCreating(ModelBuilder modelBuilder)
-	{
-		modelBuilder
-			.Entity<ItemDb>()
-			.Property(item => item.ArticleContentBody)
-			.HasConversion(
-				item => JsonSerializer.Serialize(item, new JsonSerializerOptions()),
-				item => JsonSerializer.Deserialize<RichText>(item, new JsonSerializerOptions()));
-	}
-
 	public DbSet<FeedProviderDb> FeedProviders { get; set; } = null!;
 	public DbSet<FeedNodeDb> FeedNodes { get; set; } = null!;
 	public DbSet<ItemDb> Items { get; set; } = null!;

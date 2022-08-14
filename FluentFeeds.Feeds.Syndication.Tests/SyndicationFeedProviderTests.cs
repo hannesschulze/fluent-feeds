@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using FluentFeeds.Common;
 using FluentFeeds.Feeds.Base;
 using FluentFeeds.Feeds.Base.Nodes;
@@ -31,7 +32,7 @@ public class SyndicationFeedProviderTests
 	}
 
 	[Fact]
-	public void FeedSerialization()
+	public async Task FeedSerialization()
 	{
 		var identifier = Guid.NewGuid();
 		var downloader = new FeedDownloaderMock();
@@ -41,8 +42,8 @@ public class SyndicationFeedProviderTests
 		var metadata =
 			new FeedMetadata { Name = "name", Author = "author", Description = "description", Symbol = Symbol.Web };
 		var feed = new SyndicationFeed(downloader, itemStorage, identifier, url, metadata);
-		var serialized = Provider.StoreFeed(feed);
-		var deserialized = Assert.IsType<SyndicationFeed>(Provider.LoadFeed(feedStorage, serialized));
+		var serialized = await Provider.StoreFeedAsync(feed);
+		var deserialized = Assert.IsType<SyndicationFeed>(await Provider.LoadFeedAsync(feedStorage, serialized));
 		var newDownloader = Assert.IsType<FeedDownloader>(deserialized.Downloader);
 		Assert.Equal(url, newDownloader.Url);
 		Assert.Equal(metadata, deserialized.Metadata);
