@@ -22,19 +22,17 @@ public abstract class CachedFeed : Feed
 	/// </summary>
 	public IItemStorage Storage { get; }
 
-	protected sealed override async Task<IEnumerable<IReadOnlyStoredItem>> DoLoadAsync()
+	protected sealed override async Task DoLoadAsync()
 	{
 		var items = await Storage.GetItemsAsync();
-		_items = items.ToImmutableHashSet();
-		return _items;
+		Items = items.ToImmutableHashSet();
 	}
 
-	protected sealed override async Task<IEnumerable<IReadOnlyStoredItem>> DoSynchronizeAsync()
+	protected sealed override async Task DoSynchronizeAsync()
 	{
 		var fetchedItems = await DoFetchAsync();
 		var newItems = await Storage.AddItemsAsync(fetchedItems);
-		_items = _items.Union(newItems);
-		return _items;
+		Items = Items.Union(newItems);
 	}
 
 	/// <summary>
@@ -45,6 +43,4 @@ public abstract class CachedFeed : Feed
 	/// cached item is updated.</para>
 	/// </summary>
 	protected abstract Task<IEnumerable<IReadOnlyItem>> DoFetchAsync();
-
-	private ImmutableHashSet<IReadOnlyStoredItem> _items = ImmutableHashSet<IReadOnlyStoredItem>.Empty;
 }

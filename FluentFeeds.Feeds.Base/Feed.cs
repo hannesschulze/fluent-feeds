@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
 using FluentFeeds.Feeds.Base.Items;
@@ -46,6 +45,9 @@ public abstract class Feed
 		get => _metadata;
 		protected set
 		{
+			if (_metadata == value)
+				return;
+			
 			_metadata = value;
 			MetadataUpdated?.Invoke(this, EventArgs.Empty);
 		}
@@ -84,19 +86,19 @@ public abstract class Feed
 	}
 
 	/// <summary>
-	/// Asynchronously return the initial selection of items which might be out of date.
+	/// Asynchronously update the list of items to the initial selection of items which might be out of date.
 	/// </summary>
-	protected abstract Task<IEnumerable<IReadOnlyStoredItem>> DoLoadAsync();
+	protected abstract Task DoLoadAsync();
 	
 	/// <summary>
-	/// Return a list of up to date items fetched from a remote server. It is ensured that <see cref="DoLoadAsync"/> has
-	/// been called before this method.
+	/// Update the list of items to an up-to-date list fetched from a remote server. It is ensured that
+	/// <see cref="DoLoadAsync"/> has been called before this method.
 	/// </summary>
-	protected abstract Task<IEnumerable<IReadOnlyStoredItem>> DoSynchronizeAsync();
+	protected abstract Task DoSynchronizeAsync();
 
 	private async Task LoadAsyncCore()
 	{
-		Items = (await DoLoadAsync()).ToImmutableHashSet();
+		await DoLoadAsync();
 		
 		_isLoaded = true;
 	}
@@ -104,8 +106,7 @@ public abstract class Feed
 	private async Task SynchronizeAsyncCore()
 	{
 		await LoadAsync();
-
-		Items = (await DoSynchronizeAsync()).ToImmutableHashSet();
+		await DoSynchronizeAsync();
 
 		_isSynchronizing = false;
 	}

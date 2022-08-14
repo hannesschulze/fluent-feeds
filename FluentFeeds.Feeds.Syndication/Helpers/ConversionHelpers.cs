@@ -48,7 +48,7 @@ public static class ConversionHelpers
 	{
 		if (item.Content != null)
 		{
-			var content = await TextContent.LoadAsync(item.Content, htmlOptions).ConfigureAwait(false);
+			var content = await TextContent.LoadAsync(item.Content, htmlOptions);
 			return content.ToRichText();
 		}
 
@@ -56,7 +56,7 @@ public static class ConversionHelpers
 			item.ElementExtensions.ReadElementExtensions<string>("encoded", "http://purl.org/rss/1.0/modules/content/");
 		if (encodedContent != null && encodedContent.Count != 0)
 		{
-			var content = await TextContent.LoadAsync(encodedContent.Last(), htmlOptions).ConfigureAwait(false);
+			var content = await TextContent.LoadAsync(encodedContent.Last(), htmlOptions);
 			return content.ToRichText();
 		}
 
@@ -69,12 +69,10 @@ public static class ConversionHelpers
 	public static async Task<IReadOnlyItem> ConvertItemAsync(SyndicationItem item, Uri feedUrl)
 	{
 		var htmlOptions = new HtmlParsingOptions { BaseUri = item.BaseUri ?? feedUrl };
-		var title = 
-			item.Title != null ? await TextContent.LoadAsync(item.Title, htmlOptions).ConfigureAwait(false) : null;
+		var title = item.Title != null ? await TextContent.LoadAsync(item.Title, htmlOptions) : null;
 		var author = item.Authors != null ? ConvertAuthor(item.Authors) : null;
-		var summary =
-			item.Summary != null ? await TextContent.LoadAsync(item.Summary, htmlOptions).ConfigureAwait(false) : null;
-		var content = await ConvertItemContentAsync(item, summary, htmlOptions).ConfigureAwait(false);
+		var summary = item.Summary != null ? await TextContent.LoadAsync(item.Summary, htmlOptions) : null;
+		var content = await ConvertItemContentAsync(item, summary, htmlOptions);
 		var url = ConvertItemUrl(item);
 		return new Item(
 			url, contentUrl: null, publishedTimestamp: item.PublishDate, modifiedTimestamp: item.LastUpdatedTime,
@@ -88,12 +86,9 @@ public static class ConversionHelpers
 	public static async Task<FeedMetadata> ConvertFeedMetadataAsync(SysSyndicationFeed feed, Uri feedUrl)
 	{
 		var htmlOptions = new HtmlParsingOptions { BaseUri = feed.BaseUri ?? feedUrl };
-		var title =
-			feed.Title != null ? await TextContent.LoadAsync(feed.Title, htmlOptions).ConfigureAwait(false) : null;
+		var title = feed.Title != null ? await TextContent.LoadAsync(feed.Title, htmlOptions) : null;
 		var authors = feed.Authors != null ? ConvertAuthor(feed.Authors) : null;
-		var description = feed.Description != null
-			? await TextContent.LoadAsync(feed.Description, htmlOptions).ConfigureAwait(false)
-			: null;
+		var description = feed.Description != null ? await TextContent.LoadAsync(feed.Description, htmlOptions) : null;
 		return new FeedMetadata(title?.ToPlainText(), authors, description?.ToPlainText(), Symbol.Web);
 	}
 }

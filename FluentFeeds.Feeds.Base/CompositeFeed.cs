@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
-using FluentFeeds.Feeds.Base.Items;
 
 namespace FluentFeeds.Feeds.Base;
 
@@ -47,7 +46,7 @@ public sealed class CompositeFeed : Feed
 
 			if (_hasStartedLoading)
 			{
-				Items = GetAllItems().ToImmutableHashSet();
+				UpdateItems();
 				foreach (var feed in added)
 				{
 					LoadAddedFeed(feed);
@@ -68,34 +67,39 @@ public sealed class CompositeFeed : Feed
 		}
 	}
 
-	protected override async Task<IEnumerable<IReadOnlyStoredItem>> DoLoadAsync()
+	protected override Task DoLoadAsync()
 	{
 		_hasStartedLoading = true;
-		await CoalesceUpdates(feed => feed.LoadAsync());
-		return GetAllItems();
+		return CoalesceUpdates(feed => feed.LoadAsync());
 	}
 
-	protected override async Task<IEnumerable<IReadOnlyStoredItem>> DoSynchronizeAsync()
+	protected override Task DoSynchronizeAsync()
 	{
-		await CoalesceUpdates(feed => feed.SynchronizeAsync());
-		return GetAllItems();
+		return CoalesceUpdates(feed => feed.SynchronizeAsync());
 	}
 
 	private async Task CoalesceUpdates(Func<Feed, Task> action)
 	{
 		_ignoreUpdates = true;
-		try
+		var errors = new List<Exception>();
+		foreach (var feed in Feeds)
 		{
-			await Task.WhenAll(Feeds.Select(action));
+			try
+			{
+				await action(feed);
+			}
+			catch (Exception e)
+			{
+				errors.Add(e);
+			}
 		}
-		catch (Exception)
-		{
-			_ignoreUpdates = false;
-			Items = GetAllItems().ToImmutableHashSet();
-			throw;
-		}
-
 		_ignoreUpdates = false;
+		UpdateItems();
+		
+		if (errors.Count != 0)
+		{
+			throw new AggregateException(errors);
+		}
 	}
 
 	private void HandleItemsUpdated(object? sender, EventArgs e)
@@ -104,10 +108,10 @@ public sealed class CompositeFeed : Feed
 		if (_ignoreUpdates || !_hasStartedLoading)
 			return;
 		
-		Items = GetAllItems().ToImmutableHashSet();
+		UpdateItems();
 	}
 
-	private IEnumerable<IReadOnlyStoredItem> GetAllItems() => Feeds.SelectMany(feed => feed.Items);
+	private void UpdateItems() => Items = Feeds.SelectMany(feed => feed.Items).ToImmutableHashSet();
 
 	private bool _ignoreUpdates;
 	private bool _hasStartedLoading;
