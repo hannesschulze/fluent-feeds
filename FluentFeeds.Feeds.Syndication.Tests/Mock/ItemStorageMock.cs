@@ -16,11 +16,10 @@ public sealed class ItemStorageMock : IItemStorage
 	
 	public Guid Identifier { get; } 
 	
-	public Task<IEnumerable<IReadOnlyStoredItem>> GetItemsAsync(Guid collectionIdentifier) =>
+	public Task<IEnumerable<IReadOnlyStoredItem>> GetItemsAsync() =>
 		Task.FromResult(Enumerable.Empty<IReadOnlyStoredItem>());
 
-	public Task<IEnumerable<IReadOnlyStoredItem>> AddItemsAsync(
-		IEnumerable<IReadOnlyItem> items, Guid collectionIdentifier) =>
+	public Task<IEnumerable<IReadOnlyStoredItem>> AddItemsAsync(IEnumerable<IReadOnlyItem> items) =>
 		Task.FromResult<IEnumerable<IReadOnlyStoredItem>>(
 			items.Select(item => new StoredItem(item, Guid.NewGuid(), false)));
 }

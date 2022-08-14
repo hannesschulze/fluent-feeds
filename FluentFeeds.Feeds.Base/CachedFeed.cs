@@ -12,25 +12,19 @@ namespace FluentFeeds.Feeds.Base;
 /// </summary>
 public abstract class CachedFeed : Feed
 {
-	protected CachedFeed(IItemStorage storage, Guid collectionIdentifier)
+	protected CachedFeed(IItemStorage storage)
 	{
 		Storage = storage;
-		CollectionIdentifier = collectionIdentifier;
 	}
 	
 	/// <summary>
 	/// Object which stores items.
 	/// </summary>
 	public IItemStorage Storage { get; }
-	
-	/// <summary>
-	/// The item collection identifier.
-	/// </summary>
-	public Guid CollectionIdentifier { get; }
 
 	protected sealed override async Task<IEnumerable<IReadOnlyStoredItem>> DoLoadAsync()
 	{
-		var items = await Storage.GetItemsAsync(CollectionIdentifier);
+		var items = await Storage.GetItemsAsync();
 		_items = items.ToImmutableHashSet();
 		return _items;
 	}
@@ -38,7 +32,7 @@ public abstract class CachedFeed : Feed
 	protected sealed override async Task<IEnumerable<IReadOnlyStoredItem>> DoSynchronizeAsync()
 	{
 		var fetchedItems = await DoFetchAsync();
-		var newItems = await Storage.AddItemsAsync(fetchedItems, CollectionIdentifier);
+		var newItems = await Storage.AddItemsAsync(fetchedItems);
 		_items = _items.Union(newItems);
 		return _items;
 	}

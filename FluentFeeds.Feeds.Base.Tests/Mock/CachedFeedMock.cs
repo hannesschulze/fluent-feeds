@@ -9,7 +9,7 @@ namespace FluentFeeds.Feeds.Base.Tests.Mock;
 
 public sealed class CachedFeedMock : CachedFeed
 {
-	public CachedFeedMock(IItemStorage storage, Guid collectionIdentifier) : base(storage, collectionIdentifier)
+	public CachedFeedMock(IItemStorage storage) : base(storage)
 	{
 	}
 	

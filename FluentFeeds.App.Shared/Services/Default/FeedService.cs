@@ -7,7 +7,10 @@ using System.Threading.Tasks;
 using FluentFeeds.App.Shared.Models;
 using FluentFeeds.App.Shared.Models.Database;
 using FluentFeeds.Common;
+using FluentFeeds.Documents;
 using FluentFeeds.Feeds.Base;
+using FluentFeeds.Feeds.Base.Items;
+using FluentFeeds.Feeds.Base.Items.Content;
 using FluentFeeds.Feeds.Base.Nodes;
 using FluentFeeds.Feeds.Base.Storage;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +19,154 @@ namespace FluentFeeds.App.Shared.Services.Default;
 
 public class FeedService : IFeedService
 {
+	private sealed class ItemStorage : IItemStorage
+	{
+		public ItemStorage(FeedService feedService, Guid providerIdentifier, Guid storageIdentifier)
+		{
+			_feedService = feedService;
+			_providerIdentifier = providerIdentifier;
+			_storageIdentifier = storageIdentifier;
+		}
+		
+		private static async Task UpdateItemAsync(AppDbContext context, StoredItem item, IReadOnlyItem updated)
+		{
+			var identifier = item.Identifier;
+			var dbItem = await context.Items.Where(i => i.Identifier == identifier).FirstOrDefaultAsync();
+			if (dbItem == null)
+				return;
+			
+			dbItem.ContentUrl = item.ContentUrl = updated.ContentUrl;
+			dbItem.ModifiedTimestamp = item.ModifiedTimestamp = updated.ModifiedTimestamp;
+			dbItem.Title = item.Title = updated.Title;
+			dbItem.Author = item.Author = updated.Author;
+			dbItem.Summary = item.Summary = updated.Summary;
+			dbItem.ContentType = updated.Content.Type;
+			dbItem.ArticleContentBody = (item.Content as ArticleItemContent)?.Body;
+			item.Content = updated.Content;
+		}
+
+		private void AddItemToCache(StoredItem item)
+		{
+			if (item.Url != null)
+				_urlItems.Add(item.Url, item);
+			_feedService._items.Add(item.Identifier, item);
+			_items.Add(item);
+		}
+
+		private StoredItem LoadItem(ItemDb dbItem)
+		{
+			var content =
+				dbItem.ContentType switch
+				{
+					ItemContentType.Article =>
+						new ArticleItemContent(dbItem.ArticleContentBody ?? new RichText()),
+					_ => throw new IndexOutOfRangeException()
+				};
+			var item = new StoredItem(
+				identifier: dbItem.Identifier,
+				url: dbItem.Url,
+				contentUrl: dbItem.ContentUrl,
+				publishedTimestamp: dbItem.PublishedTimestamp,
+				modifiedTimestamp: dbItem.ModifiedTimestamp,
+				title: dbItem.Title,
+				author: dbItem.Author,
+				summary: dbItem.Summary,
+				content: content,
+				isRead: dbItem.IsRead);
+			AddItemToCache(item);
+			return item;
+		}
+
+		private async Task<StoredItem> StoreItemAsync(AppDbContext database, IReadOnlyItem item)
+		{
+			var storedItem = new StoredItem(item, Guid.NewGuid(), isRead: false);
+			await database.Items.AddAsync(
+				new ItemDb
+				{ 
+					Identifier = storedItem.Identifier, 
+					ProviderIdentifier = _providerIdentifier,
+					StorageIdentifier = _storageIdentifier,
+					Url = storedItem.Url,
+					ContentUrl = storedItem.ContentUrl,
+					PublishedTimestamp = storedItem.PublishedTimestamp,
+					ModifiedTimestamp = storedItem.ModifiedTimestamp,
+					Title = storedItem.Title,
+					Author = storedItem.Author,
+					Summary = storedItem.Summary,
+					ContentType = storedItem.Content.Type,
+					ArticleContentBody = (storedItem.Content as ArticleItemContent)?.Body,
+					IsRead = storedItem.IsRead
+				});
+			AddItemToCache(storedItem);
+			return storedItem;
+		}
+
+		private Task LoadItemsAsync()
+		{
+			if (_isLoaded)
+				return Task.CompletedTask;
+		
+			_loadTask ??= LoadItemsAsyncCore();
+			return _loadTask;
+		}
+
+		private async Task LoadItemsAsyncCore()
+		{
+			await using var database = _feedService._databaseService.CreateContext();
+			var dbItems = await database.Items
+				.Where(i => i.ProviderIdentifier == _providerIdentifier && i.StorageIdentifier == _storageIdentifier)
+				.ToListAsync();
+			_items.EnsureCapacity(dbItems.Count);
+			foreach (var dbItem in dbItems)
+			{
+				LoadItem(dbItem);
+			}
+
+			_isLoaded = true;
+		}
+
+		public async Task<IEnumerable<IReadOnlyStoredItem>> GetItemsAsync()
+		{
+			await LoadItemsAsync();
+			return _items;
+		}
+
+		public async Task<IEnumerable<IReadOnlyStoredItem>> AddItemsAsync(IEnumerable<IReadOnlyItem> items)
+		{
+			await LoadItemsAsync();
+			await using var database = _feedService._databaseService.CreateContext();
+			var result = new List<IReadOnlyStoredItem>();
+			foreach (var item in items)
+			{
+				// Check if there is an item in this storage with this URL.
+				if (item.Url != null && _urlItems.TryGetValue(item.Url, out var existing))
+				{
+					// Check if the item needs to be updated.
+					if (existing.ModifiedTimestamp < item.ModifiedTimestamp)
+						await UpdateItemAsync(database, existing, item);
+					result.Add(existing);
+				}
+				else
+				{
+					// This is a new item
+					result.Add(await StoreItemAsync(database, item));
+				}
+			}
+
+			await database.SaveChangesAsync();
+
+			return result;
+		}
+
+		private readonly FeedService _feedService;
+		private readonly Guid _providerIdentifier;
+		private readonly Guid _storageIdentifier;
+		private Dictionary<Uri, StoredItem> _urlItems = new();
+		private List<StoredItem> _items = new();
+		private bool _isLoaded;
+		private Task? _loadTask;
+	}
+	
 	private sealed class FeedStorage : IFeedStorage
 	{
 		public FeedStorage(FeedService feedService, Guid providerIdentifier)
@@ -26,11 +177,17 @@ public class FeedService : IFeedService
 		
 		public IItemStorage GetItemStorage(Guid identifier)
 		{
-			throw new NotImplementedException();
+			if (_itemStorages.TryGetValue(identifier, out var existing))
+				return existing;
+
+			var itemStorage = new ItemStorage(_feedService, _providerIdentifier, identifier);
+			_itemStorages.Add(identifier, itemStorage);
+			return itemStorage;
 		}
 
 		private readonly FeedService _feedService;
 		private readonly Guid _providerIdentifier;
+		private readonly Dictionary<Guid, ItemStorage> _itemStorages = new();
 	}
 	
 	public FeedService(IDatabaseService databaseService, IPluginService pluginService)
@@ -61,13 +218,17 @@ public class FeedService : IFeedService
 	private async Task<IReadOnlyStoredFeedNode> LoadFeedNodeAsync(
 		AppDbContext database, FeedNodeDb node, FeedProvider provider, IFeedStorage storage)
 	{
-		IEnumerable<IReadOnlyFeedNode>? children = null;
+		List<IReadOnlyFeedNode>? children = null;
 		if (node.HasChildren)
 		{
 			var dbChildren = await database.FeedNodes.Where(n => n.Parent == node).ToListAsync();
-			var childTasks = dbChildren.Select(child => LoadFeedNodeAsync(database, child, provider, storage)); 
-			children = await Task.WhenAll(childTasks);
+			children = new List<IReadOnlyFeedNode> { Capacity = dbChildren.Count };
+			foreach (var child in dbChildren)
+			{
+				children.Add(await LoadFeedNodeAsync(database, child, provider, storage));
+			}
 		}
+		
 		var storedNode =
 			node.Type switch
 			{
@@ -104,13 +265,17 @@ public class FeedService : IFeedService
 			};
 		await database.FeedNodes.AddAsync(dbNode);
 
-		IEnumerable<IReadOnlyFeedNode>? children = null;
+		List<IReadOnlyFeedNode>? children = null;
 		if (node.Children != null)
 		{
-			var childTasks = node.Children.Select(child => StoreFeedNodeAsync(database, child, provider, dbNode));
-			var result = await Task.WhenAll(childTasks);
-			children = result.Select(t => t.Stored);
+			children = new List<IReadOnlyFeedNode> { Capacity = node.Children.Count };
+			foreach (var child in node.Children)
+			{
+				var (storedChild, _) = await StoreFeedNodeAsync(database, child, provider, dbNode);
+				children.Add(storedChild);
+			}
 		}
+		
 		var storedNode =
 			node.Type switch
 			{
@@ -169,6 +334,7 @@ public class FeedService : IFeedService
 	private readonly ObservableCollection<LoadedFeedProvider> _feedProviders = new();
 	private readonly CompositeFeed _overviewFeed = new();
 	private readonly Dictionary<Guid, StoredFeedNode> _feedNodes = new();
+	private readonly Dictionary<Guid, StoredItem> _items = new();
 	private bool _feedProvidersLoaded;
 	private Task? _loadFeedProvidersTask;
 }

@@ -18,8 +18,7 @@ public sealed class SyndicationFeed : CachedFeed
 {
 	public SyndicationFeed(
 		IFeedDownloader downloader, IItemStorage storage, Guid identifier, Uri url, 
-		FeedMetadata? initialMetadata = null)
-		: base(storage, identifier)
+		FeedMetadata? initialMetadata = null) : base(storage)
 	{
 		Downloader = downloader;
 		Identifier = identifier;

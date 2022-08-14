@@ -47,7 +47,6 @@ public class SyndicationFeedProviderTests
 		Assert.Equal(metadata, deserialized.Metadata);
 		Assert.Equal(url, deserialized.Url);
 		Assert.Equal(identifier, deserialized.Identifier);
-		Assert.Equal(identifier, deserialized.CollectionIdentifier);
 		var newItemStorage = Assert.IsType<ItemStorageMock>(deserialized.Storage);
 		Assert.Equal(identifier, newItemStorage.Identifier);
 	}

@@ -44,7 +44,6 @@ public class SyndicationFeedUrlFactoryTests
 		var factory = new CustomFactory(url, source);
 		var feed = Assert.IsType<SyndicationFeed>(await factory.CreateAsync(new FeedStorageMock(), url));
 		Assert.Equal(new FeedMetadata(Name: "My blog", null, null, Symbol.Web), feed.Metadata);
-		Assert.Equal(feed.Identifier, feed.CollectionIdentifier);
 		var storage = Assert.IsType<ItemStorageMock>(feed.Storage);
 		Assert.Equal(feed.Identifier, storage.Identifier);
 		Assert.Equal(url, feed.Url);
