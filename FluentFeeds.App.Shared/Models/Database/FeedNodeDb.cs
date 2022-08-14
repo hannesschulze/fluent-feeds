@@ -15,7 +15,7 @@ public class FeedNodeDb
 	public FeedNodeDb? Parent { get; set; }
 	public bool HasChildren { get; set; }
 	public FeedNodeType Type { get; set; }
-	public string? CustomSerialized { get; set; }
+	public string? Feed { get; set; }
 	public string? Title { get; set; }
 	public Symbol? Symbol { get; set; }
 	public bool IsUserCustomizable { get; set; }

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
@@ -41,17 +40,12 @@ public abstract class CachedFeed : Feed
 
 	protected sealed override async Task DoSynchronizeAsync()
 	{
-		var (items, metadata) = await Task.Run(
-			async () =>
-			{
-				var fetchResult = await DoFetchAsync();
-				var newItems = await Storage.AddItemsAsync(fetchResult.Items);
-				return (newItems, fetchResult.UpdatedMetadata);
-			});
-		Items = Items.Union(items);
-		if (metadata != null && metadata != Metadata)
+		var fetchResult = await Task.Run(DoFetchAsync);
+		var newItems = await Storage.AddItemsAsync(fetchResult.Items);
+		Items = Items.Union(newItems);
+		if (fetchResult.UpdatedMetadata != null && fetchResult.UpdatedMetadata != Metadata)
 		{
-			Metadata = metadata;
+			Metadata = fetchResult.UpdatedMetadata;
 		}
 	}
 
