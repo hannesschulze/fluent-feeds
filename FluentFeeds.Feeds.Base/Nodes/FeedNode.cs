@@ -34,11 +34,11 @@ public class FeedNode : ObservableObject, IReadOnlyFeedNode
 		_title = title;
 		_symbol = symbol;
 		_isUserCustomizable = isUserCustomizable;
-		
+
+		UpdateActualTitle();
+		UpdateActualSymbol();
 		if (_customFeed != null)
 		{
-			UpdateActualTitle();
-			UpdateActualSymbol();
 			_customFeed.MetadataUpdated += HandleFeedMetadataUpdated;
 		}
 	}

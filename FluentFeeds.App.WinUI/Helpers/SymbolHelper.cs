@@ -1,5 +1,5 @@
 ﻿using System;
-using FluentFeeds.App.Shared.Models;
+using FluentFeeds.Common;
 using Microsoft.UI.Xaml.Controls.AnimatedVisuals;
 using Microsoft.UI.Xaml.Media;
 using MUXC = Microsoft.UI.Xaml.Controls;
@@ -32,7 +32,7 @@ public static class SymbolHelper
 		{
 			Symbol.Home => CreateFont("\xE77E", FontFamily_FluentSystemIcons_Resizable),
 			Symbol.Sparkle => CreateFont("\xEC10", FontFamily_FluentSystemIcons_Resizable),
-			Symbol.Rss => CreateFont("\xEB08", FontFamily_FluentSystemIcons_Resizable),
+			Symbol.Feed => CreateFont("\xEB08", FontFamily_FluentSystemIcons_Resizable),
 			Symbol.Directory => CreateFont("\xE6AD", FontFamily_FluentSystemIcons_Resizable),
 			Symbol.Web => CreateFont("\xE71F", FontFamily_FluentSystemIcons_Resizable),
 			Symbol.Settings => CreateAnimated(

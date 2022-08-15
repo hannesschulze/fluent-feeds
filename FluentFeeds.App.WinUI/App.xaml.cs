@@ -18,7 +18,10 @@ public partial class App : Application
 	{
 		Ioc.Default.ConfigureServices(
 			new ServiceCollection()
-				.AddSingleton<INavigationService, DefaultNavigationService>()
+				.AddSingleton<IPluginService, PluginService>()
+				.AddSingleton<IDatabaseService, DatabaseService>()
+				.AddSingleton<IFeedService, FeedService>()
+				.AddSingleton<INavigationService, NavigationService>()
 				.AddTransient<MainViewModel>()
 				.BuildServiceProvider());
 

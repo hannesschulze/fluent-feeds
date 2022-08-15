@@ -89,6 +89,8 @@ public class MainViewModel : ObservableObject
 		var unreadItem = new FeedItemViewModel(unreadFeedNode, null, _feedItemRegistry);
 		_feedItemRegistry.Add(overviewFeedNode, overviewItem);
 		_feedItemRegistry.Add(unreadFeedNode, unreadItem);
+		_feedItems.Add(overviewItem);
+		_feedItems.Add(unreadItem);
 		_feedItemTransformer = ObservableCollectionTransformer.CreateCached(
 			feedService.FeedProviders, _feedItems, 
 			provider => new FeedItemViewModel(provider.RootNode, provider, _feedItemRegistry), 
@@ -97,6 +99,13 @@ public class MainViewModel : ObservableObject
 		_selectedItem = GetSelectedItem();
 
 		FeedItems = new ReadOnlyObservableCollection<NavigationItemViewModel>(_feedItems);
+
+		LoadFeeds(feedService);
+	}
+
+	private async void LoadFeeds(IFeedService feedService)
+	{
+		await feedService.InitializeAsync();
 	}
 
 	/// <summary>
