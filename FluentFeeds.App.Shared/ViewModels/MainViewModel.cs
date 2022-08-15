@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows.Input;
+using FluentFeeds.App.Shared.Helpers;
 using FluentFeeds.App.Shared.Models;
 using FluentFeeds.App.Shared.Services;
 using FluentFeeds.Common;
@@ -42,31 +44,59 @@ public class MainViewModel : ObservableObject
 
 	public class FeedItemViewModel : NavigationItemViewModel
 	{
-		public FeedItemViewModel(IReadOnlyFeedNode item)
-			: base(item.Title ?? "Unnamed", item.Symbol ?? Symbol.Feed, isExpandable: false, NavigationRoute.Feed(item))
+		public FeedItemViewModel(
+			IReadOnlyFeedNode feedNode, LoadedFeedProvider? feedProvider,
+			Dictionary<IReadOnlyFeedNode, NavigationItemViewModel> feedItemRegistry) : base(
+			feedNode.ActualTitle ?? "Unnamed", feedNode.ActualSymbol ?? Symbol.Feed,
+			isExpandable: feedNode.Children != null, NavigationRoute.Feed(feedNode))
 		{
-			Item = item;
+			_feedNode = feedNode;
+			
+			feedNode.PropertyChanged += HandlePropertyChanged;
+			if (feedNode.Children != null)
+			{
+				ObservableCollectionTransformer.CreateCached(
+					feedNode.Children, MutableChildren, 
+					node => new FeedItemViewModel(node, feedProvider, feedItemRegistry), feedItemRegistry);
+			}
 		}
 
-		public IReadOnlyFeedNode Item { get; }
+		private void HandlePropertyChanged(object? sender, PropertyChangedEventArgs e)
+		{
+			switch (e.PropertyName)
+			{
+				case nameof(IReadOnlyFeedNode.ActualTitle):
+					Title = _feedNode.ActualTitle ?? "Unnamed";
+					break;
+				case nameof(IReadOnlyFeedNode.ActualSymbol):
+					Symbol = _feedNode.ActualSymbol ?? Symbol.Feed;
+					break;
+			}
+		}
+
+		private readonly IReadOnlyFeedNode _feedNode;
 	}
 
-	public MainViewModel(INavigationService navigationService)
+	public MainViewModel(IFeedService feedService, INavigationService navigationService)
 	{
 		_navigationService = navigationService;
 		_navigationService.BackStackChanged += HandleBackStackChanged;
 
 		_goBackCommand = new RelayCommand(() => _navigationService.GoBack(), () => _navigationService.CanGoBack);
-		var overviewFeed =
-			_navigationService.BackStack[0].FeedNode ??
-			FeedNode.Custom(new EmptyFeed(), "Overview", Symbol.Home, false);
-		var unreadFeed = FeedNode.Custom(new EmptyFeed(), "Unread", Symbol.Sparkle, false);
-		_feedItems.Add(RegisterFeedItem(new FeedItemViewModel(overviewFeed)));
-		_feedItems.Add(RegisterFeedItem(new FeedItemViewModel(unreadFeed)));
+		var overviewFeedNode = feedService.OverviewFeed;
+		var overviewItem = new FeedItemViewModel(overviewFeedNode, null, _feedItemRegistry);
+		var unreadFeedNode = FeedNode.Custom(new EmptyFeed(), "Unread", Symbol.Sparkle, false);
+		var unreadItem = new FeedItemViewModel(unreadFeedNode, null, _feedItemRegistry);
+		_feedItemRegistry.Add(overviewFeedNode, overviewItem);
+		_feedItemRegistry.Add(unreadFeedNode, unreadItem);
+		_feedItemTransformer = ObservableCollectionTransformer.CreateCached(
+			feedService.FeedProviders, _feedItems, 
+			provider => new FeedItemViewModel(provider.RootNode, provider, _feedItemRegistry), 
+			provider => provider.RootNode, _feedItemRegistry);
 		_visiblePage = GetVisiblePage();
 		_selectedItem = GetSelectedItem();
 
-		FeedItems = new(_feedItems);
+		FeedItems = new ReadOnlyObservableCollection<NavigationItemViewModel>(_feedItems);
 	}
 
 	/// <summary>
@@ -141,23 +171,12 @@ public class MainViewModel : ObservableObject
 			_ => null
 		};
 
-	private FeedItemViewModel RegisterFeedItem(FeedItemViewModel item)
-	{
-		_feedItemRegistry.Add(item.Item, item);
-		if (item.Item == _navigationService.CurrentRoute.FeedNode)
-		{
-			_isChangingSelection = true;
-			SelectedItem = item;
-			_isChangingSelection = false;
-		}
-		return item;
-	}
-
 	private readonly INavigationService _navigationService;
 	private readonly RelayCommand _goBackCommand;
 	private readonly ObservableCollection<NavigationItemViewModel> _feedItems = new();
+	private readonly ObservableCollectionTransformer<LoadedFeedProvider, NavigationItemViewModel> _feedItemTransformer;
 	private readonly SettingsItemViewModel _settingsItem = new();
-	private readonly Dictionary<IReadOnlyFeedNode, FeedItemViewModel> _feedItemRegistry = new();
+	private readonly Dictionary<IReadOnlyFeedNode, NavigationItemViewModel> _feedItemRegistry = new();
 	private Page _visiblePage;
 	private NavigationItemViewModel? _selectedItem;
 	private bool _isChangingSelection;

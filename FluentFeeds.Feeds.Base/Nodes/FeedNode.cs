@@ -18,6 +18,7 @@ public class FeedNode : ObservableObject, IReadOnlyFeedNode
 		IEnumerable<IReadOnlyFeedNode>? children)
 	{
 		Type = type;
+		_customFeed = feed;
 		_feed = new Lazy<Feed>(() =>
 			type switch
 			{
@@ -33,6 +34,13 @@ public class FeedNode : ObservableObject, IReadOnlyFeedNode
 		_title = title;
 		_symbol = symbol;
 		_isUserCustomizable = isUserCustomizable;
+		
+		if (_customFeed != null)
+		{
+			UpdateActualTitle();
+			UpdateActualSymbol();
+			_customFeed.MetadataUpdated += HandleFeedMetadataUpdated;
+		}
 	}
 
 	/// <summary>
@@ -68,13 +76,33 @@ public class FeedNode : ObservableObject, IReadOnlyFeedNode
 	public string? Title
 	{
 		get => _title;
-		set => SetProperty(ref _title, value);
+		set
+		{
+			SetProperty(ref _title, value);
+			UpdateActualTitle();
+		}
 	}
 
 	public Symbol? Symbol
 	{
 		get => _symbol;
-		set => SetProperty(ref _symbol, value);
+		set
+		{
+			SetProperty(ref _symbol, value);
+			UpdateActualSymbol();
+		}
+	}
+
+	public string? ActualTitle
+	{
+		get => _actualTitle;
+		private set => SetProperty(ref _actualTitle, value);
+	}
+
+	public Symbol? ActualSymbol
+	{
+		get => _actualSymbol;
+		private set => SetProperty(ref _actualSymbol, value);
 	}
 
 	public bool IsUserCustomizable
@@ -90,11 +118,24 @@ public class FeedNode : ObservableObject, IReadOnlyFeedNode
 			result.Feeds = children.Select(node => node.Feed).ToImmutableHashSet();
 		return result;
 	}
+	
+	private void HandleFeedMetadataUpdated(object? sender, EventArgs e)
+	{
+		UpdateActualTitle();
+		UpdateActualSymbol();
+	}
+
+	private void UpdateActualTitle() => ActualTitle = Title ?? _customFeed?.Metadata.Name;
+
+	private void UpdateActualSymbol() => ActualSymbol = Symbol ?? _customFeed?.Metadata.Symbol;
 
 	private readonly Lazy<Feed> _feed;
+	private readonly Feed? _customFeed;
 	private readonly ObservableCollection<IReadOnlyFeedNode>? _children;
 	private readonly ReadOnlyObservableCollection<IReadOnlyFeedNode>? _readOnlyChildren;
 	private string? _title;
 	private Symbol? _symbol;
+	private string? _actualTitle;
+	private Symbol? _actualSymbol;
 	private bool _isUserCustomizable;
 }
