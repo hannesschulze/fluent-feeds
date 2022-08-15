@@ -1,6 +1,3 @@
-using System.Threading.Tasks;
-using FluentFeeds.App.Shared.Models.Database;
-using FluentFeeds.App.Shared.Services;
 using FluentFeeds.App.Shared.Services.Default;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -13,26 +10,19 @@ public sealed class DatabaseServiceMock : DatabaseService
 {
 	public DatabaseServiceMock(ITestOutputHelper testOutputHelper)
 	{
-		_connection = new SqliteConnection("Filename=:memory:");
 		_testOutputHelper = testOutputHelper;
 	}
 
-	protected override async Task DoInitializeAsync()
+	protected override SqliteConnection CreateConnection()
 	{
-		await _connection.OpenAsync();
-		await using var context = DoCreateContext();
-		await context.Database.EnsureCreatedAsync();
+		return new SqliteConnection("Filename=:memory:");
 	}
 
-	protected override AppDbContext DoCreateContext()
+	protected override void ConfigureContext(DbContextOptionsBuilder options)
 	{
-		var options = new DbContextOptionsBuilder()
-			.UseSqlite(_connection)
-			.LogTo(_testOutputHelper.WriteLine, LogLevel.Information)
-			.Options;
-		return new AppDbContext(options);
+		base.ConfigureContext(options);
+		options.LogTo(_testOutputHelper.WriteLine, LogLevel.Information);
 	}
 
-	private readonly SqliteConnection _connection;
 	private readonly ITestOutputHelper _testOutputHelper;
 }

@@ -1,5 +1,3 @@
-using System.Text.Json;
-using FluentFeeds.Documents;
 using Microsoft.EntityFrameworkCore;
 
 namespace FluentFeeds.App.Shared.Models.Database;

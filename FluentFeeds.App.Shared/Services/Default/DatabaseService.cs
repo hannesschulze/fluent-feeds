@@ -1,18 +1,23 @@
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using FluentFeeds.App.Shared.Models.Database;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 
 namespace FluentFeeds.App.Shared.Services.Default;
 
 public class DatabaseService : IDatabaseService
 {
+	private const string AppDataFolderName = "FluentFeeds";
+	
 	public Task<TResult> ExecuteAsync<TResult>(Func<AppDbContext, Task<TResult>> task) =>
 		QueueTask(previous => Task.Run(
 			async () =>
 			{
 				if (previous != null)
 					await previous;
-				await using var database = DoCreateContext();
+				await using var database = CreateContext();
 				return await task(database);
 			}));
 
@@ -22,7 +27,7 @@ public class DatabaseService : IDatabaseService
 			{
 				if (previous != null)
 					await previous;
-				await using var database = DoCreateContext();
+				await using var database = CreateContext();
 				await task(database);
 			}));
 
@@ -31,7 +36,7 @@ public class DatabaseService : IDatabaseService
 	/// </summary>
 	private TInnerTask QueueTask<TInnerTask>(Func<Task?, TInnerTask> createTask) where TInnerTask : Task
 	{
-		_currentTask ??= Task.Run(DoInitializeAsync);
+		_currentTask ??= Task.Run(InitializeAsync);
 		var previousTask = !_currentTask.IsCompleted ? _currentTask : null;
 		var nextTask = createTask(previousTask);
 		_currentTask = nextTask;
@@ -39,14 +44,46 @@ public class DatabaseService : IDatabaseService
 	}
 
 	/// <summary>
+	/// Create a database connection.
+	/// </summary>
+	protected virtual SqliteConnection CreateConnection()
+	{
+		var allAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+		var appDataPath = Path.Combine(allAppDataPath, AppDataFolderName);
+		Directory.CreateDirectory(appDataPath);
+		var dbPath = Path.Combine(appDataPath, "db.sqlite3");
+		return new SqliteConnection($"Filename={dbPath}");
+	}
+
+	/// <summary>
+	/// Manually adjust the db context options.
+	/// </summary>
+	protected virtual void ConfigureContext(DbContextOptionsBuilder options)
+	{
+	}
+
+	/// <summary>
 	/// Initialize the database. The service ensures that this is called before every other operation.
 	/// </summary>
-	protected virtual Task DoInitializeAsync() => throw new NotImplementedException();
+	private async Task InitializeAsync()
+	{
+		_connection = CreateConnection();
+		await _connection.OpenAsync();
+		await using var context = CreateContext();
+		await context.Database.MigrateAsync();
+	}
 	
 	/// <summary>
 	/// Create a new database context repository.
 	/// </summary>
-	protected virtual AppDbContext DoCreateContext() => throw new NotImplementedException();
+	private AppDbContext CreateContext()
+	{
+		var optionsBuilder = new DbContextOptionsBuilder();
+		optionsBuilder.UseSqlite(_connection!);
+		ConfigureContext(optionsBuilder);
+		return new AppDbContext(optionsBuilder.Options);
+	}
 
+	private SqliteConnection? _connection;
 	private Task? _currentTask;
 }

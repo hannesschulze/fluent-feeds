@@ -1,4 +1,3 @@
-using System;
 using FluentFeeds.Feeds.Base;
 using FluentFeeds.Feeds.Base.Nodes;
 using FluentFeeds.Feeds.Base.Storage;

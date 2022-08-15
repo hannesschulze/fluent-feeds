@@ -1,13 +1,13 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using FluentFeeds.Documents;
-using FluentFeeds.Feeds.Base.Items.Content;
+using Microsoft.EntityFrameworkCore;
 
 namespace FluentFeeds.App.Shared.Models.Database;
 
 /// <summary>
 /// Database representation of an item.
 /// </summary>
+[Index(nameof(ProviderIdentifier), nameof(StorageIdentifier))]
 public class ItemDb
 {
 	[Key]

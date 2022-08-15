@@ -1,6 +1,5 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using FluentFeeds.Feeds.Base;
 
 namespace FluentFeeds.App.Shared.Models.Database;
 
