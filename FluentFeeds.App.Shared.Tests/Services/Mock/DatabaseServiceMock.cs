@@ -1,3 +1,4 @@
+using System;
 using FluentFeeds.App.Shared.Services.Default;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -12,9 +13,13 @@ public sealed class DatabaseServiceMock : DatabaseService
 	{
 		_testOutputHelper = testOutputHelper;
 	}
+	
+	public bool InitializationFails { get; set; }
 
 	protected override SqliteConnection CreateConnection()
 	{
+		if (InitializationFails)
+			throw new Exception();
 		return new SqliteConnection("Filename=:memory:");
 	}
 

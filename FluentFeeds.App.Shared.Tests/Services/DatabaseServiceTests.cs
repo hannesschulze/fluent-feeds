@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using FluentFeeds.App.Shared.Tests.Services.Mock;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,26 @@ public class DatabaseServiceTests
 				Assert.Empty(await database.FeedNodes.ToListAsync());
 				Assert.Empty(await database.Items.ToListAsync());
 			});
+	}
+
+	[Fact]
+	public async Task ErroneousInitializationCausesTasksToFail_WithReturnType()
+	{
+		var service = new DatabaseServiceMock(_testOutputHelper) { InitializationFails = true };
+		var taskA = service.ExecuteAsync(_ => Task.FromResult(0));
+		var taskB = service.ExecuteAsync(_ => Task.FromResult(1));
+		await Assert.ThrowsAsync<Exception>(() => taskA);
+		await Assert.ThrowsAsync<Exception>(() => taskB);
+	}
+
+	[Fact]
+	public async Task ErroneousInitializationCausesTasksToFail_WithoutReturnType()
+	{
+		var service = new DatabaseServiceMock(_testOutputHelper) { InitializationFails = true };
+		var taskA = service.ExecuteAsync(_ => Task.CompletedTask);
+		var taskB = service.ExecuteAsync(_ => Task.CompletedTask);
+		await Assert.ThrowsAsync<Exception>(() => taskA);
+		await Assert.ThrowsAsync<Exception>(() => taskB);
 	}
 
 	[Fact]
@@ -59,6 +80,34 @@ public class DatabaseServiceTests
 		Assert.False(taskB.IsCompleted);
 		completionSourceA.SetResult();
 		await taskA;
+		await taskB;
+	}
+
+	[Fact]
+	public async Task PreviousTaskThrowsException_WithReturnType()
+	{
+		var service = new DatabaseServiceMock(_testOutputHelper);
+		var completionSourceA = new TaskCompletionSource<int>();
+		var completionSourceB = new TaskCompletionSource<int>();
+		var taskA = service.ExecuteAsync(_ => completionSourceA.Task);
+		var taskB = service.ExecuteAsync(_ => completionSourceB.Task);
+		completionSourceB.SetResult(0);
+		completionSourceA.SetException(new Exception());
+		await Assert.ThrowsAsync<Exception>(() => taskA);
+		Assert.Equal(0, await taskB);
+	}
+
+	[Fact]
+	public async Task PreviousTaskThrowsException_WithoutReturnType()
+	{
+		var service = new DatabaseServiceMock(_testOutputHelper);
+		var completionSourceA = new TaskCompletionSource();
+		var completionSourceB = new TaskCompletionSource();
+		var taskA = service.ExecuteAsync(_ => completionSourceA.Task);
+		var taskB = service.ExecuteAsync(_ => completionSourceB.Task);
+		completionSourceB.SetResult();
+		completionSourceA.SetException(new Exception());
+		await Assert.ThrowsAsync<Exception>(() => taskA);
 		await taskB;
 	}
 

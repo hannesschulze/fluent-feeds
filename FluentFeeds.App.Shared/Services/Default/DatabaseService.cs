@@ -10,13 +10,28 @@ namespace FluentFeeds.App.Shared.Services.Default;
 public class DatabaseService : IDatabaseService
 {
 	private const string AppDataFolderName = "FluentFeeds";
+
+	public DatabaseService()
+	{
+		_initialize = new Lazy<Task>(InitializeAsync, isThreadSafe: true);
+	}
 	
 	public Task<TResult> ExecuteAsync<TResult>(Func<AppDbContext, Task<TResult>> task) =>
 		QueueTask(previous => Task.Run(
 			async () =>
 			{
 				if (previous != null)
-					await previous;
+				{
+					try
+					{
+						await previous;
+					}
+					catch (Exception)
+					{
+						// ignored
+					}
+				}
+				await _initialize.Value;
 				await using var database = CreateContext();
 				return await task(database);
 			}));
@@ -26,7 +41,17 @@ public class DatabaseService : IDatabaseService
 			async () =>
 			{
 				if (previous != null)
-					await previous;
+				{
+					try
+					{
+						await previous;
+					}
+					catch (Exception)
+					{
+						// ignored
+					}
+				}
+				await _initialize.Value;
 				await using var database = CreateContext();
 				await task(database);
 			}));
@@ -36,7 +61,6 @@ public class DatabaseService : IDatabaseService
 	/// </summary>
 	private TInnerTask QueueTask<TInnerTask>(Func<Task?, TInnerTask> createTask) where TInnerTask : Task
 	{
-		_currentTask ??= Task.Run(InitializeAsync);
 		var previousTask = !_currentTask.IsCompleted ? _currentTask : null;
 		var nextTask = createTask(previousTask);
 		_currentTask = nextTask;
@@ -85,5 +109,6 @@ public class DatabaseService : IDatabaseService
 	}
 
 	private SqliteConnection? _connection;
-	private Task? _currentTask;
+	private Lazy<Task> _initialize;
+	private Task _currentTask = Task.CompletedTask;
 }
