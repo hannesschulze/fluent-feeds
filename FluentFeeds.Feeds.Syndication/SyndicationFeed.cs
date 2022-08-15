@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentFeeds.Feeds.Base;
 using FluentFeeds.Feeds.Base.Items;
@@ -25,7 +24,7 @@ public sealed class SyndicationFeed : CachedFeed
 		Downloader = downloader;
 		Identifier = identifier;
 		Url = url;
-		Metadata = initialMetadata;
+		Metadata = initialMetadata ?? new FeedMetadata();
 	}
 
 	/// <summary>

@@ -21,7 +21,7 @@ public sealed class FeedMock : Feed
 
 	public void UpdateItems(params IReadOnlyStoredItem[] items) => Items = items.ToImmutableHashSet();
 
-	public void UpdateMetadata(FeedMetadata? metadata) => Metadata = metadata;
+	public void UpdateMetadata(FeedMetadata metadata) => Metadata = metadata;
 
 	protected override async Task DoLoadAsync()
 	{
