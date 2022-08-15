@@ -18,8 +18,8 @@ public sealed class SyndicationFeed : CachedFeed
 	private const int ItemProcessingMaxDegreeOfParallelism = 3;
 	
 	public SyndicationFeed(
-		IFeedDownloader downloader, IItemStorage storage, Guid identifier, Uri url, 
-		FeedMetadata? initialMetadata = null) : base(storage)
+		IFeedDownloader downloader, IFeedStorage feedStorage, Guid identifier, Uri url, 
+		FeedMetadata? initialMetadata = null) : base(feedStorage.GetItemStorage(identifier))
 	{
 		Downloader = downloader;
 		Identifier = identifier;

@@ -16,8 +16,7 @@ public class SyndicationUrlFeedFactory : IUrlFeedFactory
 	{
 		var identifier = Guid.NewGuid();
 		var downloader = CreateDownloader(url);
-		var itemStorage = feedStorage.GetItemStorage(identifier);
-		var feed = new SyndicationFeed(downloader, itemStorage, identifier, url);
+		var feed = new SyndicationFeed(downloader, feedStorage, identifier, url);
 		await feed.LoadMetadataAsync();
 		return feed;
 	}

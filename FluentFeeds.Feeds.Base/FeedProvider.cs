@@ -29,7 +29,7 @@ public abstract class FeedProvider
 	/// <summary>
 	/// Create the initial set of feed nodes presented when the user adds this provider and there is no saved tree.
 	/// </summary>
-	public abstract IReadOnlyFeedNode CreateInitialTree();
+	public abstract IReadOnlyFeedNode CreateInitialTree(IFeedStorage feedStorage);
 	
 	/// <summary>
 	/// Load a serialized feed as returned by <see cref="StoreFeedAsync"/>.

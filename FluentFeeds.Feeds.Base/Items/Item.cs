@@ -25,6 +25,15 @@ public class Item : ObservableObject, IReadOnlyItem
 		_contentLoader = contentLoader;
 	}
 
+	/// <summary>
+	/// Create a copy of another item.
+	/// </summary>
+	public Item(IReadOnlyItem item) : this(
+		item.Url, item.ContentUrl, item.PublishedTimestamp, item.ModifiedTimestamp, item.Title, item.Author,
+		item.Summary, item.ContentLoader)
+	{
+	}
+
 	public Uri? Url
 	{
 		get => _url;

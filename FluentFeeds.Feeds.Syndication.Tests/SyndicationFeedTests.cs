@@ -31,8 +31,7 @@ public class SyndicationFeedTests
 					}
 				}
 			};
-		Feed = new SyndicationFeed(
-			Downloader, new ItemStorageMock(Guid.Empty), Guid.Empty, new Uri("https://www.example.com"));
+		Feed = new SyndicationFeed(Downloader, new FeedStorageMock(), Guid.Empty, new Uri("https://www.example.com"));
 	}
 	
 	[Fact]

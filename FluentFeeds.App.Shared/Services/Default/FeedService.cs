@@ -138,7 +138,7 @@ public partial class FeedService : IFeedService
 			else
 			{
 				var (storedNode, dbNode) =
-					await StoreFeedNodeAsync(database, provider.CreateInitialTree(), provider, null, allNodes);
+					await StoreFeedNodeAsync(database, provider.CreateInitialTree(storage), provider, null, allNodes);
 				await database.FeedProviders.AddAsync(
 					new FeedProviderDb { Identifier = provider.Metadata.Identifier, RootNode = dbNode });
 				rootNode = storedNode;

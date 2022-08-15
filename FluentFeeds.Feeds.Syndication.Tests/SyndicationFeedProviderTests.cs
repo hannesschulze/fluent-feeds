@@ -16,7 +16,8 @@ public class SyndicationFeedProviderTests
 	[Fact]
 	public void InitialStructure()
 	{
-		var structure = Provider.CreateInitialTree();
+		var feedStorage = new FeedStorageMock();
+		var structure = Provider.CreateInitialTree(feedStorage);
 		Assert.Equal(FeedNodeType.Group, structure.Type);
 		Assert.Equal(Symbol.Feed, structure.Symbol);
 		Assert.Equal("RSS/Atom feeds", structure.Title);
@@ -41,7 +42,7 @@ public class SyndicationFeedProviderTests
 		var url = new Uri("https://www.example.com/");
 		var metadata =
 			new FeedMetadata { Name = "name", Author = "author", Description = "description", Symbol = Symbol.Web };
-		var feed = new SyndicationFeed(downloader, itemStorage, identifier, url, metadata);
+		var feed = new SyndicationFeed(downloader, feedStorage, identifier, url, metadata);
 		var serialized = await Provider.StoreFeedAsync(feed);
 		var deserialized = Assert.IsType<SyndicationFeed>(await Provider.LoadFeedAsync(feedStorage, serialized));
 		var newDownloader = Assert.IsType<FeedDownloader>(deserialized.Downloader);

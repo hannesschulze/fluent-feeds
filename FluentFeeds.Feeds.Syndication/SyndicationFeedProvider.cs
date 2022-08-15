@@ -25,7 +25,7 @@ public sealed class SyndicationFeedProvider : FeedProvider
 		UrlFeedFactory = new SyndicationUrlFeedFactory();
 	}
 
-	public override IReadOnlyFeedNode CreateInitialTree()
+	public override IReadOnlyFeedNode CreateInitialTree(IFeedStorage feedStorage)
 	{
 		return FeedNode.Group(title: "RSS/Atom feeds", symbol: Symbol.Feed, isUserCustomizable: true);
 	}
@@ -34,9 +34,8 @@ public sealed class SyndicationFeedProvider : FeedProvider
 	{
 		var description = JsonSerializer.Deserialize<FeedDescription>(serialized) ?? throw new JsonException();
 		var downloader = new FeedDownloader(description.Url);
-		var itemStorage = feedStorage.GetItemStorage(description.Identifier);
 		return Task.FromResult<Feed>(new SyndicationFeed(
-			downloader, itemStorage, description.Identifier, description.Url,
+			downloader, feedStorage, description.Identifier, description.Url,
 			new FeedMetadata
 			{
 				Name = description.Name,

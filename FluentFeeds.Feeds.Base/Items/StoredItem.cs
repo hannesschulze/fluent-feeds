@@ -22,15 +22,16 @@ public class StoredItem : Item, IReadOnlyStoredItem
 	/// <summary>
 	/// Create a stored item from a base item.
 	/// </summary>
-	public StoredItem(IReadOnlyItem item, Guid identifier, bool isRead) : this(
-		identifier, item.Url, item.ContentUrl, item.PublishedTimestamp, item.ModifiedTimestamp, item.Title, item.Author,
-		item.Summary,item.ContentLoader, isRead)
+	public StoredItem(IReadOnlyItem item, Guid identifier, bool isRead) : base(item)
 	{
+		Identifier = identifier;
+		_isRead = isRead;
 	}
 
-	public StoredItem(IReadOnlyStoredItem item) : this(
-		item.Identifier, item.Url, item.ContentUrl, item.PublishedTimestamp, item.ModifiedTimestamp, item.Title,
-		item.Author, item.Summary, item.ContentLoader, item.IsRead)
+	/// <summary>
+	/// Create a copy of another stored item.
+	/// </summary>
+	public StoredItem(IReadOnlyStoredItem item) : this(item, item.Identifier, item.IsRead)
 	{
 	}
 	
