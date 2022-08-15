@@ -13,7 +13,7 @@ public interface IFeedService
 	/// <summary>
 	/// Load the available feeds asynchronously from the local database.
 	/// </summary>
-	Task LoadFeedProvidersAsync();
+	Task InitializeAsync();
 	
 	/// <summary>
 	/// A list of loaded feed providers, initially empty.

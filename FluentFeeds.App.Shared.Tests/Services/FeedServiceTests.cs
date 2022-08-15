@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using FluentFeeds.App.Shared.Services.Default;
 using FluentFeeds.App.Shared.Tests.Services.Mock;
 using FluentFeeds.Feeds.Base;
-using FluentFeeds.Feeds.Base.Nodes;
 using FluentFeeds.Feeds.Syndication;
 using Xunit;
 using Xunit.Abstractions;
@@ -27,9 +26,9 @@ public class FeedServiceTests
 	{
 		PluginService.AvailableFeedProviders = ImmutableArray.Create<FeedProvider>(new SyndicationFeedProvider());
 		var serviceA = new FeedService(DatabaseService, PluginService);
-		await serviceA.LoadFeedProvidersAsync();
+		await serviceA.InitializeAsync();
 		var serviceB = new FeedService(DatabaseService, PluginService);
-		await serviceB.LoadFeedProvidersAsync();
+		await serviceB.InitializeAsync();
 		Assert.Equal(serviceA.FeedProviders[0].RootNode.Identifier, serviceB.FeedProviders[0].RootNode.Identifier);
 	}
 }

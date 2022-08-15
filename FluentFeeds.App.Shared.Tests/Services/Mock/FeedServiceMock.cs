@@ -15,7 +15,7 @@ public sealed class FeedServiceMock : IFeedService
 		FeedProviders = new ReadOnlyObservableCollection<LoadedFeedProvider>(_feedProviders);
 	}
 	
-	public Task LoadFeedProvidersAsync() => Task.CompletedTask;
+	public Task InitializeAsync() => Task.CompletedTask;
 
 	public ReadOnlyObservableCollection<LoadedFeedProvider> FeedProviders { get; }
 

@@ -19,19 +19,15 @@ public partial class FeedService : IFeedService
 {
 	public FeedService(IDatabaseService databaseService, IPluginService pluginService)
 	{
-		DatabaseService = databaseService;
-		PluginService = pluginService;
+		_databaseService = databaseService;
+		_pluginService = pluginService;
+		_initialize = new Lazy<Task>(InitializeAsyncCore);
 
 		FeedProviders = new ReadOnlyObservableCollection<LoadedFeedProvider>(_feedProviders);
 		OverviewFeed = FeedNode.Custom(_overviewFeed, "Overview", Symbol.Home, isUserCustomizable: false);
-
-		_loadFeedProviders = new Lazy<Task>(LoadFeedProvidersAsyncCore);
 	}
-	
-	public IDatabaseService DatabaseService { get; }
-	public IPluginService PluginService { get; }
 
-	public Task LoadFeedProvidersAsync() => _loadFeedProviders.Value;
+	public Task InitializeAsync() => _initialize.Value;
 
 	public ReadOnlyObservableCollection<LoadedFeedProvider> FeedProviders { get; }
 	
@@ -40,7 +36,7 @@ public partial class FeedService : IFeedService
 	/// <summary>
 	/// Load a feed node and all of its children from its database representation.
 	/// </summary>
-	private async Task<StoredFeedNode> LoadFeedNodeAsync(
+	private static async Task<StoredFeedNode> LoadFeedNodeAsync(
 		AppDbContext database, FeedNodeDb node, FeedProvider provider, IFeedStorage storage,
 		ICollection<StoredFeedNode> allNodes)
 	{
@@ -73,7 +69,7 @@ public partial class FeedService : IFeedService
 	/// <summary>
 	/// Store a new feed node and all its children, returning its stored representation.
 	/// </summary>
-	private async Task<(StoredFeedNode Stored, FeedNodeDb Db)> StoreFeedNodeAsync(
+	private static async Task<(StoredFeedNode Stored, FeedNodeDb Db)> StoreFeedNodeAsync(
 		AppDbContext database, IReadOnlyFeedNode node, FeedProvider provider, FeedNodeDb? parent,
 		ICollection<StoredFeedNode> allNodes)
 	{
@@ -117,57 +113,64 @@ public partial class FeedService : IFeedService
 		return (storedNode, dbNode);
 	}
 
-	private async Task LoadFeedProvidersAsyncCore()
+	/// <summary>
+	/// Load a list of feed providers. This either stores the initial tree structure in the database if a feed provider
+	/// is new or loads the existing structure from the database.
+	/// </summary>
+	private async Task<List<LoadedFeedProvider>> LoadFeedProvidersAsync(
+		AppDbContext database, IEnumerable<FeedProvider> providers, ICollection<StoredFeedNode> allNodes)
 	{
-		var providers = PluginService.GetAvailableFeedProviders();
-		var allNodes = new List<StoredFeedNode>();
-		var loadedProviders = new List<LoadedFeedProvider>();
-		// TODO: WithDatabase(async database => { … });
-		await Task.Run(
-			async () =>
-			{
-				await DatabaseService.InitializeAsync();
-				await using var database = DatabaseService.CreateContext();
-
-				foreach (var provider in providers)
-				{
-					var identifier = provider.Metadata.Identifier;
-					var existingRootNode = await database.FeedProviders
-						.Where(p => p.Identifier == identifier)
-						.Select(p => p.RootNode)
-						.FirstOrDefaultAsync();
-					var storage = new FeedStorage(this, identifier);
+		var result = new List<LoadedFeedProvider>();
+		foreach (var provider in providers)
+		{
+			var identifier = provider.Metadata.Identifier;
+			var existingRootNode = await database.FeedProviders
+				.Where(p => p.Identifier == identifier)
+				.Select(p => p.RootNode)
+				.FirstOrDefaultAsync();
+			var storage = new FeedStorage(this, identifier);
 			
-					IReadOnlyStoredFeedNode rootNode;
-					if (existingRootNode != null)
-					{
-						rootNode = await LoadFeedNodeAsync(database, existingRootNode, provider, storage, allNodes);
-					}
-					else
-					{
-						var (storedNode, dbNode) =
-							await StoreFeedNodeAsync(database, provider.CreateInitialTree(), provider, null, allNodes);
-						await database.FeedProviders.AddAsync(
-							new FeedProviderDb { Identifier = provider.Metadata.Identifier, RootNode = dbNode });
-						rootNode = storedNode;
-					}
+			IReadOnlyStoredFeedNode rootNode;
+			if (existingRootNode != null)
+			{
+				rootNode = await LoadFeedNodeAsync(database, existingRootNode, provider, storage, allNodes);
+			}
+			else
+			{
+				var (storedNode, dbNode) =
+					await StoreFeedNodeAsync(database, provider.CreateInitialTree(), provider, null, allNodes);
+				await database.FeedProviders.AddAsync(
+					new FeedProviderDb { Identifier = provider.Metadata.Identifier, RootNode = dbNode });
+				rootNode = storedNode;
+			}
 
-					loadedProviders.Add(new LoadedFeedProvider(provider, rootNode, storage));
-				}
+			result.Add(new LoadedFeedProvider(provider, rootNode, storage));
+		}
 
-				await database.SaveChangesAsync();
-			});
+		await database.SaveChangesAsync();
+		
+		return result;
+	}
+
+	private async Task InitializeAsyncCore()
+	{
+		var providers = _pluginService.GetAvailableFeedProviders();
+		var allNodes = new List<StoredFeedNode>();
+		var loadedProviders =
+			await _databaseService.ExecuteAsync(database => LoadFeedProvidersAsync(database, providers, allNodes));
 		
 		foreach (var provider in loadedProviders)
 			_feedProviders.Add(provider);
 		foreach (var node in allNodes)
 			_feedNodes.Add(node.Identifier, node);
-		_overviewFeed.Feeds = FeedProviders.Select(provider => provider.RootNode.Feed).ToImmutableHashSet();
+		_overviewFeed.Feeds = loadedProviders.Select(provider => provider.RootNode.Feed).ToImmutableHashSet();
 	}
-	
+
+	private readonly IDatabaseService _databaseService;
+	private readonly IPluginService _pluginService;
+	private readonly Lazy<Task> _initialize;
 	private readonly ObservableCollection<LoadedFeedProvider> _feedProviders = new();
 	private readonly CompositeFeed _overviewFeed = new();
-	private readonly Lazy<Task> _loadFeedProviders;
 	private readonly Dictionary<Guid, StoredFeedNode> _feedNodes = new();
 	private readonly Dictionary<Guid, StoredItem> _items = new();
 }

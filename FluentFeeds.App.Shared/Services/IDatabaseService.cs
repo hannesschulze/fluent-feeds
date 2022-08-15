@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using FluentFeeds.App.Shared.Models.Database;
 
@@ -9,15 +10,18 @@ namespace FluentFeeds.App.Shared.Services;
 public interface IDatabaseService
 {
 	/// <summary>
-	/// Asynchronously initialize the database.
+	/// <para>Execute an operation which needs to access the database.</para>
+	///
+	/// <para>The task is executed on the thread pool. All database tasks are queued and only one task is processed at
+	/// the same time.</para>
 	/// </summary>
-	Task InitializeAsync();
-	
+	Task ExecuteAsync(Func<AppDbContext, Task> task);
+
 	/// <summary>
-	/// Create a new database context.
+	/// <para>Execute an operation which needs to access the database.</para>
+	///
+	/// <para>The task is executed on the thread pool. All database tasks are queued and only one task is processed at
+	/// the same time.</para>
 	/// </summary>
-	/// <remarks>
-	/// The context should be disposed of as soon as it is not needed anymore.
-	/// </remarks>
-	AppDbContext CreateContext();
+	Task<TResult> ExecuteAsync<TResult>(Func<AppDbContext, Task<TResult>> task);
 }
