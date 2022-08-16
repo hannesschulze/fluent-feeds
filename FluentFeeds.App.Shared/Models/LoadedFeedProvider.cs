@@ -10,4 +10,4 @@ namespace FluentFeeds.App.Shared.Models;
 /// <param name="Provider">The feed provider instance.</param>
 /// <param name="RootNode">Root node for this feed provider in the node tree.</param>
 /// <param name="FeedStorage">The storage object designated for this feed provider.</param>
-public record LoadedFeedProvider(FeedProvider Provider, IReadOnlyStoredFeedNode RootNode, IFeedStorage FeedStorage);
+public record LoadedFeedProvider(FeedProvider Provider, IReadOnlyFeedNode RootNode, IFeedStorage FeedStorage);

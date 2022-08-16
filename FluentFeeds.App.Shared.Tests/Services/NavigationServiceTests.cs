@@ -8,7 +8,7 @@ namespace FluentFeeds.App.Shared.Tests.Services;
 
 public class DefaultNavigationServiceTests
 {
-	public FeedServiceMock FeedService { get; } = new();
+	private FeedServiceMock FeedService { get; } = new();
 
 	[Fact]
 	public void InitialBackStackIsNotEmpty()

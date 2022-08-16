@@ -20,56 +20,14 @@ namespace FluentFeeds.App.Shared.Tests.Services;
 
 public class FeedServiceTests
 {
-	private sealed class TestFeed : Feed
-	{
-		public TestFeed(Guid identifier)
-		{
-			Identifier = identifier;
-		}
-		
-		public Guid Identifier { get; }
-		
-		protected override Task DoLoadAsync() => Task.CompletedTask;
-
-		protected override Task DoSynchronizeAsync() => Task.CompletedTask;
-	}
-
-	public sealed class TestFeedProvider : FeedProvider
-	{
-		public TestFeedProvider(Guid identifier) : base(
-			new FeedProviderMetadata(identifier, "Test Feed Provider", "A simple test feed provider."))
-		{
-			InitialTree = FeedNode.Group("Test Feed Provider", Symbol.Directory, true);
-		}
-
-		public IReadOnlyFeedNode InitialTree { get; set; }
-
-		public override IReadOnlyFeedNode CreateInitialTree(IFeedStorage feedStorage)
-		{
-			return InitialTree;
-		}
-
-		public override Task<Feed> LoadFeedAsync(IFeedStorage feedStorage, string serialized)
-		{
-			var identifier = Guid.Parse(serialized);
-			return Task.FromResult<Feed>(new TestFeed(identifier));
-		}
-
-		public override Task<string> StoreFeedAsync(Feed feed)
-		{
-			var testFeed = (TestFeed)feed;
-			return Task.FromResult(testFeed.Identifier.ToString());
-		}
-	}
-
 	public FeedServiceTests(ITestOutputHelper testOutputHelper)
 	{
 		DatabaseService = new DatabaseServiceMock(testOutputHelper);
 		PluginService = new PluginServiceMock();
 	}
 	
-	public DatabaseServiceMock DatabaseService { get; }
-	public PluginServiceMock PluginService { get; }
+	private DatabaseServiceMock DatabaseService { get; }
+	private PluginServiceMock PluginService { get; }
 
 	[Fact]
 	public async Task Initialization_StoreFeedNodesForProviders()
@@ -77,12 +35,12 @@ public class FeedServiceTests
 		var providerIdentifier = Guid.Parse("6ebe7ccf-e1ae-4930-9c6e-97cf61fec7e3");
 		var feedIdentifier = Guid.Parse("c71e97f0-5b25-43db-908c-8e8d0b4bbe66");
 		var provider =
-			new TestFeedProvider(providerIdentifier)
+			new FeedProviderMock(providerIdentifier)
 			{
 				InitialTree =
 					FeedNode.Group("root", Symbol.Feed, isUserCustomizable: false, 
 						FeedNode.Group("child", Symbol.Directory, isUserCustomizable: true,
-							FeedNode.Custom(new TestFeed(feedIdentifier), "feed", Symbol.Web, true)))
+							FeedNode.Custom(new FeedMock(feedIdentifier), "feed", Symbol.Web, true)))
 			};
 		PluginService.AvailableFeedProviders = ImmutableArray.Create<FeedProvider>(provider);
 		var serviceA = new FeedService(DatabaseService, PluginService);
@@ -90,7 +48,7 @@ public class FeedServiceTests
 
 		var loadedProviderA = Assert.Single(serviceA.FeedProviders);
 		Assert.Equal(provider, loadedProviderA.Provider);
-		var rootNodeA = loadedProviderA.RootNode;
+		var rootNodeA = Assert.IsAssignableFrom<IReadOnlyStoredFeedNode>(loadedProviderA.RootNode);
 		Assert.Equal(FeedNodeType.Group, rootNodeA.Type);
 		Assert.Equal("root", rootNodeA.Title);
 		Assert.Equal(Symbol.Feed, rootNodeA.Symbol);
@@ -108,7 +66,7 @@ public class FeedServiceTests
 		Assert.Equal(Symbol.Web, feedNodeA.Symbol);
 		Assert.True(feedNodeA.IsUserCustomizable);
 		Assert.Null(feedNodeA.Children);
-		var feedA = Assert.IsType<TestFeed>(feedNodeA.Feed);
+		var feedA = Assert.IsType<FeedMock>(feedNodeA.Feed);
 		Assert.Equal(feedIdentifier, feedA.Identifier);
 		var overviewChildA = Assert.Single(Assert.IsAssignableFrom<CompositeFeed>(serviceA.OverviewFeed.Feed).Feeds);
 		Assert.Equal(rootNodeA.Feed, overviewChildA);
@@ -119,7 +77,7 @@ public class FeedServiceTests
 
 		var loadedProviderB = Assert.Single(serviceB.FeedProviders);
 		Assert.Equal(provider, loadedProviderB.Provider);
-		var rootNodeB = loadedProviderB.RootNode;
+		var rootNodeB = Assert.IsAssignableFrom<IReadOnlyStoredFeedNode>(loadedProviderB.RootNode);
 		Assert.Equal(rootNodeA.Identifier, rootNodeB.Identifier);
 		Assert.Equal(FeedNodeType.Group, rootNodeB.Type);
 		Assert.Equal("root", rootNodeB.Title);
@@ -140,7 +98,7 @@ public class FeedServiceTests
 		Assert.Equal(Symbol.Web, feedNodeB.Symbol);
 		Assert.True(feedNodeB.IsUserCustomizable);
 		Assert.Null(feedNodeB.Children);
-		var feedB = Assert.IsType<TestFeed>(feedNodeB.Feed);
+		var feedB = Assert.IsType<FeedMock>(feedNodeB.Feed);
 		Assert.Equal(feedIdentifier, feedB.Identifier);
 		var overviewChildB = Assert.Single(Assert.IsAssignableFrom<CompositeFeed>(serviceB.OverviewFeed.Feed).Feeds);
 		Assert.Equal(rootNodeB.Feed, overviewChildB);
@@ -148,7 +106,7 @@ public class FeedServiceTests
 
 	private async Task<IFeedStorage> CreateFeedStorageAsync()
 	{
-		PluginService.AvailableFeedProviders = ImmutableArray.Create<FeedProvider>(new TestFeedProvider(Guid.Empty));
+		PluginService.AvailableFeedProviders = ImmutableArray.Create<FeedProvider>(new FeedProviderMock(Guid.Empty));
 		var service = new FeedService(DatabaseService, PluginService);
 		await service.InitializeAsync();
 		return service.FeedProviders[0].FeedStorage;

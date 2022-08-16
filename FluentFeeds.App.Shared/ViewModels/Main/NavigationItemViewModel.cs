@@ -3,21 +3,19 @@ using FluentFeeds.App.Shared.Models;
 using FluentFeeds.Common;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 
-namespace FluentFeeds.App.Shared.ViewModels;
+namespace FluentFeeds.App.Shared.ViewModels.Main;
 
 /// <summary>
 /// View model for an item in the app navigation.
 /// </summary>
-public abstract class NavigationItemViewModel : ObservableObject
+public class NavigationItemViewModel : ObservableObject
 {
-	protected NavigationItemViewModel(
-		string title, Symbol symbol, bool isExpandable, NavigationRoute? destination)
+	public NavigationItemViewModel(string title, Symbol symbol, bool isExpandable, NavigationRoute? destination)
 	{
 		_title = title;
 		_symbol = symbol;
 		IsExpandable = isExpandable;
 		Destination = destination;
-		Children = new ReadOnlyObservableCollection<NavigationItemViewModel>(MutableChildren);
 	}
 
 	/// <summary>
@@ -41,7 +39,7 @@ public abstract class NavigationItemViewModel : ObservableObject
 	public string Title
 	{
 		get => _title;
-		protected set => SetProperty(ref _title, value);
+		set => SetProperty(ref _title, value);
 	}
 
 	/// <summary>
@@ -50,15 +48,13 @@ public abstract class NavigationItemViewModel : ObservableObject
 	public Symbol Symbol
 	{
 		get => _symbol;
-		protected set => SetProperty(ref _symbol, value);
+		set => SetProperty(ref _symbol, value);
 	}
 
 	/// <summary>
 	/// A list of child elements for this item.
 	/// </summary>
-	public ReadOnlyObservableCollection<NavigationItemViewModel> Children { get; }
-
-	protected ObservableCollection<NavigationItemViewModel> MutableChildren { get; } = new();
+	public ObservableCollection<NavigationItemViewModel> Children { get; } = new();
 
 	private string _title;
 	private Symbol _symbol;

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Windows.Input;
 using FluentFeeds.App.Shared.Helpers;
 using FluentFeeds.App.Shared.Models;
@@ -12,12 +11,12 @@ using FluentFeeds.Feeds.Base.Nodes;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
 
-namespace FluentFeeds.App.Shared.ViewModels;
+namespace FluentFeeds.App.Shared.ViewModels.Main;
 
 /// <summary>
-/// View model for the main pages managing navigation between feeds and other pages.
+/// View model for the main page managing navigation between feeds and other pages.
 /// </summary>
-public class MainViewModel : ObservableObject
+public sealed class MainViewModel : ObservableObject
 {
 	/// <summary>
 	/// Child pages of the main page.
@@ -34,78 +33,38 @@ public class MainViewModel : ObservableObject
 		Feed
 	}
 
-	public class SettingsItemViewModel : NavigationItemViewModel
-	{
-		public SettingsItemViewModel()
-			: base("Settings", Symbol.Settings, isExpandable: false, NavigationRoute.Settings)
-		{
-		}
-	}
-
-	public class FeedItemViewModel : NavigationItemViewModel
-	{
-		public FeedItemViewModel(
-			IReadOnlyFeedNode feedNode, LoadedFeedProvider? feedProvider,
-			Dictionary<IReadOnlyFeedNode, NavigationItemViewModel> feedItemRegistry) : base(
-			feedNode.ActualTitle ?? "Unnamed", feedNode.ActualSymbol ?? Symbol.Feed,
-			isExpandable: feedNode.Children != null, NavigationRoute.Feed(feedNode))
-		{
-			_feedNode = feedNode;
-			
-			feedNode.PropertyChanged += HandlePropertyChanged;
-			if (feedNode.Children != null)
-			{
-				ObservableCollectionTransformer.CreateCached(
-					feedNode.Children, MutableChildren, 
-					node => new FeedItemViewModel(node, feedProvider, feedItemRegistry), feedItemRegistry);
-			}
-		}
-
-		private void HandlePropertyChanged(object? sender, PropertyChangedEventArgs e)
-		{
-			switch (e.PropertyName)
-			{
-				case nameof(IReadOnlyFeedNode.ActualTitle):
-					Title = _feedNode.ActualTitle ?? "Unnamed";
-					break;
-				case nameof(IReadOnlyFeedNode.ActualSymbol):
-					Symbol = _feedNode.ActualSymbol ?? Symbol.Feed;
-					break;
-			}
-		}
-
-		private readonly IReadOnlyFeedNode _feedNode;
-	}
-
 	public MainViewModel(IFeedService feedService, INavigationService navigationService)
 	{
+		_feedService = feedService;
 		_navigationService = navigationService;
 		_navigationService.BackStackChanged += HandleBackStackChanged;
+		
+		SettingsItem = 
+			new NavigationItemViewModel("Settings", Symbol.Settings, isExpandable: false, NavigationRoute.Settings);
+		FeedItems = new ReadOnlyObservableCollection<NavigationItemViewModel>(_feedItems);
 
 		_goBackCommand = new RelayCommand(() => _navigationService.GoBack(), () => _navigationService.CanGoBack);
 		var overviewFeedNode = feedService.OverviewFeed;
-		var overviewItem = new FeedItemViewModel(overviewFeedNode, null, _feedItemRegistry);
+		var overviewItem = new FeedNavigationItemViewModel(overviewFeedNode, null, _feedItemRegistry);
 		var unreadFeedNode = FeedNode.Custom(new EmptyFeed(), "Unread", Symbol.Sparkle, false);
-		var unreadItem = new FeedItemViewModel(unreadFeedNode, null, _feedItemRegistry);
+		var unreadItem = new FeedNavigationItemViewModel(unreadFeedNode, null, _feedItemRegistry);
 		_feedItemRegistry.Add(overviewFeedNode, overviewItem);
 		_feedItemRegistry.Add(unreadFeedNode, unreadItem);
 		_feedItems.Add(overviewItem);
 		_feedItems.Add(unreadItem);
 		_feedItemTransformer = ObservableCollectionTransformer.CreateCached(
 			feedService.FeedProviders, _feedItems, 
-			provider => new FeedItemViewModel(provider.RootNode, provider, _feedItemRegistry), 
+			provider => new FeedNavigationItemViewModel(provider.RootNode, provider, _feedItemRegistry), 
 			provider => provider.RootNode, _feedItemRegistry);
 		_visiblePage = GetVisiblePage();
 		_selectedItem = GetSelectedItem();
-
-		FeedItems = new ReadOnlyObservableCollection<NavigationItemViewModel>(_feedItems);
-
-		LoadFeeds(feedService);
+		
+		InitializeFeeds();
 	}
 
-	private async void LoadFeeds(IFeedService feedService)
+	private async void InitializeFeeds()
 	{
-		await feedService.InitializeAsync();
+		await _feedService.InitializeAsync();
 	}
 
 	/// <summary>
@@ -144,7 +103,7 @@ public class MainViewModel : ObservableObject
 	/// <summary>
 	/// Navigation item for opening the app settings.
 	/// </summary>
-	public NavigationItemViewModel SettingsItem => _settingsItem;
+	public NavigationItemViewModel SettingsItem { get; }
 
 	/// <summary>
 	/// Observable collection containing items for all available feeds.
@@ -180,11 +139,11 @@ public class MainViewModel : ObservableObject
 			_ => null
 		};
 
+	private readonly IFeedService _feedService;
 	private readonly INavigationService _navigationService;
 	private readonly RelayCommand _goBackCommand;
 	private readonly ObservableCollection<NavigationItemViewModel> _feedItems = new();
 	private readonly ObservableCollectionTransformer<LoadedFeedProvider, NavigationItemViewModel> _feedItemTransformer;
-	private readonly SettingsItemViewModel _settingsItem = new();
 	private readonly Dictionary<IReadOnlyFeedNode, NavigationItemViewModel> _feedItemRegistry = new();
 	private Page _visiblePage;
 	private NavigationItemViewModel? _selectedItem;

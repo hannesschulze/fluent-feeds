@@ -12,15 +12,17 @@ public sealed class FeedServiceMock : IFeedService
 {
 	public FeedServiceMock()
 	{
-		FeedProviders = new ReadOnlyObservableCollection<LoadedFeedProvider>(_feedProviders);
+		_readOnlyFeedProviders = new ReadOnlyObservableCollection<LoadedFeedProvider>(FeedProviders);
 	}
 	
 	public Task InitializeAsync() => Task.CompletedTask;
 
-	public ReadOnlyObservableCollection<LoadedFeedProvider> FeedProviders { get; }
+	public ObservableCollection<LoadedFeedProvider> FeedProviders { get; } = new();
+
+	ReadOnlyObservableCollection<LoadedFeedProvider> IFeedService.FeedProviders => _readOnlyFeedProviders;
 
 	public IReadOnlyFeedNode OverviewFeed { get; } =
 		FeedNode.Custom(new EmptyFeed(), "Overview", Symbol.Home, isUserCustomizable: false);
 
-	private readonly ObservableCollection<LoadedFeedProvider> _feedProviders = new();
+	private readonly ReadOnlyObservableCollection<LoadedFeedProvider> _readOnlyFeedProviders;
 }
