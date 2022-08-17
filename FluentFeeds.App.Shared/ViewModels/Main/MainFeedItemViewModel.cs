@@ -8,13 +8,13 @@ using FluentFeeds.Feeds.Base.Nodes;
 namespace FluentFeeds.App.Shared.ViewModels.Main;
 
 /// <summary>
-/// Navigation item representing a feed node.
+/// List item representing a feed on the main page.
 /// </summary>
-public sealed class FeedNavigationItemViewModel : NavigationItemViewModel
+public sealed class MainFeedItemViewModel : MainNavigationItemViewModel
 {
-	public FeedNavigationItemViewModel(
-		IReadOnlyFeedNode feedNode, LoadedFeedProvider? feedProvider,
-		Dictionary<IReadOnlyFeedNode, NavigationItemViewModel> feedItemRegistry) : base(
+	public MainFeedItemViewModel(
+		IReadOnlyFeedNode feedNode, LoadedFeedProvider? feedProvider, 
+		Dictionary<IReadOnlyFeedNode, MainItemViewModel> feedItemRegistry) : base(
 		feedNode.ActualTitle ?? "Unnamed", feedNode.ActualSymbol ?? Symbol.Feed,
 		isExpandable: feedNode.Children != null, NavigationRoute.Feed(feedNode))
 	{
@@ -25,8 +25,8 @@ public sealed class FeedNavigationItemViewModel : NavigationItemViewModel
 		if (feedNode.Children != null)
 		{
 			ObservableCollectionTransformer.CreateCached(
-				feedNode.Children, Children,
-				node => new FeedNavigationItemViewModel(node, FeedProvider, feedItemRegistry), feedItemRegistry);
+				feedNode.Children, Children, node => new MainFeedItemViewModel(node, FeedProvider, feedItemRegistry),
+				feedItemRegistry);
 		}
 	}
 	

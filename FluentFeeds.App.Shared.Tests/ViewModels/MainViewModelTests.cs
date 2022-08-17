@@ -23,7 +23,7 @@ public class MainViewModelTests
 	private NavigationService NavigationService { get; }
 
 	[Fact]
-	public void ManagesNavigationItems()
+	public void ManagesItems()
 	{
 		var viewModel = new MainViewModel(FeedService, NavigationService);
 		var feedStorage = new FeedStorageMock();
@@ -36,24 +36,24 @@ public class MainViewModelTests
 			viewModel.FeedItems,
 			item =>
 			{
-				var feedItem = Assert.IsType<FeedNavigationItemViewModel>(item);
+				var feedItem = Assert.IsType<MainFeedItemViewModel>(item);
 				Assert.Equal(FeedService.OverviewFeed, feedItem.FeedNode);
 				Assert.Null(feedItem.FeedProvider);
 			},
 			item =>
 			{
-				var feedItem = Assert.IsType<FeedNavigationItemViewModel>(item);
+				var feedItem = Assert.IsType<MainFeedItemViewModel>(item);
 				Assert.Equal("Unread", feedItem.Title);
 				Assert.Null(feedItem.FeedProvider);
 			},
 			item =>
 			{
-				var feedItem = Assert.IsType<FeedNavigationItemViewModel>(item);
+				var feedItem = Assert.IsType<MainFeedItemViewModel>(item);
 				Assert.Equal(node, feedItem.FeedNode);
 				Assert.Equal(loadedProvider, feedItem.FeedProvider);
 			});
 
-		var settings = viewModel.SettingsItem;
+		var settings = Assert.IsType<MainNavigationItemViewModel>(viewModel.SettingsItem);
 		Assert.Equal("Settings", settings.Title);
 		Assert.Equal(Symbol.Settings, settings.Symbol);
 		Assert.Equal(NavigationRoute.Settings, settings.Destination);
@@ -61,13 +61,25 @@ public class MainViewModelTests
 		Assert.True(settings.IsSelectable);
 		Assert.Empty(settings.Children);
 	}
+
+	[Fact]
+	public void FeedItems_UpdatesLoadingState()
+	{
+		FeedService.ResetInitialization();
+		var viewModel = new MainViewModel(FeedService, NavigationService);
+
+		Assert.Equal(3, viewModel.FeedItems.Count);
+		Assert.IsType<MainLoadingItemViewModel>(viewModel.FeedItems[2]);
+		FeedService.CompleteInitialization();
+		
+		Assert.Equal(2, viewModel.FeedItems.Count);
+	}
 	
 	[Fact]
-	public void FeedNavigationItems_GroupNode()
+	public void FeedItems_GroupNode()
 	{
 		var node = FeedNode.Group("Title", Symbol.Directory, isUserCustomizable: true);
-		var item = new FeedNavigationItemViewModel(
-			node, null, new Dictionary<IReadOnlyFeedNode, NavigationItemViewModel>());
+		var item = new MainFeedItemViewModel(node, null, new Dictionary<IReadOnlyFeedNode, MainItemViewModel>());
 		Assert.Equal("Title",item.Title);
 		Assert.Equal(Symbol.Directory, item.Symbol);
 		Assert.Equal(NavigationRoute.Feed(node), item.Destination);
@@ -77,18 +89,17 @@ public class MainViewModelTests
 
 		var childNode = FeedNode.Group(null, null, false);
 		node.Children!.Add(childNode);
-		var childItem = Assert.IsType<FeedNavigationItemViewModel>(Assert.Single(item.Children));
+		var childItem = Assert.IsType<MainFeedItemViewModel>(Assert.Single(item.Children));
 		Assert.Equal(childNode, childItem.FeedNode);
 	}
 	
 	[Fact]
-	public void FeedNavigationItems_LeafNode()
+	public void FeedItems_LeafNode()
 	{
 		var feed = new FeedMock(Guid.Empty);
 		feed.UpdateMetadata(new FeedMetadata { Name = "Feed", Symbol = Symbol.Web });
 		var node = FeedNode.Custom(feed, null, null, isUserCustomizable: true);
-		var item = new FeedNavigationItemViewModel(
-			node, null, new Dictionary<IReadOnlyFeedNode, NavigationItemViewModel>());
+		var item = new MainFeedItemViewModel(node, null, new Dictionary<IReadOnlyFeedNode, MainItemViewModel>());
 		Assert.Equal("Feed",item.Title);
 		Assert.Equal(Symbol.Web, item.Symbol);
 		Assert.Equal(NavigationRoute.Feed(node), item.Destination);
@@ -98,13 +109,12 @@ public class MainViewModelTests
 	}
 
 	[Fact]
-	public void FeedNavigationItems_UpdateProperties()
+	public void FeedItems_UpdateProperties()
 	{
 		var feed = new FeedMock(Guid.Empty);
 		feed.UpdateMetadata(new FeedMetadata { Name = "Feed", Symbol = Symbol.Web });
 		var node = FeedNode.Custom(feed, null, null, isUserCustomizable: true);
-		var item = new FeedNavigationItemViewModel(
-			node, null, new Dictionary<IReadOnlyFeedNode, NavigationItemViewModel>());
+		var item = new MainFeedItemViewModel(node, null, new Dictionary<IReadOnlyFeedNode, MainItemViewModel>());
 		feed.UpdateMetadata(new FeedMetadata { Name = "Updated", Symbol = Symbol.Feed });
 		Assert.Equal("Updated",item.Title);
 		Assert.Equal(Symbol.Feed, item.Symbol);
@@ -116,7 +126,7 @@ public class MainViewModelTests
 		var viewModel = new MainViewModel(FeedService, NavigationService);
 		Assert.Equal(viewModel.FeedItems[0], viewModel.SelectedItem);
 		var unread = viewModel.FeedItems[1];
-		NavigationService.Navigate(unread.Destination!.Value);
+		NavigationService.Navigate(((MainNavigationItemViewModel)unread).Destination);
 		Assert.Equal(unread, viewModel.SelectedItem);
 	}
 
@@ -163,7 +173,7 @@ public class MainViewModelTests
 		var viewModel = new MainViewModel(FeedService, NavigationService);
 		viewModel.PropertyChanged +=
 			(s, e) => Assert.NotEqual(nameof(MainViewModel.VisiblePage), e.PropertyName);
-		NavigationService.Navigate(viewModel.FeedItems[1].Destination!.Value);
+		NavigationService.Navigate(((MainNavigationItemViewModel)viewModel.FeedItems[1]).Destination);
 		Assert.Equal(MainViewModel.Page.Feed, viewModel.VisiblePage);
 	}
 
@@ -185,7 +195,7 @@ public class MainViewModelTests
 		var viewModel = new MainViewModel(FeedService, NavigationService);
 		NavigationService.Navigate(NavigationRoute.Settings);
 		viewModel.GoBackCommand.Execute(null);
-		Assert.Equal(viewModel.FeedItems[0].Destination, NavigationService.CurrentRoute);
+		Assert.Equal(((MainNavigationItemViewModel)viewModel.FeedItems[0]).Destination, NavigationService.CurrentRoute);
 		Assert.False(viewModel.GoBackCommand.CanExecute(null));
 	}
 }
