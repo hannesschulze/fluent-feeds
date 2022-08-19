@@ -30,6 +30,31 @@ public abstract class MainItemViewModel : ObservableObject
 	public bool IsExpandable { get; }
 
 	/// <summary>
+	/// Flag indicating if this item can be dragged by the user.
+	/// </summary>
+	public virtual bool CanDrag => false;
+
+	/// <summary>
+	/// Check if <c>otherItem</c> can be dropped onto this item by the user.
+	/// </summary>
+	/// <param name="otherItem"></param>
+	/// <returns></returns>
+	public virtual bool CanDrop(MainItemViewModel otherItem) => false;
+
+	/// <summary>
+	/// Handle <c>otherItem</c> being dropped onto this item by the user.
+	/// </summary>
+	/// <param name="otherItem"></param>
+	public virtual void HandleDrop(MainItemViewModel otherItem)
+	{
+	}
+
+	/// <summary>
+	/// A list of possible actions which can be executed on this item.
+	/// </summary>
+	public ObservableCollection<MainItemActionViewModel> Actions { get; } = new();
+
+	/// <summary>
 	/// A list of child elements for this item.
 	/// </summary>
 	public ObservableCollection<MainItemViewModel> Children { get; } = new();
