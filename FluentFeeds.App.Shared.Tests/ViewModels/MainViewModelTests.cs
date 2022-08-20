@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using FluentFeeds.App.Shared.Models;
 using FluentFeeds.App.Shared.Services.Default;
 using FluentFeeds.App.Shared.Tests.Services.Mock;
+using FluentFeeds.App.Shared.ViewModels;
 using FluentFeeds.App.Shared.ViewModels.Main;
 using FluentFeeds.Common;
 using FluentFeeds.Feeds.Base;
@@ -53,26 +54,13 @@ public class MainViewModelTests
 				Assert.Equal(loadedProvider, feedItem.FeedProvider);
 			});
 
-		var settings = Assert.IsType<MainNavigationItemViewModel>(viewModel.SettingsItem);
+		var settings = Assert.IsType<MainItemViewModel>(viewModel.SettingsItem);
 		Assert.Equal("Settings", settings.Title);
 		Assert.Equal(Symbol.Settings, settings.Symbol);
 		Assert.Equal(NavigationRoute.Settings, settings.Destination);
 		Assert.False(settings.IsExpandable);
-		Assert.True(settings.IsSelectable);
 		Assert.Empty(settings.Children);
-	}
-
-	[Fact]
-	public void FeedItems_UpdatesLoadingState()
-	{
-		FeedService.ResetInitialization();
-		var viewModel = new MainViewModel(FeedService, NavigationService);
-
-		Assert.Equal(3, viewModel.FeedItems.Count);
-		Assert.IsType<MainLoadingItemViewModel>(viewModel.FeedItems[2]);
-		FeedService.CompleteInitialization();
-		
-		Assert.Equal(2, viewModel.FeedItems.Count);
+		Assert.Null(settings.Actions);
 	}
 	
 	[Fact]
@@ -84,7 +72,6 @@ public class MainViewModelTests
 		Assert.Equal(Symbol.Directory, item.Symbol);
 		Assert.Equal(NavigationRoute.Feed(node), item.Destination);
 		Assert.True(item.IsExpandable);
-		Assert.True(item.IsSelectable);
 		Assert.Empty(item.Children);
 
 		var childNode = FeedNode.Group(null, null, false);
@@ -104,7 +91,6 @@ public class MainViewModelTests
 		Assert.Equal(Symbol.Web, item.Symbol);
 		Assert.Equal(NavigationRoute.Feed(node), item.Destination);
 		Assert.False(item.IsExpandable);
-		Assert.True(item.IsSelectable);
 		Assert.Empty(item.Children);
 	}
 
@@ -126,7 +112,7 @@ public class MainViewModelTests
 		var viewModel = new MainViewModel(FeedService, NavigationService);
 		Assert.Equal(viewModel.FeedItems[0], viewModel.SelectedItem);
 		var unread = viewModel.FeedItems[1];
-		NavigationService.Navigate(((MainNavigationItemViewModel)unread).Destination);
+		NavigationService.Navigate(unread.Destination);
 		Assert.Equal(unread, viewModel.SelectedItem);
 	}
 
@@ -173,7 +159,7 @@ public class MainViewModelTests
 		var viewModel = new MainViewModel(FeedService, NavigationService);
 		viewModel.PropertyChanged +=
 			(s, e) => Assert.NotEqual(nameof(MainViewModel.VisiblePage), e.PropertyName);
-		NavigationService.Navigate(((MainNavigationItemViewModel)viewModel.FeedItems[1]).Destination);
+		NavigationService.Navigate(((MainItemViewModel)viewModel.FeedItems[1]).Destination);
 		Assert.Equal(MainViewModel.Page.Feed, viewModel.VisiblePage);
 	}
 
@@ -195,7 +181,7 @@ public class MainViewModelTests
 		var viewModel = new MainViewModel(FeedService, NavigationService);
 		NavigationService.Navigate(NavigationRoute.Settings);
 		viewModel.GoBackCommand.Execute(null);
-		Assert.Equal(((MainNavigationItemViewModel)viewModel.FeedItems[0]).Destination, NavigationService.CurrentRoute);
+		Assert.Equal(((MainItemViewModel)viewModel.FeedItems[0]).Destination, NavigationService.CurrentRoute);
 		Assert.False(viewModel.GoBackCommand.CanExecute(null));
 	}
 }

@@ -1,19 +1,30 @@
 ﻿<Page
-    x:Class="FluentFeeds.App.WinUI.Pages.MainPage"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-	xmlns:vm="using:FluentFeeds.App.Shared.ViewModels" 
-	xmlns:helpers="using:FluentFeeds.App.WinUI.Helpers" 
+	x:Class="FluentFeeds.App.WinUI.Pages.MainPage"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:vm="using:FluentFeeds.App.Shared.ViewModels"
+	xmlns:views="using:FluentFeeds.App.WinUI.Views"
 	d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
 	mc:Ignorable="d">
+	
+	<Page.Resources>
+		<DataTemplate 
+			x:DataType="vm:MainItemViewModel"
+			x:Key="NavigationItemTemplate"
+			xmlns:vm="using:FluentFeeds.App.Shared.ViewModels.Main">
+					
+			<views:MainItemView DataContext="{x:Bind}" />
+					
+		</DataTemplate>
+	</Page.Resources>
 
 	<Grid>
 		<VisualStateManager.VisualStateGroups>
 			<VisualStateGroup>
-				<!-- 
-					When there is enough space to show the compact navigation bar and the full search field, show the 
+				<!--
+					When there is enough space to show the compact navigation bar and the full search field, show the
 					title (ensuring that the search field is never bigger than its max width).
 				-->
 				<VisualState>
@@ -43,7 +54,7 @@
 				</VisualState>
 				
 				<!--
-					When there is enough space to center the search bar, ensure that the spacing on both sides is 
+					When there is enough space to center the search bar, ensure that the spacing on both sides is
 					equal.
 				-->
 				<VisualState>
@@ -115,10 +126,10 @@
 			<AutoSuggestBox 
 				Grid.Column="1" 
 				QueryIcon="Find"
-                PlaceholderText="Search"
+				PlaceholderText="Search"
 				Height="32"
 				Margin="8,0"
-                VerticalAlignment="Center" 
+				VerticalAlignment="Center" 
 				BorderThickness="1"
 				SizeChanged="HandleDragRegionSizeChanged">
 				
@@ -144,6 +155,7 @@
 			IsTitleBarAutoPaddingEnabled="False"
 			CompactModeThresholdWidth="0"
 			IsSettingsVisible="False"
+			MenuItemTemplate="{StaticResource NavigationItemTemplate}"
 			CompactPaneLength="{x:Bind NavigationCompactWidth}"
 			OpenPaneLength="{x:Bind NavigationExpandedWidth}"
 			MenuItemsSource="{x:Bind ViewModel.FeedItems, Mode=OneWay}"
@@ -155,16 +167,6 @@
 				<Thickness x:Key="NavigationViewContentGridBorderThickness">0</Thickness>
 				<SolidColorBrush x:Key="NavigationViewContentBackground" Color="Transparent" />
 			</NavigationView.Resources>
-
-			<NavigationView.MenuItemTemplate>
-				<DataTemplate x:DataType="vm:NavigationItemViewModel">
-					<NavigationViewItem 
-						Content="{x:Bind Title, Mode=OneWay}"
-						MenuItemsSource="{x:Bind Children, Mode=OneWay}"
-						Icon="{x:Bind helpers:SymbolHelper.ToIconElement(Symbol), Mode=OneWay}"
-						SelectsOnInvoked="{x:Bind IsSelectable}" />
-				</DataTemplate>
-			</NavigationView.MenuItemTemplate>
 			
 			<Frame 
 				x:Name="_contentFrame"

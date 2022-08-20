@@ -20,7 +20,7 @@ public static class SymbolHelper
 		};
 
 	private static MUXC.IconSource CreateAnimated(
-			MUXC.IAnimatedVisualSource2 animatedSource, MUXC.IconSource fallback) =>
+		MUXC.IAnimatedVisualSource2 animatedSource, MUXC.IconSource fallback) =>
 		new MUXC.AnimatedIconSource
 		{
 			Source = animatedSource,
@@ -55,11 +55,7 @@ public static class SymbolHelper
 		}
 		else
 		{
-			return
-				new MUXC.IconSourceElement
-				{
-					IconSource = source
-				};
+			return new MUXC.IconSourceElement { IconSource = source };
 		}
 	}
 }

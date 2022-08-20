@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using FluentFeeds.App.Shared.ViewModels;
+using FluentFeeds.App.Shared.ViewModels.Main;
 using FluentFeeds.App.WinUI.Helpers;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
@@ -30,7 +31,7 @@ public sealed partial class MainPage : Page
 	private GridLength CaptionButtonsGridLength => new(CaptionButtonsWidth);
 	private Thickness TitleBarAreaLeftMargin => new(left: NavigationCompactWidth, 0, 0, 0);
 	private Thickness ContentFrameMargin => new(0, top: TitleBarHeight, 0, 0);
-	private ObservableCollection<NavigationItemViewModel> FooterItems { get; } = new();
+	private ObservableCollection<MainItemViewModel> FooterItems { get; } = new();
 
 	public MainViewModel ViewModel => (MainViewModel)DataContext;
 

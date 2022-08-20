@@ -5,13 +5,14 @@ using System.Windows.Input;
 using FluentFeeds.App.Shared.Helpers;
 using FluentFeeds.App.Shared.Models;
 using FluentFeeds.App.Shared.Services;
+using FluentFeeds.App.Shared.ViewModels.Main;
 using FluentFeeds.Common;
 using FluentFeeds.Feeds.Base;
 using FluentFeeds.Feeds.Base.Nodes;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
 
-namespace FluentFeeds.App.Shared.ViewModels.Main;
+namespace FluentFeeds.App.Shared.ViewModels;
 
 /// <summary>
 /// View model for the main page managing navigation between feeds and other pages.
@@ -39,8 +40,8 @@ public sealed class MainViewModel : ObservableObject
 		_navigationService = navigationService;
 		_navigationService.BackStackChanged += HandleBackStackChanged;
 		
-		SettingsItem = 
-			new MainNavigationItemViewModel("Settings", Symbol.Settings, isExpandable: false, NavigationRoute.Settings);
+		SettingsItem =
+			new MainItemViewModel(NavigationRoute.Settings, isExpandable: false, "Settings", Symbol.Settings);
 		FeedItems = new ReadOnlyObservableCollection<MainItemViewModel>(_feedItems);
 
 		_goBackCommand = new RelayCommand(() => _navigationService.GoBack(), () => _navigationService.CanGoBack);
@@ -52,7 +53,6 @@ public sealed class MainViewModel : ObservableObject
 		_feedItemRegistry.Add(unreadFeedNode, unreadItem);
 		_feedItems.Add(overviewItem);
 		_feedItems.Add(unreadItem);
-		_feedItems.Add(_loadingItem);
 		_feedItemTransformer = ObservableCollectionTransformer.CreateCached(
 			feedService.FeedProviders, _feedItems, 
 			provider => new MainFeedItemViewModel(provider.RootNode, provider, _feedItemRegistry), 
@@ -66,9 +66,6 @@ public sealed class MainViewModel : ObservableObject
 	private async void InitializeFeeds()
 	{
 		await _feedService.InitializeAsync();
-		
-		_feedItems.Remove(_loadingItem);
-		_feedItemTransformer.TargetOffset--;
 	}
 
 	/// <summary>
@@ -93,7 +90,7 @@ public sealed class MainViewModel : ObservableObject
 		get => _selectedItem;
 		set
 		{
-			var destination = (value as MainNavigationItemViewModel)?.Destination;
+			var destination = (value as MainItemViewModel)?.Destination;
 			if (!SetProperty(ref _selectedItem, value) || _isChangingSelection || destination == null)
 				// Item is not actually selectable or the selection has already changed.
 				return;
@@ -146,7 +143,6 @@ public sealed class MainViewModel : ObservableObject
 	private readonly IFeedService _feedService;
 	private readonly INavigationService _navigationService;
 	private readonly RelayCommand _goBackCommand;
-	private readonly MainLoadingItemViewModel _loadingItem = new();
 	private readonly ObservableCollection<MainItemViewModel> _feedItems = new();
 	private readonly ObservableCollectionTransformer<LoadedFeedProvider, MainItemViewModel> _feedItemTransformer;
 	private readonly Dictionary<IReadOnlyFeedNode, MainItemViewModel> _feedItemRegistry = new();

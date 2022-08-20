@@ -1,7 +1,7 @@
 ﻿<Application
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	xmlns:local="using:FluentFeeds.App.WinUI"
+	xmlns:converters="using:FluentFeeds.App.WinUI.Converters"
 	x:Class="FluentFeeds.App.WinUI.App">
 	
 	<Application.Resources>
@@ -9,6 +9,10 @@
 			<ResourceDictionary.MergedDictionaries>
 				<XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
 			</ResourceDictionary.MergedDictionaries>
+
+			<converters:SymbolToIconElementConverter x:Key="SymbolToIconElementConverter" />
+			
+			<converters:SymbolToIconSourceConverter x:Key="SymbolToIconSourceConverter" />
 		</ResourceDictionary>
 	</Application.Resources>
 	
