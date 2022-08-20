@@ -4,22 +4,20 @@ using FluentFeeds.App.Shared.Models;
 using FluentFeeds.Common;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 
-namespace FluentFeeds.App.Shared.ViewModels.Main;
+namespace FluentFeeds.App.Shared.ViewModels.Items.Navigation;
 
 /// <summary>
-/// A list item on the main page.
+/// A navigation item on the main page.
 /// </summary>
-public class MainItemViewModel : ObservableObject
+public class NavigationItemViewModel : ObservableObject
 {
-	public MainItemViewModel(
-		NavigationRoute destination, bool isExpandable, string title, Symbol symbol,
-		ImmutableArray<MainItemActionViewModel>? actions = null)
+	public NavigationItemViewModel(NavigationRoute destination, bool isExpandable, string title, Symbol symbol)
 	{
 		Destination = destination;
 		IsExpandable = isExpandable;
+		Children = new ReadOnlyObservableCollection<NavigationItemViewModel>(MutableChildren);
 		_title = title;
 		_symbol = symbol;
-		_actions = actions;
 	}
 
 	/// <summary>
@@ -38,7 +36,7 @@ public class MainItemViewModel : ObservableObject
 	public string Title
 	{
 		get => _title;
-		set => SetProperty(ref _title, value);
+		protected set => SetProperty(ref _title, value);
 	}
 
 	/// <summary>
@@ -47,24 +45,29 @@ public class MainItemViewModel : ObservableObject
 	public Symbol Symbol
 	{
 		get => _symbol;
-		set => SetProperty(ref _symbol, value);
+		protected set => SetProperty(ref _symbol, value);
 	}
 
 	/// <summary>
 	/// A list of possible actions which can be executed on this item.
 	/// </summary>
-	public ImmutableArray<MainItemActionViewModel>? Actions
+	public ImmutableArray<NavigationItemActionViewModel>? Actions
 	{
 		get => _actions;
-		set => SetProperty(ref _actions, value);
+		protected set => SetProperty(ref _actions, value);
 	}
 
 	/// <summary>
 	/// A list of child elements for this item.
 	/// </summary>
-	public ObservableCollection<MainItemViewModel> Children { get; } = new();
+	public ReadOnlyObservableCollection<NavigationItemViewModel> Children { get; }
+
+	/// <summary>
+	/// Mutable list of child elements.
+	/// </summary>
+	protected ObservableCollection<NavigationItemViewModel> MutableChildren { get; } = new();
 
 	private string _title;
 	private Symbol _symbol;
-	private ImmutableArray<MainItemActionViewModel>? _actions;
+	private ImmutableArray<NavigationItemActionViewModel>? _actions;
 }

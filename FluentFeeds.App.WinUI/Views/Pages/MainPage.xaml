@@ -1,21 +1,21 @@
 ﻿<Page
-	x:Class="FluentFeeds.App.WinUI.Pages.MainPage"
+	x:Class="FluentFeeds.App.WinUI.Views.Pages.MainPage"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-	xmlns:vm="using:FluentFeeds.App.Shared.ViewModels"
-	xmlns:views="using:FluentFeeds.App.WinUI.Views"
+	xmlns:vm="using:FluentFeeds.App.Shared.ViewModels.Pages"
+	xmlns:views="using:FluentFeeds.App.WinUI.Views.Items.Navigation"
 	d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
 	mc:Ignorable="d">
 	
 	<Page.Resources>
-		<DataTemplate 
-			x:DataType="vm:MainItemViewModel"
-			x:Key="NavigationItemTemplate"
-			xmlns:vm="using:FluentFeeds.App.Shared.ViewModels.Main">
+		<DataTemplate
+			xmlns:vm="using:FluentFeeds.App.Shared.ViewModels.Items.Navigation"
+			x:DataType="vm:NavigationItemViewModel"
+			x:Key="NavigationItemTemplate">
 					
-			<views:MainItemView DataContext="{x:Bind}" />
+			<views:NavigationItemView DataContext="{x:Bind}" />
 					
 		</DataTemplate>
 	</Page.Resources>
@@ -32,8 +32,8 @@
 						<AdaptiveTrigger MinWindowWidth="{x:Bind MinWidthForTitleVisible}" />
 					</VisualState.StateTriggers>
 					<VisualState.Setters>
-						<Setter Target="_titleBarTitle.Visibility" Value="Visible" />
-						<Setter Target="_titleBarAreaLeftColumn.Width" Value="{x:Bind NavigationExpandedGridLength}" />
+						<Setter Target="TitleBarTitle.Visibility" Value="Visible" />
+						<Setter Target="TitleBarAreaLeftColumn.Width" Value="{x:Bind NavigationExpandedGridLength}" />
 					</VisualState.Setters>
 				</VisualState>
 				
@@ -46,10 +46,10 @@
 						<AdaptiveTrigger MinWindowWidth="{x:Bind MinWidthForSearchSpacing}" />
 					</VisualState.StateTriggers>
 					<VisualState.Setters>
-						<Setter Target="_titleBarTitle.Visibility" Value="Visible" />
-						<Setter Target="_titleBarAreaLeftColumn.Width" Value="{x:Bind NavigationExpandedGridLength}" />
-						<Setter Target="_titleBarAreaCenterColumn.Width" Value="{x:Bind SearchFieldMaxGridLength}" />
-						<Setter Target="_titleBarAreaRightColumn.Width" Value="*" />
+						<Setter Target="TitleBarTitle.Visibility" Value="Visible" />
+						<Setter Target="TitleBarAreaLeftColumn.Width" Value="{x:Bind NavigationExpandedGridLength}" />
+						<Setter Target="TitleBarAreaCenterColumn.Width" Value="{x:Bind SearchFieldMaxGridLength}" />
+						<Setter Target="TitleBarAreaRightColumn.Width" Value="*" />
 					</VisualState.Setters>
 				</VisualState>
 				
@@ -62,10 +62,10 @@
 						<AdaptiveTrigger MinWindowWidth="{x:Bind MinWidthForCenterSearch}" />
 					</VisualState.StateTriggers>
 					<VisualState.Setters>
-						<Setter Target="_titleBarTitle.Visibility" Value="Visible" />
-						<Setter Target="_titleBarAreaLeftColumn.Width" Value="*" />
-						<Setter Target="_titleBarAreaCenterColumn.Width" Value="{x:Bind SearchFieldMaxGridLength}" />
-						<Setter Target="_titleBarAreaRightColumn.Width" Value="*" />
+						<Setter Target="TitleBarTitle.Visibility" Value="Visible" />
+						<Setter Target="TitleBarAreaLeftColumn.Width" Value="*" />
+						<Setter Target="TitleBarAreaCenterColumn.Width" Value="{x:Bind SearchFieldMaxGridLength}" />
+						<Setter Target="TitleBarAreaRightColumn.Width" Value="*" />
 					</VisualState.Setters>
 				</VisualState>
 			</VisualStateGroup>
@@ -77,19 +77,18 @@
 			title bar helper.
 		-->
 		<Grid
-			x:Name="_titleBar"
+			x:Name="TitleBar"
 			Canvas.ZIndex="1"
 			VerticalAlignment="Top"
 			Height="{x:Bind TitleBarHeight}">
 
 			<Grid.ColumnDefinitions>
-				<ColumnDefinition x:Name="_titleBarAreaLeftColumn" Width="{x:Bind NavigationCompactGridLength}" />
-				<ColumnDefinition x:Name="_titleBarAreaCenterColumn" Width="*" />
-				<ColumnDefinition x:Name="_titleBarAreaRightColumn" Width="{x:Bind CaptionButtonsGridLength}" />
+				<ColumnDefinition x:Name="TitleBarAreaLeftColumn" Width="{x:Bind NavigationCompactGridLength}" />
+				<ColumnDefinition x:Name="TitleBarAreaCenterColumn" Width="*" />
+				<ColumnDefinition x:Name="TitleBarAreaRightColumn" Width="{x:Bind CaptionButtonsGridLength}" />
 			</Grid.ColumnDefinitions>
 
 			<StackPanel
-				x:Name="_titleBarAreaLeft"
 				Grid.Column="0"
 				Orientation="Horizontal"
 				SizeChanged="HandleDragRegionSizeChanged"
@@ -97,7 +96,7 @@
 				
 				<!-- Inner title container, position is animated when the navigation bar is expanded/collapsed. -->
 				<StackPanel
-					x:Name="_titleBarTitle"
+					x:Name="TitleBarTitle"
 					Orientation="Horizontal"
 					Visibility="Collapsed">
 
@@ -142,14 +141,13 @@
 			</AutoSuggestBox>
 
 			<StackPanel
-				x:Name="_titleBarAreaRight"
 				Grid.Column="2"
 				SizeChanged="HandleDragRegionSizeChanged" />
 
 		</Grid>
 
 		<NavigationView
-			x:Name="_navigationView"
+			x:Name="NavigationView"
 			Canvas.ZIndex="0"
 			IsTabStop="False"
 			IsTitleBarAutoPaddingEnabled="False"
@@ -159,7 +157,7 @@
 			CompactPaneLength="{x:Bind NavigationCompactWidth}"
 			OpenPaneLength="{x:Bind NavigationExpandedWidth}"
 			MenuItemsSource="{x:Bind ViewModel.FeedItems, Mode=OneWay}"
-			FooterMenuItemsSource="{x:Bind FooterItems, Mode=OneWay}"
+			FooterMenuItemsSource="{x:Bind ViewModel.FooterItems, Mode=OneWay}"
 			SelectedItem="{x:Bind ViewModel.SelectedItem, Mode=TwoWay}">
 
 			<!-- Remove built-in layer for navigation view content. -->
@@ -169,7 +167,7 @@
 			</NavigationView.Resources>
 			
 			<Frame 
-				x:Name="_contentFrame"
+				x:Name="ContentFrame"
 				IsNavigationStackEnabled="False"
 				Margin="{x:Bind ContentFrameMargin}" />
 

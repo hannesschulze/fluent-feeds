@@ -7,12 +7,12 @@ using FluentFeeds.Common;
 using FluentFeeds.Feeds.Base.Nodes;
 using Microsoft.Toolkit.Mvvm.Input;
 
-namespace FluentFeeds.App.Shared.ViewModels.Main;
+namespace FluentFeeds.App.Shared.ViewModels.Items.Navigation;
 
 /// <summary>
-/// List item representing a feed on the main page.
+/// Navigation item representing a feed.
 /// </summary>
-public sealed class MainFeedItemViewModel : MainItemViewModel
+public sealed class FeedNavigationItemViewModel : NavigationItemViewModel
 {
 	private static string GetTitle(IReadOnlyFeedNode feedNode)
 	{
@@ -24,42 +24,42 @@ public sealed class MainFeedItemViewModel : MainItemViewModel
 		return feedNode.ActualSymbol ?? Symbol.Feed;
 	}
 
-	private static ImmutableArray<MainItemActionViewModel>? GetActions(
-		IReadOnlyFeedNode feedNode, LoadedFeedProvider? provider)
+	private ImmutableArray<NavigationItemActionViewModel>? GetActions()
 	{
-		if (feedNode is not IReadOnlyStoredFeedNode storedFeedNode || !feedNode.IsUserCustomizable || provider == null)
+		if (FeedNode is not IReadOnlyStoredFeedNode storedNode || !FeedNode.IsUserCustomizable || FeedProvider == null)
 			return null;
 
-		var result = new List<MainItemActionViewModel>();
-		if (feedNode.Type == FeedNodeType.Group)
+		var result = new List<NavigationItemActionViewModel>();
+		if (FeedNode.Type == FeedNodeType.Group)
 		{
-			if (provider.Provider.UrlFeedFactory != null)
+			if (FeedProvider.Provider.UrlFeedFactory != null)
 			{
-				result.Add(new MainItemActionViewModel(new RelayCommand(() => { }), "Add feed…", null));
+				result.Add(new NavigationItemActionViewModel(new RelayCommand(() => { }), "Add feed…", null));
 			}
-			result.Add(new MainItemActionViewModel(new RelayCommand(() => { }), "Add group…", null));
+			result.Add(new NavigationItemActionViewModel(new RelayCommand(() => { }), "Add group…", null));
 		}
-		result.Add(new MainItemActionViewModel(new RelayCommand(() => { }), "Rename…", null));
-		result.Add(new MainItemActionViewModel(new RelayCommand(() => { }), "Move…", null));
-		result.Add(new MainItemActionViewModel(new RelayCommand(() => { }), "Delete", null));
+		result.Add(new NavigationItemActionViewModel(new RelayCommand(() => { }), "Rename…", null));
+		result.Add(new NavigationItemActionViewModel(new RelayCommand(() => { }), "Move…", null));
+		result.Add(new NavigationItemActionViewModel(new RelayCommand(() => { }), "Delete…", null));
 		return result.ToImmutableArray();
 	}
 
-	public MainFeedItemViewModel(
+	public FeedNavigationItemViewModel(
 		IReadOnlyFeedNode feedNode, LoadedFeedProvider? feedProvider, 
-		Dictionary<IReadOnlyFeedNode, MainItemViewModel> feedItemRegistry) : base(
+		Dictionary<IReadOnlyFeedNode, NavigationItemViewModel> feedItemRegistry) : base(
 			NavigationRoute.Feed(feedNode), isExpandable: feedNode.Children != null, GetTitle(feedNode),
-			GetSymbol(feedNode), GetActions(feedNode, feedProvider))
+			GetSymbol(feedNode))
 	{
 		FeedNode = feedNode;
 		FeedNode.PropertyChanged += HandlePropertyChanged;
 		FeedProvider = feedProvider;
-		
+
+		Actions = GetActions();
 		if (feedNode.Children != null)
 		{
 			ObservableCollectionTransformer.CreateCached(
-				feedNode.Children, Children,
-				node => new MainFeedItemViewModel(node, FeedProvider, feedItemRegistry), feedItemRegistry);
+				feedNode.Children, MutableChildren,
+				node => new FeedNavigationItemViewModel(node, FeedProvider, feedItemRegistry), feedItemRegistry);
 		}
 	}
 	
@@ -84,7 +84,7 @@ public sealed class MainFeedItemViewModel : MainItemViewModel
 				Symbol = GetSymbol(FeedNode);
 				break;
 			case nameof(IReadOnlyFeedNode.IsUserCustomizable):
-				Actions = GetActions(FeedNode, FeedProvider);
+				Actions = GetActions();
 				break;
 		}
 	}

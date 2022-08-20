@@ -11,8 +11,8 @@ public sealed partial class MainWindow : Window
 	{
 		InitializeComponent();
 
-		Title = _mainPage.WindowTitle;
-		this.GetAppWindow().SetIcon(_mainPage.WindowIcon);
+		Title = MainPage.WindowTitle;
+		this.GetAppWindow().SetIcon(MainPage.WindowIcon);
 
 		if (MicaController.IsSupported())
 		{
@@ -21,10 +21,10 @@ public sealed partial class MainWindow : Window
 
 		if (AppWindowTitleBar.IsCustomizationSupported())
 		{
-			_titleBarHelper = new TitleBarHelper(this, () => _mainPage.ComputeTitleBarDragRegions());
-			_mainPage.CaptionButtonsWidth = _titleBarHelper.CaptionButtonsWidth;
-			_mainPage.TitleBarHeight = _titleBarHelper.TitleBarHeight;
-			_mainPage.DragRegionSizeChanged += (s, e) => _titleBarHelper.UpdateDragRegions();
+			_titleBarHelper = new TitleBarHelper(this, () => MainPage.ComputeTitleBarDragRegions());
+			MainPage.CaptionButtonsWidth = _titleBarHelper.CaptionButtonsWidth;
+			MainPage.TitleBarHeight = _titleBarHelper.TitleBarHeight;
+			MainPage.DragRegionSizeChanged += (s, e) => _titleBarHelper.UpdateDragRegions();
 		}
 	}
 

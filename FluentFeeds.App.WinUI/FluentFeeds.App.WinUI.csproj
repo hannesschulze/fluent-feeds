@@ -14,10 +14,6 @@
 		<Nullable>enable</Nullable>
 		<AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
 	</PropertyGroup>
-	<ItemGroup>
-	  <None Remove="Views\MainItemActionView.xaml" />
-	  <None Remove="Views\MainItemView.xaml" />
-	</ItemGroup>
 	
 	<ItemGroup>
 		<Content Include="Assets\Large310x310Logo.scale-100.png" />
@@ -80,47 +76,14 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Page Update="Views\MainItemActionView.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </Page>
+		<Page Update="Controls\RichTextViewer.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Page Update="Controls\RichTextViewer.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </Page>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Page Update="Controls\RichTextViewer.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </Page>
-	</ItemGroup>
-
-	<ItemGroup>
-		<Page Update="Pages\MainPage.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</Page>
-		<Page Update="Pages\ItemListPage.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</Page>
-		<Page Update="Pages\FeedPage.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</Page>
-		<Page Update="Pages\ArticlePage.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</Page>
-		<Page Update="Pages\SettingsPage.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</Page>
 		<Page Update="Themes\Generic.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Page Update="Views\MainItemView.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </Page>
 	</ItemGroup>
 </Project>

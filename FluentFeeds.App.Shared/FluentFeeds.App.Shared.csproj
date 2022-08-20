@@ -19,4 +19,8 @@
 		<ProjectReference Include="..\FluentFeeds.Feeds.Base\FluentFeeds.Feeds.Base.csproj" />
 		<ProjectReference Include="..\FluentFeeds.Feeds.Syndication\FluentFeeds.Feeds.Syndication.csproj" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="ViewModels\Items" />
+	</ItemGroup>
 </Project>

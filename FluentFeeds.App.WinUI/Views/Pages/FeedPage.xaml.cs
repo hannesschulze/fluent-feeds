@@ -5,19 +5,16 @@ using FluentFeeds.Documents.Blocks.Heading;
 using FluentFeeds.Documents.Blocks.List;
 using FluentFeeds.Documents.Blocks.Table;
 using FluentFeeds.Documents.Inlines;
-using FluentFeeds.App.Shared.Services;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Navigation;
 
-namespace FluentFeeds.App.WinUI.Pages;
+namespace FluentFeeds.App.WinUI.Views.Pages;
 
 public sealed partial class FeedPage : Page
 {
 	public FeedPage()
 	{
 		InitializeComponent();
-		_richText = new RichText(
+		RichText = new RichText(
 			new ParagraphBlock(
 				new TextInline("This is a demo for the "),
 				new HyperlinkInline(
@@ -177,6 +174,6 @@ public sealed partial class FeedPage : Page
 		//navigationService.BackStackChanged += (s, e) => updateLabel();
 		//updateLabel();
 	}
-
-	private RichText _richText;
+	
+	private RichText RichText { get; }
 }

@@ -1,29 +1,29 @@
 ﻿using System.Collections.Immutable;
 using System.ComponentModel;
-using FluentFeeds.App.Shared.ViewModels.Main;
+using FluentFeeds.App.Shared.ViewModels.Items.Navigation;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
-namespace FluentFeeds.App.WinUI.Views;
+namespace FluentFeeds.App.WinUI.Views.Items.Navigation;
 
 /// <summary>
-/// <para>A navigation view item which presents a <see cref="MainItemViewModel"/>.</para>
+/// <para>A navigation view item which presents a <see cref="NavigationItemViewModel"/>.</para>
 /// 
 /// <para>This subclass is currently necessary because we need to keep track of the menu flyout items manually (because
 /// MenuFlyout does not support ItemsSource and ItemTemplate).</para>
 /// </summary>
-public sealed partial class MainItemView : NavigationViewItem
+public sealed partial class NavigationItemView : NavigationViewItem
 {
-	public MainItemView()
+	public NavigationItemView()
 	{
 		InitializeComponent();
 
 		Loading += HandleLoading;
 	}
 
-	public MainItemViewModel? ViewModel => (MainItemViewModel?)DataContext;
+	public NavigationItemViewModel ViewModel => (NavigationItemViewModel)DataContext;
 
-	private void UpdateActions(ImmutableArray<MainItemActionViewModel>? actions)
+	private void UpdateActions(ImmutableArray<NavigationItemActionViewModel>? actions)
 	{
 		if (actions.HasValue)
 		{
@@ -31,7 +31,7 @@ public sealed partial class MainItemView : NavigationViewItem
 			_menuFlyout.Items.Clear();
 			foreach (var action in actions.Value)
 			{
-				_menuFlyout.Items.Add(new MainItemActionView { DataContext = action });
+				_menuFlyout.Items.Add(new NavigationItemActionView { DataContext = action });
 			}
 			ContextFlyout = _menuFlyout;
 		}
@@ -43,7 +43,7 @@ public sealed partial class MainItemView : NavigationViewItem
 
 	private void HandlePropertyChanged(object? sender, PropertyChangedEventArgs e)
 	{
-		if (ViewModel != null && e.PropertyName == nameof(MainItemViewModel.Actions))
+		if (e.PropertyName == nameof(NavigationItemViewModel.Actions))
 		{
 			UpdateActions(ViewModel.Actions);
 		}
@@ -51,11 +51,8 @@ public sealed partial class MainItemView : NavigationViewItem
 
 	private void HandleLoading(FrameworkElement sender, object args)
 	{
-		if (ViewModel != null)
-		{
-			ViewModel.PropertyChanged += HandlePropertyChanged;
-			UpdateActions(ViewModel.Actions);
-		}
+		ViewModel.PropertyChanged += HandlePropertyChanged;
+		UpdateActions(ViewModel.Actions);
 	}
 
 	private MenuFlyout? _menuFlyout;

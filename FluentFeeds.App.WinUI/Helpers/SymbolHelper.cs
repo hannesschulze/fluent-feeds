@@ -45,17 +45,15 @@ public static class SymbolHelper
 	{
 		var source = symbol.ToIconSource();
 		if (source is MUXC.AnimatedIconSource animatedSource)
-		{
-			return 
+			return
 				new MUXC.AnimatedIcon
 				{
 					Source = animatedSource.Source,
 					FallbackIconSource = animatedSource.FallbackIconSource
 				};
-		}
-		else
-		{
-			return new MUXC.IconSourceElement { IconSource = source };
-		}
+
+		return new MUXC.IconSourceElement { IconSource = source };
 	}
+
+	public static MUXC.IconElement? ToIconElementOrNull(Symbol? symbol) => symbol?.ToIconElement();
 }
