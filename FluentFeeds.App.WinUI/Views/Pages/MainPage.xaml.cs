@@ -30,7 +30,7 @@ public sealed partial class MainPage : Page
 	private GridLength NavigationExpandedGridLength => new(NavigationExpandedWidth);
 	private GridLength CaptionButtonsGridLength => new(CaptionButtonsWidth);
 	private Thickness TitleBarAreaLeftMargin => new(left: NavigationCompactWidth, 0, 0, 0);
-	private Thickness ContentFrameMargin => new(0, top: TitleBarHeight, 0, 0);
+	private Thickness ContentMargin => new(0, top: TitleBarHeight, 0, 0);
 
 	public MainViewModel ViewModel => (MainViewModel)DataContext;
 
@@ -54,6 +54,7 @@ public sealed partial class MainPage : Page
 		{
 			modalService.NavigationItemLocator =
 				itemViewModel => NavigationView.ContainerFromMenuItem(itemViewModel) as FrameworkElement;
+			modalService.ErrorBarLocator = () => ErrorBar;
 		}
 
 		TitleBar.Loaded += (s, e) => DragRegionSizeChanged?.Invoke(this, EventArgs.Empty);

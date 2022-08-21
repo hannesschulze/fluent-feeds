@@ -14,6 +14,8 @@ public sealed class ModalService : IModalService
 
 	public Func<NavigationItemViewModel, FrameworkElement?>? NavigationItemLocator { get; set; }
 
+	public Func<InfoBar?>? ErrorBarLocator { get; set; }
+
 	private async void ShowDialog(ContentDialog dialog)
 	{
 		if (XamlRootLocator == null)
@@ -38,9 +40,26 @@ public sealed class ModalService : IModalService
 		}
 	}
 
-	public void ShowModal(NodeDataViewModel viewModel, NavigationItemViewModel relatedItem) =>
+	public void Show(NodeDataViewModel viewModel, NavigationItemViewModel relatedItem)
+	{
 		ShowDialog(new NodeDataView { DataContext = viewModel });
+	}
 
-	public void ShowModal(DeleteNodeViewModel viewModel, NavigationItemViewModel relatedItem) =>
+	public void Show(DeleteNodeViewModel viewModel, NavigationItemViewModel relatedItem)
+	{
 		ShowNavigationFlyout(new DeleteNodeView { DataContext = viewModel }, relatedItem);
+	}
+
+	public void Show(ErrorViewModel viewModel)
+	{
+		if (ErrorBarLocator == null)
+			throw new Exception("Attempting to show an error without an error bar locator.");
+		var errorBar = ErrorBarLocator.Invoke();
+		if (errorBar != null)
+		{
+			errorBar.Title = viewModel.Title;
+			errorBar.Message = viewModel.Message;
+			errorBar.IsOpen = true;
+		}
+	}
 }

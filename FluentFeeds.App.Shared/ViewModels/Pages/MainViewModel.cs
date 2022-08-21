@@ -6,6 +6,7 @@ using FluentFeeds.App.Shared.Helpers;
 using FluentFeeds.App.Shared.Models;
 using FluentFeeds.App.Shared.Services;
 using FluentFeeds.App.Shared.ViewModels.Items.Navigation;
+using FluentFeeds.App.Shared.ViewModels.Modals;
 using FluentFeeds.Common;
 using FluentFeeds.Feeds.Base;
 using FluentFeeds.Feeds.Base.Nodes;
@@ -38,6 +39,7 @@ public sealed class MainViewModel : ObservableObject
 	{
 		_feedService = feedService;
 		_navigationService = navigationService;
+		_modalService = modalService;
 		_navigationService.BackStackChanged += HandleBackStackChanged;
 		
 		_goBackCommand = new RelayCommand(() => _navigationService.GoBack(), () => _navigationService.CanGoBack);
@@ -67,7 +69,15 @@ public sealed class MainViewModel : ObservableObject
 
 	private async void InitializeFeeds()
 	{
-		await _feedService.InitializeAsync();
+		try
+		{
+			await _feedService.InitializeAsync();
+		}
+		catch (Exception)
+		{
+			_modalService.Show(
+				new ErrorViewModel("A database error occurred", "FluentFeeds was unable to initialize its database."));
+		}
 	}
 
 	/// <summary>
@@ -143,6 +153,7 @@ public sealed class MainViewModel : ObservableObject
 
 	private readonly IFeedService _feedService;
 	private readonly INavigationService _navigationService;
+	private readonly IModalService _modalService;
 	private readonly RelayCommand _goBackCommand;
 	private readonly NavigationItemViewModel _settingsItem;
 	private readonly ObservableCollection<NavigationItemViewModel> _feedItems = new();

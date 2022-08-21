@@ -1,4 +1,6 @@
-﻿using System.Windows.Input;
+﻿using System;
+using System.Windows.Input;
+using FluentFeeds.App.Shared.Services;
 using FluentFeeds.Feeds.Base.Nodes;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
@@ -10,8 +12,9 @@ namespace FluentFeeds.App.Shared.ViewModels.Modals;
 /// </summary>
 public sealed class DeleteNodeViewModel : ObservableObject
 {
-	public DeleteNodeViewModel(IReadOnlyStoredFeedNode node)
+	public DeleteNodeViewModel(IModalService modalService, IReadOnlyStoredFeedNode node)
 	{
+		_modalService = modalService;
 		_node = node;
 		_confirmCommand = new RelayCommand(HandleConfirmCommand);
 		InfoText =
@@ -31,10 +34,21 @@ public sealed class DeleteNodeViewModel : ObservableObject
 
 	private async void HandleConfirmCommand()
 	{
-		var storage = _node.Storage;
-		await storage.DeleteNodeAsync(_node.Identifier);
+		try
+		{
+			var storage = _node.Storage;
+			await storage.DeleteNodeAsync(_node.Identifier);
+		}
+		catch (Exception)
+		{
+			_modalService.Show(
+				new ErrorViewModel(
+					"A database error occurred",
+					"FluentFeeds was unable to delete the selected item from the database."));
+		}
 	}
 
+	private readonly IModalService _modalService;
 	private readonly IReadOnlyStoredFeedNode _node;
 	private readonly RelayCommand _confirmCommand;
 }

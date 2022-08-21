@@ -29,21 +29,21 @@ public sealed class FeedNavigationItemViewModel : NavigationItemViewModel
 			{
 				result.Add(new NavigationItemActionViewModel(
 					new RelayCommand(() =>
-						_modalService.ShowModal(new AddFeedViewModel(urlFactory, _rootNode, storedNode), this)),
+						_modalService.Show(new AddFeedViewModel(urlFactory, _rootNode, storedNode), this)),
 					"Add feed…", null));
 			}
 			result.Add(new NavigationItemActionViewModel(
-				new RelayCommand(() => _modalService.ShowModal(new AddGroupViewModel(_rootNode, storedNode), this)),
+				new RelayCommand(() => _modalService.Show(new AddGroupViewModel(_rootNode, storedNode), this)),
 				"Add group…", null));
 		}
 		
 		if (storedNode != _rootNode)
 		{
 			result.Add(new NavigationItemActionViewModel(
-				new RelayCommand(() => _modalService.ShowModal(new EditNodeViewModel(_rootNode, storedNode), this)),
+				new RelayCommand(() => _modalService.Show(new EditNodeViewModel(_rootNode, storedNode), this)),
 				"Edit…", null));
 			result.Add(new NavigationItemActionViewModel(
-				new RelayCommand(() => _modalService.ShowModal(new DeleteNodeViewModel(storedNode), this)),
+				new RelayCommand(() => _modalService.Show(new DeleteNodeViewModel(_modalService, storedNode), this)),
 				"Delete", null));
 		}
 		
