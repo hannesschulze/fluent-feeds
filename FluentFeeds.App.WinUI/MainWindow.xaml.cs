@@ -1,4 +1,7 @@
-﻿using FluentFeeds.App.WinUI.Helpers;
+﻿using FluentFeeds.App.Shared.Services;
+using FluentFeeds.App.WinUI.Helpers;
+using FluentFeeds.App.WinUI.Services;
+using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
@@ -10,6 +13,11 @@ public sealed partial class MainWindow : Window
 	public MainWindow()
 	{
 		InitializeComponent();
+
+		if (Ioc.Default.GetService<IModalService>() is ModalService modalService)
+		{
+			modalService.XamlRootLocator = () => Content.XamlRoot;
+		}
 
 		Title = MainPage.WindowTitle;
 		this.GetAppWindow().SetIcon(MainPage.WindowIcon);

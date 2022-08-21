@@ -1,6 +1,7 @@
 ﻿using FluentFeeds.App.Shared.Services;
 using FluentFeeds.App.Shared.Services.Default;
 using FluentFeeds.App.Shared.ViewModels.Pages;
+using FluentFeeds.App.WinUI.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
@@ -22,6 +23,7 @@ public partial class App : Application
 				.AddSingleton<IDatabaseService, DatabaseService>()
 				.AddSingleton<IFeedService, FeedService>()
 				.AddSingleton<INavigationService, NavigationService>()
+				.AddSingleton<IModalService, ModalService>()
 				.AddTransient<MainViewModel>()
 				.BuildServiceProvider());
 

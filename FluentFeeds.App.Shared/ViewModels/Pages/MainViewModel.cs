@@ -34,7 +34,7 @@ public sealed class MainViewModel : ObservableObject
 		Feed
 	}
 
-	public MainViewModel(IFeedService feedService, INavigationService navigationService)
+	public MainViewModel(IFeedService feedService, INavigationService navigationService, IModalService modalService)
 	{
 		_feedService = feedService;
 		_navigationService = navigationService;
@@ -45,16 +45,19 @@ public sealed class MainViewModel : ObservableObject
 			new NavigationItemViewModel(NavigationRoute.Settings, isExpandable: false, "Settings", Symbol.Settings);
 		_footerItems.Add(_settingsItem);
 		var overviewFeedNode = feedService.OverviewFeed;
-		var overviewItem = new FeedNavigationItemViewModel(overviewFeedNode, null, _feedItemRegistry);
+		var overviewItem = new FeedNavigationItemViewModel(
+			feedService, modalService, overviewFeedNode, null, _feedItemRegistry);
 		var unreadFeedNode = FeedNode.Custom(new EmptyFeed(), "Unread", Symbol.Sparkle, false);
-		var unreadItem = new FeedNavigationItemViewModel(unreadFeedNode, null, _feedItemRegistry);
+		var unreadItem = new FeedNavigationItemViewModel(
+			feedService, modalService, unreadFeedNode, null, _feedItemRegistry);
 		_feedItemRegistry.Add(overviewFeedNode, overviewItem);
 		_feedItemRegistry.Add(unreadFeedNode, unreadItem);
 		_feedItems.Add(overviewItem);
 		_feedItems.Add(unreadItem);
 		_feedItemTransformer = ObservableCollectionTransformer.CreateCached(
 			feedService.FeedProviders, _feedItems, 
-			provider => new FeedNavigationItemViewModel(provider.RootNode, provider, _feedItemRegistry), 
+			provider => new FeedNavigationItemViewModel(
+				feedService, modalService, provider.RootNode, provider, _feedItemRegistry),
 			provider => provider.RootNode, _feedItemRegistry);
 		_visiblePage = GetVisiblePage();
 		_selectedItem = GetSelectedItem();

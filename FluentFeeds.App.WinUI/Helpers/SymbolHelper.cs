@@ -54,6 +54,4 @@ public static class SymbolHelper
 
 		return new MUXC.IconSourceElement { IconSource = source };
 	}
-
-	public static MUXC.IconElement? ToIconElementOrNull(Symbol? symbol) => symbol?.ToIconElement();
 }

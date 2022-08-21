@@ -3,6 +3,8 @@ using System.Collections.Immutable;
 using System.ComponentModel;
 using FluentFeeds.App.Shared.Helpers;
 using FluentFeeds.App.Shared.Models;
+using FluentFeeds.App.Shared.Services;
+using FluentFeeds.App.Shared.ViewModels.Modals;
 using FluentFeeds.Common;
 using FluentFeeds.Feeds.Base.Nodes;
 using Microsoft.Toolkit.Mvvm.Input;
@@ -26,40 +28,53 @@ public sealed class FeedNavigationItemViewModel : NavigationItemViewModel
 
 	private ImmutableArray<NavigationItemActionViewModel>? GetActions()
 	{
-		if (FeedNode is not IReadOnlyStoredFeedNode storedNode || !FeedNode.IsUserCustomizable || FeedProvider == null)
+		if (FeedNode is not IReadOnlyStoredFeedNode || !FeedNode.IsUserCustomizable || FeedProvider == null)
+			return null;
+
+		var showGroupActions = FeedNode.Type == FeedNodeType.Group;
+		var showEditActions = FeedNode != FeedProvider.RootNode;
+		if (!showGroupActions && !showEditActions)
 			return null;
 
 		var result = new List<NavigationItemActionViewModel>();
-		if (FeedNode.Type == FeedNodeType.Group)
+		if (showGroupActions)
 		{
 			if (FeedProvider.Provider.UrlFeedFactory != null)
 			{
-				result.Add(new NavigationItemActionViewModel(new RelayCommand(() => { }), "Add feed…", null));
+				result.Add(new NavigationItemActionViewModel(new RelayCommand(HandleAddFeedCommand), "Add feed…", null));
 			}
-			result.Add(new NavigationItemActionViewModel(new RelayCommand(() => { }), "Add group…", null));
+			result.Add(new NavigationItemActionViewModel(new RelayCommand(HandleAddGroupCommand), "Add group…", null));
 		}
-		result.Add(new NavigationItemActionViewModel(new RelayCommand(() => { }), "Rename…", null));
-		result.Add(new NavigationItemActionViewModel(new RelayCommand(() => { }), "Move…", null));
-		result.Add(new NavigationItemActionViewModel(new RelayCommand(() => { }), "Delete…", null));
+		if (showEditActions)
+		{
+			result.Add(new NavigationItemActionViewModel(new RelayCommand(HandleEditNodeCommand), "Edit…", null));
+			result.Add(new NavigationItemActionViewModel(new RelayCommand(HandleDeleteNodeCommand), "Delete", null));
+		}
 		return result.ToImmutableArray();
 	}
 
 	public FeedNavigationItemViewModel(
-		IReadOnlyFeedNode feedNode, LoadedFeedProvider? feedProvider, 
+		IFeedService feedService, IModalService modalService, IReadOnlyFeedNode feedNode,
+		LoadedFeedProvider? feedProvider,
 		Dictionary<IReadOnlyFeedNode, NavigationItemViewModel> feedItemRegistry) : base(
 			NavigationRoute.Feed(feedNode), isExpandable: feedNode.Children != null, GetTitle(feedNode),
 			GetSymbol(feedNode))
 	{
+		_feedService = feedService;
+		_modalService = modalService;
+
 		FeedNode = feedNode;
 		FeedNode.PropertyChanged += HandlePropertyChanged;
 		FeedProvider = feedProvider;
-
 		Actions = GetActions();
+
 		if (feedNode.Children != null)
 		{
 			ObservableCollectionTransformer.CreateCached(
 				feedNode.Children, MutableChildren,
-				node => new FeedNavigationItemViewModel(node, FeedProvider, feedItemRegistry), feedItemRegistry);
+				node => new FeedNavigationItemViewModel(
+					_feedService, _modalService, node, FeedProvider, feedItemRegistry),
+				feedItemRegistry);
 		}
 	}
 	
@@ -88,4 +103,31 @@ public sealed class FeedNavigationItemViewModel : NavigationItemViewModel
 				break;
 		}
 	}
+
+	private void HandleAddFeedCommand()
+	{
+		var viewModel = new AddFeedViewModel(_feedService, FeedProvider!, (IReadOnlyStoredFeedNode)FeedNode);
+		_modalService.ShowModal(viewModel, this);
+	}
+
+	private void HandleAddGroupCommand()
+	{
+		var viewModel = new AddGroupViewModel(_feedService, FeedProvider!, (IReadOnlyStoredFeedNode)FeedNode);
+		_modalService.ShowModal(viewModel, this);
+	}
+
+	private void HandleEditNodeCommand()
+	{
+		var viewModel = new EditNodeViewModel(_feedService, FeedProvider!, (IReadOnlyStoredFeedNode)FeedNode);
+		_modalService.ShowModal(viewModel, this);
+	}
+
+	private void HandleDeleteNodeCommand()
+	{
+		var viewModel = new DeleteNodeViewModel(_feedService, (IReadOnlyStoredFeedNode)FeedNode);
+		_modalService.ShowModal(viewModel, this);
+	}
+
+	private readonly IFeedService _feedService;
+	private readonly IModalService _modalService;
 }

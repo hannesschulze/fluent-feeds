@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Immutable;
 using System.ComponentModel;
 using FluentFeeds.App.Shared.ViewModels.Items.Navigation;
 using Microsoft.UI.Xaml;
@@ -18,20 +19,22 @@ public sealed partial class NavigationItemView : NavigationViewItem
 	{
 		InitializeComponent();
 
-		Loading += HandleLoading;
+		DataContextChanged += HandleDataContextChanged;
 	}
 
-	public NavigationItemViewModel ViewModel => (NavigationItemViewModel)DataContext;
+	public NavigationItemViewModel? ViewModel { get; private set; }
 
-	private void UpdateActions(ImmutableArray<NavigationItemActionViewModel>? actions)
+	private void UpdateActions()
 	{
+		var actions = ViewModel?.Actions;
 		if (actions.HasValue)
 		{
+			_itemStyle ??= Application.Current.Resources["DefaultMenuFlyoutItemStyle"] as Style;
 			_menuFlyout ??= new MenuFlyout();
 			_menuFlyout.Items.Clear();
 			foreach (var action in actions.Value)
 			{
-				_menuFlyout.Items.Add(new NavigationItemActionView { DataContext = action });
+				_menuFlyout.Items.Add(new NavigationItemActionView { DataContext = action, Style = _itemStyle });
 			}
 			ContextFlyout = _menuFlyout;
 		}
@@ -45,15 +48,23 @@ public sealed partial class NavigationItemView : NavigationViewItem
 	{
 		if (e.PropertyName == nameof(NavigationItemViewModel.Actions))
 		{
-			UpdateActions(ViewModel.Actions);
+			UpdateActions();
 		}
 	}
 
-	private void HandleLoading(FrameworkElement sender, object args)
+	private void HandleDataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
 	{
-		ViewModel.PropertyChanged += HandlePropertyChanged;
-		UpdateActions(ViewModel.Actions);
+		if (!Object.ReferenceEquals(DataContext, ViewModel))
+		{
+			if (ViewModel != null)
+				ViewModel.PropertyChanged -= HandlePropertyChanged;
+			ViewModel = DataContext as NavigationItemViewModel;
+			if (ViewModel != null)
+				ViewModel.PropertyChanged += HandlePropertyChanged;
+			UpdateActions();
+		}
 	}
 
 	private MenuFlyout? _menuFlyout;
+	private Style? _itemStyle;
 }

@@ -8,6 +8,8 @@ using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
+using FluentFeeds.App.Shared.Services;
+using FluentFeeds.App.WinUI.Services;
 
 namespace FluentFeeds.App.WinUI.Views.Pages;
 
@@ -47,6 +49,12 @@ public sealed partial class MainPage : Page
 	{
 		DataContext = Ioc.Default.GetRequiredService<MainViewModel>();
 		InitializeComponent();
+
+		if (Ioc.Default.GetService<IModalService>() is ModalService modalService)
+		{
+			modalService.NavigationItemLocator =
+				itemViewModel => NavigationView.ContainerFromMenuItem(itemViewModel) as FrameworkElement;
+		}
 
 		TitleBar.Loaded += (s, e) => DragRegionSizeChanged?.Invoke(this, EventArgs.Empty);
 		NavigationView.PaneClosing += (s, e) => UpdateTitleInset();

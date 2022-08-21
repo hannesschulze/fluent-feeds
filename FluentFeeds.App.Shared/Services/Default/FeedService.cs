@@ -4,6 +4,8 @@ using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.Linq;
+using AngleSharp.Dom;
 using FluentFeeds.App.Shared.Models;
 using FluentFeeds.App.Shared.Models.Database;
 using FluentFeeds.Common;
@@ -17,6 +19,21 @@ namespace FluentFeeds.App.Shared.Services.Default;
 
 public partial class FeedService : IFeedService
 {
+	private sealed class CachedFeedNode : StoredFeedNode
+	{
+		public CachedFeedNode(IReadOnlyFeedNode node, FeedProvider provider, CachedFeedNode? parent, FeedNodeDb db)
+			: base(node, db.Identifier)
+		{
+			Parent = parent;
+			Provider = provider;
+			Db = db;
+		}
+		
+		public CachedFeedNode? Parent { get; set; }
+		public FeedProvider Provider { get; }
+		public FeedNodeDb Db { get; }
+	}
+
 	public FeedService(IDatabaseService databaseService, IPluginService pluginService)
 	{
 		_databaseService = databaseService;
@@ -29,6 +46,147 @@ public partial class FeedService : IFeedService
 
 	public Task InitializeAsync() => _initialize.Value;
 
+	public async Task AddGroupNodeAsync(Guid parentIdentifier, string name)
+	{
+		var parentNode = _feedNodes[parentIdentifier];
+		if (parentNode.Type != FeedNodeType.Group)
+			throw new Exception("Invalid parent node type.");
+		var newNode = FeedNode.Group(name, Symbol.Directory, isUserCustomizable: true);
+
+		// Update database
+		var node = await _databaseService.ExecuteAsync(
+			async database =>
+			{
+				database.Attach(parentNode.Db);
+				var node = await StoreFeedNodeAsync(database, newNode, parentNode.Provider, parentNode);
+				await database.SaveChangesAsync();
+				return node;
+			});
+
+		// Update local representation
+		AddNodeSorted(node, parentNode.Children!);
+		_feedNodes.Add(node.Identifier, node);
+	}
+
+	public async Task AddFeedNodeAsync(Guid parentIdentifier, Feed feed)
+	{
+		var parentNode = _feedNodes[parentIdentifier];
+		if (parentNode.Type != FeedNodeType.Group)
+			throw new Exception("Invalid parent node type.");
+		var newNode = FeedNode.Custom(feed, null, null, isUserCustomizable: true);
+
+		// Update database
+		var node = await _databaseService.ExecuteAsync(
+			async database =>
+			{
+				database.Attach(parentNode.Db);
+				var node = await StoreFeedNodeAsync(database, newNode, parentNode.Provider, parentNode);
+				await database.SaveChangesAsync();
+				return node;
+			});
+
+		// Update local representation
+		AddNodeSorted(node, parentNode.Children!);
+		_feedNodes.Add(node.Identifier, node);
+	}
+
+	public async Task DeleteNodeAsync(Guid identifier)
+	{
+		// Determine deleted items.
+		var node = _feedNodes[identifier];
+		var stack = new Stack<CachedFeedNode>();
+		var deleted = new List<CachedFeedNode>();
+		stack.Push(node);
+		while (stack.TryPop(out var currentNode))
+		{
+			deleted.Add(currentNode);
+
+			if (currentNode.Children != null)
+			{
+				foreach (var child in currentNode.Children)
+				{
+					stack.Push((CachedFeedNode)child);
+				}
+			}
+		}
+
+		// Update database
+		await _databaseService.ExecuteAsync(
+			async database =>
+			{
+				var dbNodes = deleted.Select(node => node.Db).ToList();
+				database.AttachRange(dbNodes);
+				database.RemoveRange(dbNodes);
+				await database.SaveChangesAsync();
+			});
+
+		// Update local representation
+		node.Parent?.Children?.Remove(node);
+		foreach (var deletedNode in deleted)
+		{
+			_feedNodes.Remove(deletedNode.Identifier);
+		}
+	}
+
+	public IReadOnlyStoredFeedNode? GetNode(Guid identifier)
+	{
+		return _feedNodes.GetValueOrDefault(identifier);
+	}
+
+	public IReadOnlyStoredFeedNode? GetParentNode(Guid identifier)
+	{
+		return _feedNodes.GetValueOrDefault(identifier)?.Parent;
+	}
+
+	public async Task EditNodeAsync(Guid identifier, Guid parentIdentifier, string name)
+	{
+		var node = _feedNodes[identifier];
+		var oldParent = node.Parent;
+		var newParent = oldParent?.Identifier != parentIdentifier ? _feedNodes[parentIdentifier] : null;
+
+		// Update database
+		await _databaseService.ExecuteAsync(
+			async database =>
+			{
+				database.Attach(node.Db);
+				if (name != node.ActualTitle)
+					node.Db.Title = name;
+				if (newParent != null)
+					node.Db.Parent = newParent.Db;
+				await database.SaveChangesAsync();
+			});
+
+		// Update local representation
+		if (name != node.Title)
+		{
+			node.Title = name;
+		}
+
+		if (newParent != null)
+		{
+			// Move the local item to the new parent.
+			oldParent?.Children?.Remove(node);
+			node.Parent = newParent;
+			AddNodeSorted(node, newParent.Children!);
+		}
+	}
+
+	private static void AddNodeSorted(CachedFeedNode node, ObservableCollection<IReadOnlyFeedNode> container)
+	{
+		for (var i = 0; i < container.Count; ++i)
+		{
+			var comparisonResult = String.Compare(
+				container[i].ActualTitle, node.ActualTitle, StringComparison.CurrentCultureIgnoreCase);
+			if (comparisonResult > 0)
+			{
+				container.Insert(i, node);
+				return;
+			}
+		}
+
+		container.Add(node);
+	}
+
 	public ReadOnlyObservableCollection<LoadedFeedProvider> FeedProviders { get; }
 	
 	public IReadOnlyFeedNode OverviewFeed { get; }
@@ -36,81 +194,75 @@ public partial class FeedService : IFeedService
 	/// <summary>
 	/// Load a feed node and all of its children from its database representation.
 	/// </summary>
-	private static async Task<StoredFeedNode> LoadFeedNodeAsync(
-		AppDbContext database, FeedNodeDb node, FeedProvider provider, IFeedStorage storage,
-		ICollection<StoredFeedNode> allNodes)
+	private static async Task<CachedFeedNode> LoadFeedNodeAsync(
+		AppDbContext database, FeedNodeDb dbNode, FeedProvider provider, IFeedStorage storage, CachedFeedNode? parent,
+		ICollection<CachedFeedNode>? allNodes = null)
 	{
-		List<IReadOnlyFeedNode>? children = null;
-		if (node.HasChildren)
+		var node = new CachedFeedNode(
+			dbNode.Type switch
+			{
+				FeedNodeType.Group => FeedNode.Group(dbNode.Title, dbNode.Symbol, dbNode.IsUserCustomizable),
+				FeedNodeType.Custom => FeedNode.Custom(
+					await provider.LoadFeedAsync(storage, dbNode.Feed ?? String.Empty), dbNode.Title, dbNode.Symbol,
+					dbNode.IsUserCustomizable, dbNode.HasChildren ? Enumerable.Empty<IReadOnlyFeedNode>() : null),
+				_ => throw new IndexOutOfRangeException()
+			}, provider, parent, dbNode);
+		allNodes?.Add(node);
+
+		if (node.Children != null)
 		{
-			var dbChildren = await database.FeedNodes.Where(n => n.Parent == node).ToListAsync();
-			children = new List<IReadOnlyFeedNode> { Capacity = dbChildren.Count };
+			var dbChildren = await database.FeedNodes.Where(n => n.Parent == dbNode).ToListAsync();
+			var children = new List<CachedFeedNode>();
 			foreach (var child in dbChildren)
 			{
-				children.Add(await LoadFeedNodeAsync(database, child, provider, storage, allNodes));
+				children.Add(await LoadFeedNodeAsync(database, child, provider, storage, node, allNodes));
+			}
+
+			var sortedChildren = children.OrderBy(n => n.ActualTitle, StringComparer.CurrentCultureIgnoreCase);
+			foreach (var child in sortedChildren)
+			{
+				node.Children.Add(child);
 			}
 		}
-		
-		var storedNode =
-			node.Type switch
-			{
-				FeedNodeType.Group => StoredFeedNode.Group(
-					node.Identifier, node.Title, node.Symbol, node.IsUserCustomizable,
-					children ?? Enumerable.Empty<IReadOnlyFeedNode>()),
-				FeedNodeType.Custom => StoredFeedNode.Custom(
-					node.Identifier, await provider.LoadFeedAsync(storage, node.Feed ?? String.Empty),
-					node.Title, node.Symbol, node.IsUserCustomizable, children),
-				_ => throw new IndexOutOfRangeException()
-			};
-		allNodes.Add(storedNode);
-		return storedNode;
+
+		return node;
 	}
 
 	/// <summary>
 	/// Store a new feed node and all its children, returning its stored representation.
 	/// </summary>
-	private static async Task<(StoredFeedNode Stored, FeedNodeDb Db)> StoreFeedNodeAsync(
-		AppDbContext database, IReadOnlyFeedNode node, FeedProvider provider, FeedNodeDb? parent,
-		ICollection<StoredFeedNode> allNodes)
+	private static async Task<CachedFeedNode> StoreFeedNodeAsync(
+		AppDbContext database, IReadOnlyFeedNode inputNode, FeedProvider provider, CachedFeedNode? parent,
+		ICollection<CachedFeedNode>? allNodes = null)
 	{
-		var identifier = Guid.NewGuid();
-		var dbNode =
+		var node = new CachedFeedNode(
+			inputNode, provider, parent,
 			new FeedNodeDb
 			{
-				Identifier = identifier,
-				Parent = parent,
-				HasChildren = node.Children != null,
-				Type = node.Type,
-				Feed = node.Type == FeedNodeType.Custom ? await provider.StoreFeedAsync(node.Feed) : null,
-				Title = node.Title,
-				Symbol = node.Symbol,
-				IsUserCustomizable = node.IsUserCustomizable
-			};
-		await database.FeedNodes.AddAsync(dbNode);
+				Identifier = Guid.NewGuid(),
+				Parent = parent?.Db,
+				HasChildren = inputNode.Children != null,
+				Type = inputNode.Type,
+				Feed = inputNode.Type == FeedNodeType.Custom ? await provider.StoreFeedAsync(inputNode.Feed) : null,
+				Title = inputNode.Title,
+				Symbol = inputNode.Symbol,
+				IsUserCustomizable = inputNode.IsUserCustomizable
+			});
+		await database.FeedNodes.AddAsync(node.Db);
+		allNodes?.Add(node);
 
-		List<IReadOnlyFeedNode>? children = null;
 		if (node.Children != null)
 		{
-			children = new List<IReadOnlyFeedNode> { Capacity = node.Children.Count };
-			foreach (var child in node.Children)
+			node.Children.Clear();
+			var sortedChildren = inputNode.Children!
+				.OrderBy(n => n.ActualTitle, StringComparer.CurrentCultureIgnoreCase);
+			foreach (var child in sortedChildren)
 			{
-				var (storedChild, _) = await StoreFeedNodeAsync(database, child, provider, dbNode, allNodes);
-				children.Add(storedChild);
+				node.Children.Add(await StoreFeedNodeAsync(database, child, provider, node, allNodes));
 			}
 		}
-		
-		var storedNode =
-			node.Type switch
-			{
-				FeedNodeType.Group => StoredFeedNode.Group(
-					identifier, node.Title, node.Symbol, node.IsUserCustomizable,
-					children ?? Enumerable.Empty<IReadOnlyFeedNode>()),
-				FeedNodeType.Custom => StoredFeedNode.Custom(
-					identifier, node.Feed, node.Title, node.Symbol, node.IsUserCustomizable, children),
-				_ => throw new IndexOutOfRangeException()
-			};
-		allNodes.Add(storedNode);
-		return (storedNode, dbNode);
+
+		return node;
 	}
 
 	/// <summary>
@@ -118,7 +270,7 @@ public partial class FeedService : IFeedService
 	/// is new or loads the existing structure from the database.
 	/// </summary>
 	private async Task<List<LoadedFeedProvider>> LoadFeedProvidersAsync(
-		AppDbContext database, IEnumerable<FeedProvider> providers, ICollection<StoredFeedNode> allNodes)
+		AppDbContext database, IEnumerable<FeedProvider> providers, ICollection<CachedFeedNode>? allNodes = null)
 	{
 		var result = new List<LoadedFeedProvider>();
 		foreach (var provider in providers)
@@ -129,19 +281,18 @@ public partial class FeedService : IFeedService
 				.Select(p => p.RootNode)
 				.FirstOrDefaultAsync();
 			var storage = new FeedStorage(this, identifier);
-			
-			IReadOnlyStoredFeedNode rootNode;
+
+			CachedFeedNode rootNode;
 			if (existingRootNode != null)
 			{
-				rootNode = await LoadFeedNodeAsync(database, existingRootNode, provider, storage, allNodes);
+				rootNode = await LoadFeedNodeAsync(database, existingRootNode, provider, storage, null, allNodes);
 			}
 			else
 			{
-				var (storedNode, dbNode) =
+				rootNode =
 					await StoreFeedNodeAsync(database, provider.CreateInitialTree(storage), provider, null, allNodes);
 				await database.FeedProviders.AddAsync(
-					new FeedProviderDb { Identifier = provider.Metadata.Identifier, RootNode = dbNode });
-				rootNode = storedNode;
+					new FeedProviderDb { Identifier = provider.Metadata.Identifier, RootNode = rootNode.Db });
 			}
 
 			result.Add(new LoadedFeedProvider(provider, rootNode, storage));
@@ -155,7 +306,7 @@ public partial class FeedService : IFeedService
 	private async Task InitializeAsyncCore()
 	{
 		var providers = _pluginService.GetAvailableFeedProviders();
-		var allNodes = new List<StoredFeedNode>();
+		var allNodes = new List<CachedFeedNode>();
 		var loadedProviders =
 			await _databaseService.ExecuteAsync(database => LoadFeedProvidersAsync(database, providers, allNodes));
 		
@@ -171,6 +322,6 @@ public partial class FeedService : IFeedService
 	private readonly Lazy<Task> _initialize;
 	private readonly ObservableCollection<LoadedFeedProvider> _feedProviders = new();
 	private readonly CompositeFeed _overviewFeed = new();
-	private readonly Dictionary<Guid, StoredFeedNode> _feedNodes = new();
+	private readonly Dictionary<Guid, CachedFeedNode> _feedNodes = new();
 	private readonly Dictionary<Guid, StoredItem> _items = new();
 }
