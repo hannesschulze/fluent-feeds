@@ -13,7 +13,7 @@ namespace FluentFeeds.Feeds.Base.Nodes;
 /// </summary>
 public class FeedNode : ObservableObject, IReadOnlyFeedNode
 {
-	internal FeedNode(
+	private FeedNode(
 		FeedNodeType type, Feed? feed, string? title, Symbol? symbol, bool isUserCustomizable,
 		IEnumerable<IReadOnlyFeedNode>? children)
 	{
@@ -34,13 +34,22 @@ public class FeedNode : ObservableObject, IReadOnlyFeedNode
 		_title = title;
 		_symbol = symbol;
 		_isUserCustomizable = isUserCustomizable;
+		_displayTitle = GetDisplayTitle();
+		_displaySymbol = GetDisplaySymbol();
 
-		UpdateActualTitle();
-		UpdateActualSymbol();
 		if (_customFeed != null)
 		{
 			_customFeed.MetadataUpdated += HandleFeedMetadataUpdated;
 		}
+	}
+
+	/// <summary>
+	/// Create a copy of another node.
+	/// </summary>
+	public FeedNode(IReadOnlyFeedNode node) : this(
+		node.Type, node.Type == FeedNodeType.Custom ? node.Feed : null, node.Title, node.Symbol,
+		node.IsUserCustomizable, node.Children)
+	{
 	}
 
 	/// <summary>
@@ -79,7 +88,7 @@ public class FeedNode : ObservableObject, IReadOnlyFeedNode
 		set
 		{
 			SetProperty(ref _title, value);
-			UpdateActualTitle();
+			DisplayTitle = GetDisplayTitle();
 		}
 	}
 
@@ -89,20 +98,20 @@ public class FeedNode : ObservableObject, IReadOnlyFeedNode
 		set
 		{
 			SetProperty(ref _symbol, value);
-			UpdateActualSymbol();
+			DisplaySymbol = GetDisplaySymbol();
 		}
 	}
 
-	public string? ActualTitle
+	public string DisplayTitle
 	{
-		get => _actualTitle;
-		private set => SetProperty(ref _actualTitle, value);
+		get => _displayTitle;
+		private set => SetProperty(ref _displayTitle, value);
 	}
 
-	public Symbol? ActualSymbol
+	public Symbol DisplaySymbol
 	{
-		get => _actualSymbol;
-		private set => SetProperty(ref _actualSymbol, value);
+		get => _displaySymbol;
+		private set => SetProperty(ref _displaySymbol, value);
 	}
 
 	public bool IsUserCustomizable
@@ -121,13 +130,13 @@ public class FeedNode : ObservableObject, IReadOnlyFeedNode
 	
 	private void HandleFeedMetadataUpdated(object? sender, EventArgs e)
 	{
-		UpdateActualTitle();
-		UpdateActualSymbol();
+		DisplayTitle = GetDisplayTitle();
+		DisplaySymbol = GetDisplaySymbol();
 	}
 
-	private void UpdateActualTitle() => ActualTitle = Title ?? _customFeed?.Metadata.Name;
+	private string GetDisplayTitle() => Title ?? _customFeed?.Metadata.Name ?? "Unnamed feed";
 
-	private void UpdateActualSymbol() => ActualSymbol = Symbol ?? _customFeed?.Metadata.Symbol;
+	private Symbol GetDisplaySymbol() => Symbol ?? _customFeed?.Metadata.Symbol ?? Common.Symbol.Feed;
 
 	private readonly Lazy<Feed> _feed;
 	private readonly Feed? _customFeed;
@@ -135,7 +144,7 @@ public class FeedNode : ObservableObject, IReadOnlyFeedNode
 	private readonly ReadOnlyObservableCollection<IReadOnlyFeedNode>? _readOnlyChildren;
 	private string? _title;
 	private Symbol? _symbol;
-	private string? _actualTitle;
-	private Symbol? _actualSymbol;
+	private string _displayTitle;
+	private Symbol _displaySymbol;
 	private bool _isUserCustomizable;
 }

@@ -1,5 +1,4 @@
 ﻿using System.Windows.Input;
-using FluentFeeds.App.Shared.Services;
 using FluentFeeds.Feeds.Base.Nodes;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
@@ -11,12 +10,13 @@ namespace FluentFeeds.App.Shared.ViewModels.Modals;
 /// </summary>
 public sealed class DeleteNodeViewModel : ObservableObject
 {
-	public DeleteNodeViewModel(IFeedService feedService, IReadOnlyStoredFeedNode node)
+	public DeleteNodeViewModel(IReadOnlyStoredFeedNode node)
 	{
-		_feedService = feedService;
 		_node = node;
 		_confirmCommand = new RelayCommand(HandleConfirmCommand);
-		InfoText = $"This action will permanently delete \"{node.ActualTitle}\" and all of its children. Are you sure you want to continue?";
+		InfoText =
+			$"This action will permanently delete \"{node.DisplayTitle}\" and all of its children. Are you sure you" + 
+			" want to continue?";
 	}
 
 	/// <summary>
@@ -31,10 +31,10 @@ public sealed class DeleteNodeViewModel : ObservableObject
 
 	private async void HandleConfirmCommand()
 	{
-		await _feedService.DeleteNodeAsync(_node.Identifier);
+		var storage = _node.Storage;
+		await storage.DeleteNodeAsync(_node.Identifier);
 	}
 
-	private readonly IFeedService _feedService;
 	private readonly IReadOnlyStoredFeedNode _node;
 	private readonly RelayCommand _confirmCommand;
 }

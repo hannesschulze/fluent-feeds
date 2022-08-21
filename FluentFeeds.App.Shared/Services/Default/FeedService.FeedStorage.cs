@@ -4,9 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentFeeds.App.Shared.Models.Database;
-using FluentFeeds.Feeds.Base.Items;
-using FluentFeeds.Feeds.Base.Items.Content;
-using FluentFeeds.Feeds.Base.Items.ContentLoaders;
+using FluentFeeds.Feeds.Base;
+using FluentFeeds.Feeds.Base.Nodes;
 using FluentFeeds.Feeds.Base.Storage;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,245 +13,285 @@ namespace FluentFeeds.App.Shared.Services.Default;
 
 public partial class FeedService
 {
-	/// <summary>
-	/// Content loader which lazily loads the serialized content from the database and then acts as a proxy for the
-	/// deserialized loader.
-	/// </summary>
-	private sealed class ItemContentLoader : IItemContentLoader
+	private sealed class FeedStorage : IFeedStorage
 	{
-		public ItemContentLoader(FeedService feedService, Guid identifier, IItemContentSerializer contentSerializer)
+		public FeedStorage(IDatabaseService databaseService, FeedProvider provider)
 		{
-			_feedService = feedService;
-			_identifier = identifier;
-			_contentSerializer = contentSerializer;
-			_fetchFromDatabase = new Lazy<Task<IItemContentLoader>>(FetchFromDatabaseAsync, isThreadSafe: false);
+			_databaseService = databaseService;
+			Provider = provider;
+			Identifier = Provider.Metadata.Identifier;
 		}
 		
-		private Task<IItemContentLoader> FetchFromDatabaseAsync()
-		{
-			return _feedService._databaseService.ExecuteAsync(
-				async database =>
-				{
-					var serialized = await database.Items
-						.Where(i => i.Identifier == _identifier)
-						.Select(i => i.Content)
-						.FirstAsync();
-					return await _contentSerializer.LoadAsync(serialized);
-				});
-		}
-		
-		public Task<ItemContent> LoadAsync(bool reload = false)
-		{
-			return Task.Run(
-				async () =>
-				{
-					var loader = await _fetchFromDatabase.Value;
-					return await loader.LoadAsync(reload);
-				});
-		}
+		public FeedProvider Provider { get; }
 
-		private readonly FeedService _feedService;
-		private readonly Guid _identifier;
-		private readonly IItemContentSerializer _contentSerializer;
-		private readonly Lazy<Task<IItemContentLoader>> _fetchFromDatabase;
-	}
-	
-	private sealed class ItemStorage : IItemStorage
-	{
-		public ItemStorage(
-			FeedService feedService, Guid providerIdentifier, Guid storageIdentifier,
-			IItemContentSerializer contentSerializer)
-		{
-			_feedService = feedService;
-			_providerIdentifier = providerIdentifier;
-			_storageIdentifier = storageIdentifier;
-			_contentSerializer = contentSerializer;
-
-			_initialize = new Lazy<Task>(InitializeAsync);
-		}
-
-		/// <summary>
-		/// Add an item to the cache.
-		/// </summary>
-		private void RegisterItem(StoredItem item)
-		{
-			_feedService._items.Add(item.Identifier, item);
-			if (item.Url != null)
-				_urlItems.Add(item.Url, item);
-			_items.Add(item);
-		}
+		public Guid Identifier { get; }
 		
 		/// <summary>
-		/// Store a collection of items in the database.
+		/// Load a feed node and all of its children from its database representation.
 		/// </summary>
-		private async Task StoreItemsAsync(AppDbContext database, IReadOnlyCollection<StoredItem> items)
+		private async Task<LoadedFeedNode> LoadNodeAsync(
+			AppDbContext database, FeedNodeDb dbNode, LoadedFeedNode? parent,
+			ICollection<LoadedFeedNode>? allNodes = null)
 		{
-			var dbItems = new List<ItemDb> { Capacity = items.Count };
-			foreach (var item in items)
-			{
-				dbItems.Add(
-					new ItemDb
-					{ 
-						Identifier = item.Identifier, 
-						ProviderIdentifier = _providerIdentifier,
-						StorageIdentifier = _storageIdentifier,
-						Url = item.Url,
-						ContentUrl = item.ContentUrl,
-						PublishedTimestamp = item.PublishedTimestamp,
-						ModifiedTimestamp = item.ModifiedTimestamp,
-						Title = item.Title,
-						Author = item.Author,
-						Summary = item.Summary,
-						Content = await _contentSerializer.StoreAsync(item.ContentLoader),
-						IsRead = item.IsRead
-					});
-			}
-			
-			await database.Items.AddRangeAsync(dbItems);
-		}
-
-		/// <summary>
-		/// Update a set of items in the database. This does not update the item objects.
-		/// </summary>
-		private async Task UpdateItemsAsync(AppDbContext database, IEnumerable<StoredItem> items)
-		{
-			foreach (var item in items)
-			{
-				var identifier = item.Identifier;
-				var dbItem = await database.Items.Where(i => i.Identifier == identifier).FirstAsync();
-				dbItem.ContentUrl = item.ContentUrl;
-				dbItem.ModifiedTimestamp = item.ModifiedTimestamp;
-				dbItem.Title = item.Title;
-				dbItem.Author = item.Author;
-				dbItem.Summary = item.Summary;
-				dbItem.Content = await _contentSerializer.StoreAsync(item.ContentLoader);
-			}
-		}
-
-		/// <summary>
-		/// Load all items in this storage from the database into stored item models.
-		/// </summary>
-		/// <param name="database"></param>
-		/// <returns></returns>
-		private async Task<List<StoredItem>> LoadItemsAsync(AppDbContext database)
-		{
-			var dbItems = await database.Items
-				.Where(i =>
-					i.ProviderIdentifier == _providerIdentifier && i.StorageIdentifier == _storageIdentifier)
-				.Select(i =>
-					new
-					{
-						i.Identifier,
-						i.Url,
-						i.ContentUrl,
-						i.PublishedTimestamp,
-						i.ModifiedTimestamp,
-						i.Title,
-						i.Author,
-						i.Summary,
-						i.IsRead
-					})
-				.ToListAsync();
-			return dbItems
-				.Select(item => new StoredItem(
-					identifier: item.Identifier,
-					url: item.Url,
-					contentUrl: item.ContentUrl,
-					publishedTimestamp: item.PublishedTimestamp,
-					modifiedTimestamp: item.ModifiedTimestamp,
-					title: item.Title,
-					author: item.Author,
-					summary: item.Summary,
-					contentLoader: new ItemContentLoader(_feedService, item.Identifier, _contentSerializer),
-					isRead: item.IsRead))
-				.ToList();
-		}
-
-		private async Task InitializeAsync()
-		{
-			foreach (var item in await _feedService._databaseService.ExecuteAsync(LoadItemsAsync))
-			{
-				RegisterItem(item);
-			}
-		}
-
-		public async Task<IEnumerable<IReadOnlyStoredItem>> GetItemsAsync()
-		{
-			await _initialize.Value;
-			return _items;
-		}
-
-		public async Task<IEnumerable<IReadOnlyStoredItem>> AddItemsAsync(IEnumerable<IReadOnlyItem> items)
-		{
-			await _initialize.Value;
-			
-			var added = new List<StoredItem>();
-			var updated = new List<StoredItem>();
-			var result = new List<IReadOnlyStoredItem>();
-			foreach (var item in items)
-			{
-				// Check if there is an item in this storage with this URL.
-				if (item.Url != null && _urlItems.TryGetValue(item.Url, out var existing))
+			var node = new LoadedFeedNode(
+				dbNode.Type switch
 				{
-					// Check if the item needs to be updated.
-					if (existing.ModifiedTimestamp < item.ModifiedTimestamp)
-					{
-						existing.ContentUrl = item.ContentUrl;
-						existing.ModifiedTimestamp = item.ModifiedTimestamp;
-						existing.Title = item.Title;
-						existing.Author = item.Author;
-						existing.Summary = item.Summary;
-						existing.ContentLoader = item.ContentLoader;
-						updated.Add(new StoredItem(existing));
-					}
-					result.Add(existing);
+					FeedNodeType.Group => FeedNode.Group(dbNode.Title, dbNode.Symbol, dbNode.IsUserCustomizable),
+					FeedNodeType.Custom => FeedNode.Custom(
+						await Provider.LoadFeedAsync(this, dbNode.Feed ?? String.Empty), dbNode.Title, dbNode.Symbol,
+						dbNode.IsUserCustomizable, dbNode.HasChildren ? Enumerable.Empty<IReadOnlyFeedNode>() : null),
+					_ => throw new IndexOutOfRangeException()
+				}, this, dbNode, parent);
+			allNodes?.Add(node);
+
+			if (node.Children != null)
+			{
+				var dbChildren = await database.FeedNodes.Where(n => n.Parent == dbNode).ToListAsync();
+				var children = new List<LoadedFeedNode>();
+				foreach (var child in dbChildren)
+				{
+					children.Add(await LoadNodeAsync(database, child, node, allNodes));
 				}
-				else
+
+				var sortedChildren = children.OrderBy(n => n.DisplayTitle, StringComparer.CurrentCultureIgnoreCase);
+				foreach (var child in sortedChildren)
 				{
-					// This is a new item.
-					var storedItem = new StoredItem(item, Guid.NewGuid(), isRead: false);
-					RegisterItem(storedItem);
-					added.Add(new StoredItem(storedItem));
-					result.Add(storedItem);
+					node.Children.Add(child);
+				}
+			}
+			return node;
+		}
+
+		/// <summary>
+		/// Store a new feed node and all its children, returning its stored representation.
+		/// </summary>
+		private async Task<LoadedFeedNode> StoreNodeAsync(
+			AppDbContext database, IReadOnlyFeedNode inputNode, LoadedFeedNode? parent, 
+			ICollection<LoadedFeedNode>? allNodes = null)
+		{
+			var node = new LoadedFeedNode(
+				inputNode, this,
+				new FeedNodeDb
+				{
+					Identifier = Guid.NewGuid(),
+					Parent = parent?.Db,
+					HasChildren = inputNode.Children != null,
+					Type = inputNode.Type,
+					Feed = inputNode.Type == FeedNodeType.Custom ? await Provider.StoreFeedAsync(inputNode.Feed) : null,
+					Title = inputNode.Title,
+					Symbol = inputNode.Symbol,
+					IsUserCustomizable = inputNode.IsUserCustomizable
+				}, parent);
+			await database.FeedNodes.AddAsync(node.Db);
+			allNodes?.Add(node);
+
+			if (node.Children != null && inputNode.Children != null)
+			{
+				node.Children.Clear();
+				var sortedChildren = inputNode.Children
+					.OrderBy(n => n.DisplayTitle, StringComparer.CurrentCultureIgnoreCase);
+				foreach (var child in sortedChildren)
+				{
+					node.Children.Add(await StoreNodeAsync(database, child, node, allNodes));
 				}
 			}
 
-			await _feedService._databaseService.ExecuteAsync(
+			return node;
+		}
+
+		/// <summary>
+		/// Initialize this storage, returning the root node.
+		/// </summary>
+		public async Task<IReadOnlyStoredFeedNode> InitializeAsync(AppDbContext database)
+		{
+			var existingRootNode = await database.FeedProviders
+				.Where(p => p.Identifier == Identifier)
+				.Select(p => p.RootNode)
+				.FirstOrDefaultAsync();
+
+			var allNodes = new List<LoadedFeedNode>();
+			LoadedFeedNode rootNode;
+			if (existingRootNode != null)
+			{
+				rootNode = await LoadNodeAsync(database, existingRootNode, null, allNodes);
+			}
+			else
+			{
+				// This is a new provider, let it initialize the tree and store it in the database
+				var initialTree = Provider.CreateInitialTree(this);
+				rootNode = await StoreNodeAsync(database, initialTree, null, allNodes);
+				// Map the provider to the node
+				await database.FeedProviders.AddAsync(
+					new FeedProviderDb { Identifier = Identifier, RootNode = rootNode.Db });
+			}
+
+			// Add nodes to the cache (no need for synchronization as this method is called before the storage is
+			// exposed publicly.
+			foreach (var node in allNodes)
+			{
+				_nodes.Add(node.Identifier, node);
+			}
+			
+			return rootNode;
+		}
+		
+		public IItemStorage GetItemStorage(Guid identifier, IItemContentSerializer? contentSerializer = null)
+		{
+			return _itemStorages.GetOrAdd(identifier, _ => new ItemStorage(
+				_databaseService, Identifier, identifier, contentSerializer ?? new DefaultItemContentSerializer()));
+		}
+
+		public IReadOnlyStoredFeedNode? GetNode(Guid identifier)
+		{
+			return _nodes.GetValueOrDefault(identifier);
+		}
+
+		public IReadOnlyStoredFeedNode? GetNodeParent(Guid identifier)
+		{
+			return _nodes.GetValueOrDefault(identifier)?.Parent;
+		}
+
+		public async Task<IReadOnlyStoredFeedNode> AddNodeAsync(IReadOnlyFeedNode node, Guid parentIdentifier)
+		{
+			var parentNode = _nodes[parentIdentifier];
+			if (parentNode.Type != FeedNodeType.Group || parentNode.Children == null)
+				throw new Exception("Invalid parent node type.");
+
+			// Update database
+			var storedNode = await _databaseService.ExecuteAsync(
 				async database =>
 				{
-					await UpdateItemsAsync(database, updated);
-					await StoreItemsAsync(database, added);
+					database.Attach(parentNode.Db);
+					var stored = await StoreNodeAsync(database, node, parentNode);
+					await database.SaveChangesAsync();
+					return stored;
+				});
+
+			// Update local copy
+			AddSortedNode(storedNode, parentNode.Children);
+			_nodes.Add(storedNode.Identifier, storedNode);
+			
+			return storedNode;
+		}
+
+		public async Task<IReadOnlyStoredFeedNode> RenameNodeAsync(Guid identifier, string newTitle)
+		{
+			var node = _nodes[identifier];
+
+			// Update database
+			await _databaseService.ExecuteAsync(
+				async database =>
+				{
+					database.Attach(node.Db);
+					node.Db.Title = newTitle;
 					await database.SaveChangesAsync();
 				});
 
-			return result;
+			// Update local representation
+			node.Title = newTitle;
+
+			return node;
 		}
 
-		private readonly FeedService _feedService;
-		private readonly Guid _providerIdentifier;
-		private readonly Guid _storageIdentifier;
-		private readonly IItemContentSerializer _contentSerializer;
-		private readonly Dictionary<Uri, StoredItem> _urlItems = new();
-		private readonly List<StoredItem> _items = new();
-		private readonly Lazy<Task> _initialize;
+		public async Task<IReadOnlyStoredFeedNode> MoveNodeAsync(Guid identifier, Guid newParentIdentifier)
+		{
+			var node = _nodes[identifier];
+			if (node.Parent?.Identifier == newParentIdentifier)
+				return node;
+			var newParent = _nodes[newParentIdentifier];
+			if (newParent.Type != FeedNodeType.Group || newParent.Children == null)
+				throw new Exception("Invalid parent node type.");
+
+			// Update database
+			await _databaseService.ExecuteAsync(
+				async database =>
+				{
+					database.Attach(node.Db);
+					node.Db.Parent = newParent.Db;
+					await database.SaveChangesAsync();
+				});
+
+			// Update local copy
+			node.Parent?.Children?.Remove(node);
+			node.Parent = newParent;
+			AddSortedNode(node, newParent.Children);
+
+			return node;
+		}
+
+		public async Task DeleteNodeAsync(Guid identifier)
+		{
+			var node = _nodes[identifier];
+			
+			// Determine deleted items.
+			var stack = new Stack<LoadedFeedNode>();
+			var deleted = new List<LoadedFeedNode>();
+			stack.Push(node);
+			while (stack.TryPop(out var currentNode))
+			{
+				deleted.Add(currentNode);
+
+				if (currentNode.Children != null)
+				{
+					foreach (var child in currentNode.Children)
+					{
+						stack.Push((LoadedFeedNode)child);
+					}
+				}
+			}
+
+			// Update database
+			await _databaseService.ExecuteAsync(
+				async database =>
+				{
+					var dbNodes = deleted.Select(n => n.Db).ToList();
+					database.AttachRange(dbNodes);
+					database.RemoveRange(dbNodes);
+					await database.SaveChangesAsync();
+				});
+
+			// Update local representation
+			node.Parent?.Children?.Remove(node);
+			foreach (var deletedNode in deleted)
+			{
+				_nodes.Remove(deletedNode.Identifier);
+			}
+		}
+		
+		/// <summary>
+		/// Add a node to a collection, ensuring that the collection remains sorted.
+		/// </summary>
+		private static void AddSortedNode(IReadOnlyFeedNode node, IList<IReadOnlyFeedNode> container)
+		{
+			for (var i = 0; i < container.Count; ++i)
+			{
+				var comparisonResult = String.Compare(
+					container[i].DisplayTitle, node.DisplayTitle, StringComparison.CurrentCultureIgnoreCase);
+				if (comparisonResult > 0)
+				{
+					container.Insert(i, node);
+					return;
+				}
+			}
+
+			container.Add(node);
+		}
+
+		private readonly IDatabaseService _databaseService;
+		private readonly Dictionary<Guid, LoadedFeedNode> _nodes = new();
+		private readonly ConcurrentDictionary<Guid, ItemStorage> _itemStorages = new();
 	}
 	
-	private sealed class FeedStorage : IFeedStorage
+	private sealed class LoadedFeedNode : StoredFeedNode
 	{
-		public FeedStorage(FeedService feedService, Guid providerIdentifier)
+		public LoadedFeedNode(IReadOnlyFeedNode node, IFeedStorage storage, FeedNodeDb db, LoadedFeedNode? parent)
+			: base(node, db.Identifier, storage)
 		{
-			_feedService = feedService;
-			_providerIdentifier = providerIdentifier;
+			Parent = parent;
+			Db = db;
 		}
-
-		public IItemStorage GetItemStorage(Guid identifier, IItemContentSerializer? contentSerializer = null) =>
-			_itemStorages.GetOrAdd(identifier, _ => CreateItemStorage(identifier, contentSerializer));
-
-		private ItemStorage CreateItemStorage(Guid identifier, IItemContentSerializer? contentSerializer) =>
-			new(_feedService, _providerIdentifier, identifier, contentSerializer ?? new DefaultItemContentSerializer());
-
-		private readonly FeedService _feedService;
-		private readonly Guid _providerIdentifier;
-		private readonly ConcurrentDictionary<Guid, ItemStorage> _itemStorages = new();
+		
+		public LoadedFeedNode? Parent { get; set; }
+		public FeedNodeDb Db { get; }
 	}
 }

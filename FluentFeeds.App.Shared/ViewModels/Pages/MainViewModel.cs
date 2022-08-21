@@ -44,21 +44,18 @@ public sealed class MainViewModel : ObservableObject
 		_settingsItem =
 			new NavigationItemViewModel(NavigationRoute.Settings, isExpandable: false, "Settings", Symbol.Settings);
 		_footerItems.Add(_settingsItem);
-		var overviewFeedNode = feedService.OverviewFeed;
-		var overviewItem = new FeedNavigationItemViewModel(
-			feedService, modalService, overviewFeedNode, null, _feedItemRegistry);
+		var overviewFeedNode = feedService.OverviewNode;
+		var overviewItem = new FeedNavigationItemViewModel(modalService, overviewFeedNode, null, _feedItemRegistry);
 		var unreadFeedNode = FeedNode.Custom(new EmptyFeed(), "Unread", Symbol.Sparkle, false);
-		var unreadItem = new FeedNavigationItemViewModel(
-			feedService, modalService, unreadFeedNode, null, _feedItemRegistry);
+		var unreadItem = new FeedNavigationItemViewModel(modalService, unreadFeedNode, null, _feedItemRegistry);
 		_feedItemRegistry.Add(overviewFeedNode, overviewItem);
 		_feedItemRegistry.Add(unreadFeedNode, unreadItem);
 		_feedItems.Add(overviewItem);
 		_feedItems.Add(unreadItem);
 		_feedItemTransformer = ObservableCollectionTransformer.CreateCached(
-			feedService.FeedProviders, _feedItems, 
-			provider => new FeedNavigationItemViewModel(
-				feedService, modalService, provider.RootNode, provider, _feedItemRegistry),
-			provider => provider.RootNode, _feedItemRegistry);
+			feedService.ProviderNodes, _feedItems,
+			rootNode => new FeedNavigationItemViewModel(modalService, rootNode, rootNode, _feedItemRegistry),
+			rootNode => rootNode, _feedItemRegistry);
 		_visiblePage = GetVisiblePage();
 		_selectedItem = GetSelectedItem();
 
@@ -150,7 +147,7 @@ public sealed class MainViewModel : ObservableObject
 	private readonly NavigationItemViewModel _settingsItem;
 	private readonly ObservableCollection<NavigationItemViewModel> _feedItems = new();
 	private readonly ObservableCollection<NavigationItemViewModel> _footerItems = new();
-	private readonly ObservableCollectionTransformer<LoadedFeedProvider, NavigationItemViewModel> _feedItemTransformer;
+	private readonly ObservableCollectionTransformer<IReadOnlyStoredFeedNode, NavigationItemViewModel> _feedItemTransformer;
 	private readonly Dictionary<IReadOnlyFeedNode, NavigationItemViewModel> _feedItemRegistry = new();
 	private Page _visiblePage;
 	private NavigationItemViewModel? _selectedItem;

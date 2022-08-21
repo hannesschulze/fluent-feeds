@@ -5,7 +5,6 @@ using FluentFeeds.App.Shared.Helpers;
 using FluentFeeds.App.Shared.Models;
 using FluentFeeds.App.Shared.Services;
 using FluentFeeds.App.Shared.ViewModels.Modals;
-using FluentFeeds.Common;
 using FluentFeeds.Feeds.Base.Nodes;
 using Microsoft.Toolkit.Mvvm.Input;
 
@@ -16,64 +15,59 @@ namespace FluentFeeds.App.Shared.ViewModels.Items.Navigation;
 /// </summary>
 public sealed class FeedNavigationItemViewModel : NavigationItemViewModel
 {
-	private static string GetTitle(IReadOnlyFeedNode feedNode)
+	private ImmutableArray<NavigationItemActionViewModel> BuildActions()
 	{
-		return feedNode.ActualTitle ?? "Unnamed";
-	}
-
-	private static Symbol GetSymbol(IReadOnlyFeedNode feedNode)
-	{
-		return feedNode.ActualSymbol ?? Symbol.Feed;
-	}
-
-	private ImmutableArray<NavigationItemActionViewModel>? GetActions()
-	{
-		if (FeedNode is not IReadOnlyStoredFeedNode || !FeedNode.IsUserCustomizable || FeedProvider == null)
-			return null;
-
-		var showGroupActions = FeedNode.Type == FeedNodeType.Group;
-		var showEditActions = FeedNode != FeedProvider.RootNode;
-		if (!showGroupActions && !showEditActions)
-			return null;
+		if (FeedNode is not IReadOnlyStoredFeedNode storedNode || !FeedNode.IsUserCustomizable || _rootNode == null)
+			return ImmutableArray<NavigationItemActionViewModel>.Empty;
 
 		var result = new List<NavigationItemActionViewModel>();
-		if (showGroupActions)
+		
+		if (storedNode.Type == FeedNodeType.Group)
 		{
-			if (FeedProvider.Provider.UrlFeedFactory != null)
+			var urlFactory = storedNode.Storage.Provider.UrlFeedFactory;
+			if (urlFactory != null)
 			{
-				result.Add(new NavigationItemActionViewModel(new RelayCommand(HandleAddFeedCommand), "Add feed…", null));
+				result.Add(new NavigationItemActionViewModel(
+					new RelayCommand(() =>
+						_modalService.ShowModal(new AddFeedViewModel(urlFactory, _rootNode, storedNode), this)),
+					"Add feedâ€¦", null));
 			}
-			result.Add(new NavigationItemActionViewModel(new RelayCommand(HandleAddGroupCommand), "Add group…", null));
+			result.Add(new NavigationItemActionViewModel(
+				new RelayCommand(() => _modalService.ShowModal(new AddGroupViewModel(_rootNode, storedNode), this)),
+				"Add groupâ€¦", null));
 		}
-		if (showEditActions)
+		
+		if (storedNode != _rootNode)
 		{
-			result.Add(new NavigationItemActionViewModel(new RelayCommand(HandleEditNodeCommand), "Edit…", null));
-			result.Add(new NavigationItemActionViewModel(new RelayCommand(HandleDeleteNodeCommand), "Delete", null));
+			result.Add(new NavigationItemActionViewModel(
+				new RelayCommand(() => _modalService.ShowModal(new EditNodeViewModel(_rootNode, storedNode), this)),
+				"Editâ€¦", null));
+			result.Add(new NavigationItemActionViewModel(
+				new RelayCommand(() => _modalService.ShowModal(new DeleteNodeViewModel(storedNode), this)),
+				"Delete", null));
 		}
+		
 		return result.ToImmutableArray();
 	}
 
 	public FeedNavigationItemViewModel(
-		IFeedService feedService, IModalService modalService, IReadOnlyFeedNode feedNode,
-		LoadedFeedProvider? feedProvider,
+		IModalService modalService, IReadOnlyFeedNode feedNode, IReadOnlyStoredFeedNode? rootNode,
 		Dictionary<IReadOnlyFeedNode, NavigationItemViewModel> feedItemRegistry) : base(
-			NavigationRoute.Feed(feedNode), isExpandable: feedNode.Children != null, GetTitle(feedNode),
-			GetSymbol(feedNode))
+			NavigationRoute.Feed(feedNode), isExpandable: feedNode.Children != null, feedNode.DisplayTitle,
+			feedNode.DisplaySymbol)
 	{
-		_feedService = feedService;
 		_modalService = modalService;
+		_rootNode = rootNode;
 
 		FeedNode = feedNode;
 		FeedNode.PropertyChanged += HandlePropertyChanged;
-		FeedProvider = feedProvider;
-		Actions = GetActions();
+		Actions = BuildActions();
 
 		if (feedNode.Children != null)
 		{
 			ObservableCollectionTransformer.CreateCached(
 				feedNode.Children, MutableChildren,
-				node => new FeedNavigationItemViewModel(
-					_feedService, _modalService, node, FeedProvider, feedItemRegistry),
+				node => new FeedNavigationItemViewModel(modalService, node, rootNode, feedItemRegistry),
 				feedItemRegistry);
 		}
 	}
@@ -82,52 +76,23 @@ public sealed class FeedNavigationItemViewModel : NavigationItemViewModel
 	/// The source feed node.
 	/// </summary>
 	public IReadOnlyFeedNode FeedNode { get; }
-	
-	/// <summary>
-	/// Feed provider to which the feed belongs.
-	/// </summary>
-	public LoadedFeedProvider? FeedProvider { get; }
 
 	private void HandlePropertyChanged(object? sender, PropertyChangedEventArgs e)
 	{
 		switch (e.PropertyName)
 		{
-			case nameof(IReadOnlyFeedNode.ActualTitle):
-				Title = GetTitle(FeedNode);
+			case nameof(IReadOnlyFeedNode.DisplayTitle):
+				Title = FeedNode.DisplayTitle;
 				break;
-			case nameof(IReadOnlyFeedNode.ActualSymbol):
-				Symbol = GetSymbol(FeedNode);
+			case nameof(IReadOnlyFeedNode.DisplaySymbol):
+				Symbol = FeedNode.DisplaySymbol;
 				break;
 			case nameof(IReadOnlyFeedNode.IsUserCustomizable):
-				Actions = GetActions();
+				Actions = BuildActions();
 				break;
 		}
 	}
 
-	private void HandleAddFeedCommand()
-	{
-		var viewModel = new AddFeedViewModel(_feedService, FeedProvider!, (IReadOnlyStoredFeedNode)FeedNode);
-		_modalService.ShowModal(viewModel, this);
-	}
-
-	private void HandleAddGroupCommand()
-	{
-		var viewModel = new AddGroupViewModel(_feedService, FeedProvider!, (IReadOnlyStoredFeedNode)FeedNode);
-		_modalService.ShowModal(viewModel, this);
-	}
-
-	private void HandleEditNodeCommand()
-	{
-		var viewModel = new EditNodeViewModel(_feedService, FeedProvider!, (IReadOnlyStoredFeedNode)FeedNode);
-		_modalService.ShowModal(viewModel, this);
-	}
-
-	private void HandleDeleteNodeCommand()
-	{
-		var viewModel = new DeleteNodeViewModel(_feedService, (IReadOnlyStoredFeedNode)FeedNode);
-		_modalService.ShowModal(viewModel, this);
-	}
-
-	private readonly IFeedService _feedService;
 	private readonly IModalService _modalService;
+	private readonly IReadOnlyStoredFeedNode? _rootNode;
 }

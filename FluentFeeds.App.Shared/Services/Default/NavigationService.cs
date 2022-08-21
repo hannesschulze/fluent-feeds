@@ -8,7 +8,7 @@ public class NavigationService : INavigationService
 {
 	public NavigationService(IFeedService feedService)
 	{
-		_backStack.Add(NavigationRoute.Feed(feedService.OverviewFeed));
+		_backStack.Add(NavigationRoute.Feed(feedService.OverviewNode));
 	}
 
 	public event EventHandler<EventArgs>? BackStackChanged;

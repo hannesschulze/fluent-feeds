@@ -1,7 +1,5 @@
-﻿using System;
-using FluentFeeds.App.Shared.ViewModels.Modals;
+﻿using FluentFeeds.App.Shared.ViewModels.Modals;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 
 namespace FluentFeeds.App.WinUI.Views.Modals;
 

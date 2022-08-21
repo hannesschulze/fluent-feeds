@@ -38,15 +38,9 @@ public sealed class ModalService : IModalService
 		}
 	}
 
-	public void ShowModal(AddFeedViewModel viewModel, NavigationItemViewModel relatedItem) =>
-		ShowDialog(new AddFeedView { DataContext = viewModel });
-
-	public void ShowModal(AddGroupViewModel viewModel, NavigationItemViewModel relatedItem) =>
-		ShowDialog(new AddGroupView { DataContext = viewModel });
+	public void ShowModal(NodeDataViewModel viewModel, NavigationItemViewModel relatedItem) =>
+		ShowDialog(new NodeDataView { DataContext = viewModel });
 
 	public void ShowModal(DeleteNodeViewModel viewModel, NavigationItemViewModel relatedItem) =>
 		ShowNavigationFlyout(new DeleteNodeView { DataContext = viewModel }, relatedItem);
-
-	public void ShowModal(EditNodeViewModel viewModel, NavigationItemViewModel relatedItem) =>
-		ShowDialog(new EditNodeView { DataContext = viewModel });
 }

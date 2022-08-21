@@ -1,64 +1,32 @@
 ﻿using System;
-using System.Collections.ObjectModel;
-using System.Windows.Input;
-using FluentFeeds.App.Shared.Models;
-using FluentFeeds.App.Shared.Services;
-using FluentFeeds.App.Shared.ViewModels.Items.GroupSelection;
+using System.Threading.Tasks;
+using FluentFeeds.Common;
 using FluentFeeds.Feeds.Base.Nodes;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
-using Microsoft.Toolkit.Mvvm.Input;
 
 namespace FluentFeeds.App.Shared.ViewModels.Modals;
 
 /// <summary>
 /// View model for a modal allowing the user to add a child group to the selected group.
 /// </summary>
-public sealed class AddGroupViewModel : ObservableObject
+public sealed class AddGroupViewModel : NodeDataViewModel
 {
-	public AddGroupViewModel(IFeedService feedService, LoadedFeedProvider provider, IReadOnlyStoredFeedNode parentNode)
+	public AddGroupViewModel(IReadOnlyStoredFeedNode rootNode, IReadOnlyFeedNode? parentGroup)
+		: base(
+			title: "Add a group", errorTitle: "Unable to create the group",
+			errorMessage: "An error occurred while trying to create the group.", inputLabel: "Name",
+			showProgressSpinner: false, rootNode, parentGroup, null)
 	{
-		GroupSelectionViewModel = new GroupSelectionViewModel(provider, parentNode, null);
-
-		_feedService = feedService;
-		_confirmCommand = new RelayCommand(
-			HandleConfirmCommand,
-			() => !String.IsNullOrWhiteSpace(Name) && GroupSelectionViewModel.SelectedItem != null);
-
-		GroupSelectionViewModel.PropertyChanged += (s, e) => _confirmCommand.NotifyCanExecuteChanged();
 	}
 
-	/// <summary>
-	/// Command executed when the user confirms that they want to create the group with the name entered.
-	/// </summary>
-	public ICommand ConfirmCommand => _confirmCommand;
-
-	/// <summary>
-	/// Name entered by the user.
-	/// </summary>
-	public string Name
+	protected override async Task SaveAsync(IReadOnlyStoredFeedNode selectedGroup)
 	{
-		get => _name;
-		set
-		{
-			if (SetProperty(ref _name, value))
-			{
-				_confirmCommand.NotifyCanExecuteChanged();
-			}
-		}
+		var storage = selectedGroup.Storage;
+		var node = FeedNode.Group(Input.Trim(), Symbol.Directory, isUserCustomizable: true);
+		await storage.AddNodeAsync(node, selectedGroup.Identifier);
 	}
 
-	/// <summary>
-	/// View model for selecting the parent group.
-	/// </summary>
-	public GroupSelectionViewModel GroupSelectionViewModel { get; }
-
-	private async void HandleConfirmCommand()
+	protected override void HandleInputChanged()
 	{
-		var group = GroupSelectionViewModel.SelectedItem!.FeedNode;
-		await _feedService.AddGroupNodeAsync(group.Identifier, Name.Trim());
+		IsInputValid = !String.IsNullOrWhiteSpace(Input);
 	}
-
-	private readonly IFeedService _feedService;
-	private readonly RelayCommand _confirmCommand;
-	private string _name = String.Empty;
 }

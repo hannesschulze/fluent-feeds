@@ -51,7 +51,7 @@ public class NavigationItemViewModel : ObservableObject
 	/// <summary>
 	/// A list of possible actions which can be executed on this item.
 	/// </summary>
-	public ImmutableArray<NavigationItemActionViewModel>? Actions
+	public ImmutableArray<NavigationItemActionViewModel> Actions
 	{
 		get => _actions;
 		protected set => SetProperty(ref _actions, value);
@@ -69,5 +69,6 @@ public class NavigationItemViewModel : ObservableObject
 
 	private string _title;
 	private Symbol _symbol;
-	private ImmutableArray<NavigationItemActionViewModel>? _actions;
+	private ImmutableArray<NavigationItemActionViewModel> _actions =
+		ImmutableArray<NavigationItemActionViewModel>.Empty;
 }

@@ -37,12 +37,12 @@ public interface IReadOnlyFeedNode : INotifyPropertyChanged, INotifyPropertyChan
 	/// <summary>
 	/// The actual title of the feed, using the feed's title as the fallback.
 	/// </summary>
-	string? ActualTitle { get; }
+	string DisplayTitle { get; }
 	
 	/// <summary>
 	/// The actual symbol of the feed, using the feed's symbol as the fallback.
 	/// </summary>
-	Symbol? ActualSymbol { get; }
+	Symbol DisplaySymbol { get; }
 
 	/// <summary>
 	/// Flag indicating whether the user should be able to customize this node.

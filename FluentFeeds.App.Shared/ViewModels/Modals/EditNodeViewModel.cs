@@ -1,67 +1,41 @@
 ﻿using System;
-using System.Windows.Input;
-using FluentFeeds.App.Shared.Models;
-using FluentFeeds.App.Shared.Services;
-using FluentFeeds.App.Shared.ViewModels.Items.GroupSelection;
+using System.Threading.Tasks;
 using FluentFeeds.Feeds.Base.Nodes;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
-using Microsoft.Toolkit.Mvvm.Input;
 
 namespace FluentFeeds.App.Shared.ViewModels.Modals;
 
 /// <summary>
 /// View model for a modal allowing the user to rename or move a tree node.
 /// </summary>
-public sealed class EditNodeViewModel : ObservableObject
+public sealed class EditNodeViewModel : NodeDataViewModel
 {
-	public EditNodeViewModel(IFeedService feedService, LoadedFeedProvider provider, IReadOnlyStoredFeedNode node)
+	public EditNodeViewModel(IReadOnlyStoredFeedNode rootNode, IReadOnlyStoredFeedNode node)
+		: base(
+			title: "Edit an item", errorTitle: "Unable to edit the item",
+			errorMessage: "An error occurred while trying to apply changes to the item.", inputLabel: "Name",
+			showProgressSpinner: false, rootNode, node.Storage.GetNodeParent(node.Identifier), node)
 	{
-		var currentParent = feedService.GetParentNode(node.Identifier);
-		GroupSelectionViewModel = new GroupSelectionViewModel(provider, currentParent, node);
-
-		_feedService = feedService;
 		_node = node;
-		_name = node.ActualTitle ?? String.Empty;
-		_saveCommand = new RelayCommand(
-			HandleSaveCommand,
-			() => !String.IsNullOrWhiteSpace(Name) && GroupSelectionViewModel.SelectedItem != null);
-
-		GroupSelectionViewModel.PropertyChanged += (s, e) => _saveCommand.NotifyCanExecuteChanged();
+		Input = node.DisplayTitle;
 	}
 
-	/// <summary>
-	/// Command executed when the user confirms that they want to save the changes.
-	/// </summary>
-	public ICommand SaveCommand => _saveCommand;
-
-	/// <summary>
-	/// The updated name.
-	/// </summary>
-	public string Name
+	protected override async Task SaveAsync(IReadOnlyStoredFeedNode selectedGroup)
 	{
-		get => _name;
-		set
+		var storage = _node.Storage;
+		
+		var newTitle = Input.Trim();
+		if (newTitle != _node.DisplayTitle)
 		{
-			if (SetProperty(ref _name, value))
-			{
-				_saveCommand.NotifyCanExecuteChanged();
-			}
+			await storage.RenameNodeAsync(_node.Identifier, newTitle);
 		}
+
+		await storage.MoveNodeAsync(_node.Identifier, selectedGroup.Identifier);
 	}
 
-	/// <summary>
-	/// View model for selecting the new parent group.
-	/// </summary>
-	public GroupSelectionViewModel GroupSelectionViewModel { get; }
-
-	private async void HandleSaveCommand()
+	protected override void HandleInputChanged()
 	{
-		var newParent = GroupSelectionViewModel.SelectedItem!.FeedNode;
-		await _feedService.EditNodeAsync(_node.Identifier, newParent.Identifier, Name.Trim());
+		IsInputValid = !String.IsNullOrWhiteSpace(Input);
 	}
 
-	private readonly IFeedService _feedService;
 	private readonly IReadOnlyStoredFeedNode _node;
-	private readonly RelayCommand _saveCommand;
-	private string _name;
 }

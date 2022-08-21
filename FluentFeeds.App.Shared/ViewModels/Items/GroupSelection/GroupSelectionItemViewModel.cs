@@ -13,7 +13,7 @@ public sealed class GroupSelectionItemViewModel : ObservableObject
 	public GroupSelectionItemViewModel(IReadOnlyStoredFeedNode feedNode, int indentationLevel, bool isSelectable)
 	{
 		FeedNode = feedNode;
-		Title = FeedNode.ActualTitle ?? "Unnamed";
+		Title = FeedNode.DisplayTitle;
 		IndentationLevel = indentationLevel;
 		IsSelectable = isSelectable;
 	}

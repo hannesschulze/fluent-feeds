@@ -5,16 +5,18 @@ using Microsoft.UI.Xaml.Controls;
 namespace FluentFeeds.App.WinUI.Views.Modals;
 
 /// <summary>
-/// Dialog presenting an <see cref="AddFeedViewModel"/>.
+/// Dialog presenting a <see cref="NodeDataViewModel"/>.
 /// </summary>
-public sealed partial class AddFeedView : ContentDialog
+public sealed partial class NodeDataView : ContentDialog
 {
-	public AddFeedView()
+	public NodeDataView()
 	{
 		InitializeComponent();
+
+		Loading += (s, e) => InputTextBox.SelectAll();
 	}
 
-	public AddFeedViewModel ViewModel => (AddFeedViewModel)DataContext;
+	public NodeDataViewModel ViewModel => (NodeDataViewModel)DataContext;
 
 	private async void HandlePrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
 	{
