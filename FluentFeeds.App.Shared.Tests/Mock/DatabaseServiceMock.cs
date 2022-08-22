@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Xunit.Abstractions;
 
-namespace FluentFeeds.App.Shared.Tests.Services.Mock;
+namespace FluentFeeds.App.Shared.Tests.Mock;
 
 public sealed class DatabaseServiceMock : DatabaseService
 {

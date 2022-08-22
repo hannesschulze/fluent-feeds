@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using FluentFeeds.Feeds.Base;
 
-namespace FluentFeeds.App.Shared.Tests.Services.Mock;
+namespace FluentFeeds.App.Shared.Tests.Mock;
 
 public sealed class FeedMock : Feed
 {

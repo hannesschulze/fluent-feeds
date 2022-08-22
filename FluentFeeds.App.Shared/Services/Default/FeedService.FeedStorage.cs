@@ -171,9 +171,9 @@ public partial class FeedService
 				});
 
 			// Update local copy
-			AddSortedNode(storedNode, parentNode.Children);
 			_nodes.Add(storedNode.Identifier, storedNode);
-			
+			AddSortedNode(storedNode, parentNode.Children);
+
 			return storedNode;
 		}
 
@@ -255,11 +255,11 @@ public partial class FeedService
 
 			// Update local representation
 			node.Parent?.Children?.Remove(node);
+			NodesDeleted?.Invoke(this, new FeedNodesDeletedEventArgs(deleted));
 			foreach (var deletedNode in deleted)
 			{
 				_nodes.Remove(deletedNode.Identifier);
 			}
-			NodesDeleted?.Invoke(this, new FeedNodesDeletedEventArgs(deleted));
 		}
 		
 		/// <summary>

@@ -8,11 +8,19 @@ namespace FluentFeeds.Feeds.Base.Tests;
 
 public class CachedFeedTests
 {
+	private ItemStorageMock ItemStorage { get; } = new();
+	
 	[Fact]
 	public async Task LoadItems()
 	{
 		var storage = new ItemStorageMock();
-		_ = storage.AddItems(new[] { TestHelpers.CreateItem(Guid.Empty), TestHelpers.CreateItem(Guid.Empty) }).ToList();
+		_ = storage
+			.AddItems(
+				new[]
+				{
+					TestHelpers.CreateItem(Guid.Empty, ItemStorage), TestHelpers.CreateItem(Guid.Empty, ItemStorage)
+				})
+			.ToList();
 		var feed = new CachedFeedMock(storage);
 		await feed.LoadAsync();
 		Assert.Equal(2, feed.Items.Count);
@@ -26,12 +34,12 @@ public class CachedFeedTests
 		_ = feed.LoadAsync();
 		var taskA = feed.SynchronizeAsync();
 		Assert.False(taskA.IsCompleted);
-		feed.CompleteFetch(TestHelpers.CreateItem(Guid.NewGuid()));
+		feed.CompleteFetch(TestHelpers.CreateItem(Guid.NewGuid(), ItemStorage));
 		await taskA;
 		Assert.Single(feed.Items);
 		var taskB = feed.SynchronizeAsync();
 		Assert.False(taskB.IsCompleted);
-		feed.CompleteFetch(TestHelpers.CreateItem(Guid.NewGuid()));
+		feed.CompleteFetch(TestHelpers.CreateItem(Guid.NewGuid(), ItemStorage));
 		await taskB;
 		Assert.Equal(2, feed.Items.Count);
 	}

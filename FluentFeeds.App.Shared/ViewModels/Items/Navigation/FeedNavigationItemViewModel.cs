@@ -17,7 +17,7 @@ public sealed class FeedNavigationItemViewModel : NavigationItemViewModel
 {
 	private ImmutableArray<NavigationItemActionViewModel> BuildActions()
 	{
-		if (FeedNode is not IReadOnlyStoredFeedNode storedNode || !FeedNode.IsUserCustomizable || _rootNode == null)
+		if (FeedNode is not IReadOnlyStoredFeedNode storedNode || !FeedNode.IsUserCustomizable || RootNode == null)
 			return ImmutableArray<NavigationItemActionViewModel>.Empty;
 
 		var result = new List<NavigationItemActionViewModel>();
@@ -29,18 +29,18 @@ public sealed class FeedNavigationItemViewModel : NavigationItemViewModel
 			{
 				result.Add(new NavigationItemActionViewModel(
 					new RelayCommand(() =>
-						_modalService.Show(new AddFeedViewModel(urlFactory, _rootNode, storedNode), this)),
+						_modalService.Show(new AddFeedViewModel(urlFactory, RootNode, storedNode), this)),
 					"Add feed…", null));
 			}
 			result.Add(new NavigationItemActionViewModel(
-				new RelayCommand(() => _modalService.Show(new AddGroupViewModel(_rootNode, storedNode), this)),
+				new RelayCommand(() => _modalService.Show(new AddGroupViewModel(RootNode, storedNode), this)),
 				"Add group…", null));
 		}
 		
-		if (storedNode != _rootNode)
+		if (storedNode != RootNode)
 		{
 			result.Add(new NavigationItemActionViewModel(
-				new RelayCommand(() => _modalService.Show(new EditNodeViewModel(_rootNode, storedNode), this)),
+				new RelayCommand(() => _modalService.Show(new EditNodeViewModel(RootNode, storedNode), this)),
 				"Edit…", null));
 			result.Add(new NavigationItemActionViewModel(
 				new RelayCommand(() => _modalService.Show(new DeleteNodeViewModel(_modalService, storedNode), this)),
@@ -57,10 +57,10 @@ public sealed class FeedNavigationItemViewModel : NavigationItemViewModel
 			feedNode.DisplaySymbol)
 	{
 		_modalService = modalService;
-		_rootNode = rootNode;
 
 		FeedNode = feedNode;
 		FeedNode.PropertyChanged += HandlePropertyChanged;
+		RootNode = rootNode;
 		Actions = BuildActions();
 
 		if (feedNode.Children != null)
@@ -76,6 +76,11 @@ public sealed class FeedNavigationItemViewModel : NavigationItemViewModel
 	/// The source feed node.
 	/// </summary>
 	public IReadOnlyFeedNode FeedNode { get; }
+	
+	/// <summary>
+	/// The root for the source node.
+	/// </summary>
+	public IReadOnlyStoredFeedNode? RootNode { get; }
 
 	private void HandlePropertyChanged(object? sender, PropertyChangedEventArgs e)
 	{
@@ -94,5 +99,4 @@ public sealed class FeedNavigationItemViewModel : NavigationItemViewModel
 	}
 
 	private readonly IModalService _modalService;
-	private readonly IReadOnlyStoredFeedNode? _rootNode;
 }

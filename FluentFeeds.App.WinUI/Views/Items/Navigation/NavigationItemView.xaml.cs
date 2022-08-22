@@ -26,13 +26,13 @@ public sealed partial class NavigationItemView : NavigationViewItem
 
 	private void UpdateActions()
 	{
-		var actions = ViewModel?.Actions;
-		if (actions.HasValue)
+		var actions = ViewModel?.Actions ?? ImmutableArray<NavigationItemActionViewModel>.Empty;
+		if (actions.Length != 0)
 		{
 			_itemStyle ??= Application.Current.Resources["DefaultMenuFlyoutItemStyle"] as Style;
 			_menuFlyout ??= new MenuFlyout();
 			_menuFlyout.Items.Clear();
-			foreach (var action in actions.Value)
+			foreach (var action in actions)
 			{
 				_menuFlyout.Items.Add(new NavigationItemActionView { DataContext = action, Style = _itemStyle });
 			}

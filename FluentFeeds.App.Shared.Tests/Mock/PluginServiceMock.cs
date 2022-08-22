@@ -3,7 +3,7 @@ using System.Collections.Immutable;
 using FluentFeeds.App.Shared.Services;
 using FluentFeeds.Feeds.Base;
 
-namespace FluentFeeds.App.Shared.Tests.Services.Mock;
+namespace FluentFeeds.App.Shared.Tests.Mock;
 
 public sealed class PluginServiceMock : IPluginService
 {

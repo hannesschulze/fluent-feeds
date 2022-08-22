@@ -1,6 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using FluentFeeds.App.Shared.Tests.Services.Mock;
+using FluentFeeds.App.Shared.Tests.Mock;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 using Xunit.Abstractions;

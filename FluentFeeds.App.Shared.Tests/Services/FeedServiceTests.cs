@@ -2,7 +2,7 @@ using System;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
 using FluentFeeds.App.Shared.Services.Default;
-using FluentFeeds.App.Shared.Tests.Services.Mock;
+using FluentFeeds.App.Shared.Tests.Mock;
 using FluentFeeds.Common;
 using FluentFeeds.Documents;
 using FluentFeeds.Documents.Blocks;
@@ -46,9 +46,8 @@ public class FeedServiceTests
 		var serviceA = new FeedService(DatabaseService, PluginService);
 		await serviceA.InitializeAsync();
 
-		var loadedProviderA = Assert.Single(serviceA.FeedProviders);
-		Assert.Equal(provider, loadedProviderA.Provider);
-		var rootNodeA = Assert.IsAssignableFrom<IReadOnlyStoredFeedNode>(loadedProviderA.RootNode);
+		var rootNodeA = Assert.Single(serviceA.ProviderNodes);
+		Assert.Equal(provider, rootNodeA.Storage.Provider);
 		Assert.Equal(FeedNodeType.Group, rootNodeA.Type);
 		Assert.Equal("root", rootNodeA.Title);
 		Assert.Equal(Symbol.Feed, rootNodeA.Symbol);
@@ -68,16 +67,15 @@ public class FeedServiceTests
 		Assert.Null(feedNodeA.Children);
 		var feedA = Assert.IsType<FeedMock>(feedNodeA.Feed);
 		Assert.Equal(feedIdentifier, feedA.Identifier);
-		var overviewChildA = Assert.Single(Assert.IsAssignableFrom<CompositeFeed>(serviceA.OverviewFeed.Feed).Feeds);
+		var overviewChildA = Assert.Single(Assert.IsAssignableFrom<CompositeFeed>(serviceA.OverviewNode.Feed).Feeds);
 		Assert.Equal(rootNodeA.Feed, overviewChildA);
 		
 		provider.InitialTree = FeedNode.Group(null, null, false);
 		var serviceB = new FeedService(DatabaseService, PluginService);
 		await serviceB.InitializeAsync();
 
-		var loadedProviderB = Assert.Single(serviceB.FeedProviders);
-		Assert.Equal(provider, loadedProviderB.Provider);
-		var rootNodeB = Assert.IsAssignableFrom<IReadOnlyStoredFeedNode>(loadedProviderB.RootNode);
+		var rootNodeB = Assert.Single(serviceB.ProviderNodes);
+		Assert.Equal(provider, rootNodeB.Storage.Provider);
 		Assert.Equal(rootNodeA.Identifier, rootNodeB.Identifier);
 		Assert.Equal(FeedNodeType.Group, rootNodeB.Type);
 		Assert.Equal("root", rootNodeB.Title);
@@ -100,7 +98,7 @@ public class FeedServiceTests
 		Assert.Null(feedNodeB.Children);
 		var feedB = Assert.IsType<FeedMock>(feedNodeB.Feed);
 		Assert.Equal(feedIdentifier, feedB.Identifier);
-		var overviewChildB = Assert.Single(Assert.IsAssignableFrom<CompositeFeed>(serviceB.OverviewFeed.Feed).Feeds);
+		var overviewChildB = Assert.Single(Assert.IsAssignableFrom<CompositeFeed>(serviceB.OverviewNode.Feed).Feeds);
 		Assert.Equal(rootNodeB.Feed, overviewChildB);
 	}
 
@@ -109,7 +107,7 @@ public class FeedServiceTests
 		PluginService.AvailableFeedProviders = ImmutableArray.Create<FeedProvider>(new FeedProviderMock(Guid.Empty));
 		var service = new FeedService(DatabaseService, PluginService);
 		await service.InitializeAsync();
-		return service.FeedProviders[0].FeedStorage;
+		return service.ProviderNodes[0].Storage;
 	}
 
 	[Fact]

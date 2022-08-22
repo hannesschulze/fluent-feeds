@@ -5,7 +5,7 @@ using FluentFeeds.Feeds.Base;
 using FluentFeeds.Feeds.Base.Nodes;
 using FluentFeeds.Feeds.Base.Storage;
 
-namespace FluentFeeds.App.Shared.Tests.Services.Mock;
+namespace FluentFeeds.App.Shared.Tests.Mock;
 
 public sealed class FeedProviderMock : FeedProvider
 {
