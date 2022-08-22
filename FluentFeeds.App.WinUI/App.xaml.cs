@@ -22,7 +22,6 @@ public partial class App : Application
 				.AddSingleton<IPluginService, PluginService>()
 				.AddSingleton<IDatabaseService, DatabaseService>()
 				.AddSingleton<IFeedService, FeedService>()
-				.AddSingleton<INavigationService, NavigationService>()
 				.AddSingleton<IModalService, ModalService>()
 				.AddTransient<MainViewModel>()
 				.BuildServiceProvider());

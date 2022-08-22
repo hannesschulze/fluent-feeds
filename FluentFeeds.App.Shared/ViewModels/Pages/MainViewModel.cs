@@ -20,29 +20,12 @@ namespace FluentFeeds.App.Shared.ViewModels.Pages;
 /// </summary>
 public sealed class MainViewModel : ObservableObject
 {
-	/// <summary>
-	/// Child pages of the main page.
-	/// </summary>
-	public enum Page
-	{
-		/// <summary>
-		/// App settings
-		/// </summary>
-		Settings,
-		/// <summary>
-		/// Feed viewer
-		/// </summary>
-		Feed
-	}
-
-	public MainViewModel(IFeedService feedService, INavigationService navigationService, IModalService modalService)
+	public MainViewModel(IFeedService feedService, IModalService modalService)
 	{
 		_feedService = feedService;
-		_navigationService = navigationService;
 		_modalService = modalService;
-		_navigationService.BackStackChanged += HandleBackStackChanged;
 		
-		_goBackCommand = new RelayCommand(() => _navigationService.GoBack(), () => _navigationService.CanGoBack);
+		_goBackCommand = new RelayCommand(HandleGoBackCommand, () => _backStack.Count > 1);
 		_settingsItem =
 			new NavigationItemViewModel(NavigationRoute.Settings, isExpandable: false, "Settings", Symbol.Settings);
 		_footerItems.Add(_settingsItem);
@@ -58,8 +41,9 @@ public sealed class MainViewModel : ObservableObject
 			feedService.ProviderNodes, _feedItems,
 			rootNode => new FeedNavigationItemViewModel(modalService, rootNode, rootNode, _feedItemRegistry),
 			rootNode => rootNode, _feedItemRegistry);
-		_visiblePage = GetVisiblePage();
-		_selectedItem = GetSelectedItem();
+		_currentRoute = NavigationRoute.Feed(overviewFeedNode);
+		_backStack.Add(_currentRoute);
+		_selectedItem = overviewItem;
 
 		FooterItems = new ReadOnlyObservableCollection<NavigationItemViewModel>(_footerItems);
 		FeedItems = new ReadOnlyObservableCollection<NavigationItemViewModel>(_feedItems);
@@ -81,17 +65,17 @@ public sealed class MainViewModel : ObservableObject
 	}
 
 	/// <summary>
-	/// Go back to the previous page/feed/article.
+	/// Go back to the previous page/feed.
 	/// </summary>
 	public ICommand GoBackCommand => _goBackCommand;
 
 	/// <summary>
-	/// The currently visible child page.
+	/// The currently active navigation route.
 	/// </summary>
-	public Page VisiblePage
+	public NavigationRoute CurrentRoute
 	{
-		get => _visiblePage;
-		private set => SetProperty(ref _visiblePage, value);
+		get => _currentRoute;
+		private set => SetProperty(ref _currentRoute, value);
 	}
 
 	/// <summary>
@@ -106,9 +90,10 @@ public sealed class MainViewModel : ObservableObject
 				// Item is not actually selectable or the selection has already changed.
 				return;
 
-			_isChangingSelection = true;
-			_navigationService.Navigate(value.Destination);
-			_isChangingSelection = false;
+			var newRoute = value.Destination;
+			_backStack.Add(newRoute);
+			_goBackCommand.NotifyCanExecuteChanged();
+			CurrentRoute = newRoute;
 		}
 	}
 
@@ -122,45 +107,33 @@ public sealed class MainViewModel : ObservableObject
 	/// </summary>
 	public ReadOnlyObservableCollection<NavigationItemViewModel> FooterItems { get; }
 
-	private void HandleBackStackChanged(object? sender, EventArgs e)
+	private void HandleGoBackCommand()
 	{
+		_backStack.RemoveAt(_backStack.Count - 1);
+		var newRoute = _backStack[^1];
 		_goBackCommand.NotifyCanExecuteChanged();
-		if (!_isChangingSelection)
-		{
-			_isChangingSelection = true;
-			SelectedItem = GetSelectedItem();
-			_isChangingSelection = false;
-		}
-		VisiblePage = GetVisiblePage();
+		_isChangingSelection = true;
+		SelectedItem =
+			newRoute.Type switch
+			{
+				NavigationRouteType.Settings => _settingsItem,
+				NavigationRouteType.Feed => _feedItemRegistry.GetValueOrDefault(newRoute.FeedNode!),
+				_ => null
+			};
+		_isChangingSelection = false;
+		CurrentRoute = newRoute;
 	}
 
-	private Page GetVisiblePage() =>
-		_navigationService.CurrentRoute.Type switch
-		{
-			NavigationRouteType.Settings => Page.Settings,
-			NavigationRouteType.Feed => Page.Feed,
-			_ => throw new IndexOutOfRangeException()
-		};
-
-	private NavigationItemViewModel? GetSelectedItem() =>
-		_navigationService.CurrentRoute.Type switch
-		{
-			NavigationRouteType.Settings => _settingsItem,
-			NavigationRouteType.Feed =>
-				_feedItemRegistry.GetValueOrDefault(_navigationService.CurrentRoute.FeedNode!),
-			_ => null
-		};
-
 	private readonly IFeedService _feedService;
-	private readonly INavigationService _navigationService;
 	private readonly IModalService _modalService;
+	private readonly List<NavigationRoute> _backStack = new();
 	private readonly RelayCommand _goBackCommand;
 	private readonly NavigationItemViewModel _settingsItem;
 	private readonly ObservableCollection<NavigationItemViewModel> _feedItems = new();
 	private readonly ObservableCollection<NavigationItemViewModel> _footerItems = new();
 	private readonly ObservableCollectionTransformer<IReadOnlyStoredFeedNode, NavigationItemViewModel> _feedItemTransformer;
 	private readonly Dictionary<IReadOnlyFeedNode, NavigationItemViewModel> _feedItemRegistry = new();
-	private Page _visiblePage;
+	private NavigationRoute _currentRoute;
 	private NavigationItemViewModel? _selectedItem;
 	private bool _isChangingSelection;
 }

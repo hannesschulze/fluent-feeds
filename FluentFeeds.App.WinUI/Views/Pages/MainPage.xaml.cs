@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.IO;
 using Windows.ApplicationModel;
+using FluentFeeds.App.Shared.Models;
 using FluentFeeds.App.Shared.ViewModels.Pages;
 using FluentFeeds.App.WinUI.Helpers;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
@@ -32,19 +33,6 @@ public sealed partial class MainPage : Page
 	private Thickness TitleBarAreaLeftMargin => new(left: NavigationCompactWidth, 0, 0, 0);
 	private Thickness ContentMargin => new(0, top: TitleBarHeight, 0, 0);
 
-	public MainViewModel ViewModel => (MainViewModel)DataContext;
-
-	public string WindowTitle => Package.Current.DisplayName;
-	public string WindowIcon => Path.Combine(Package.Current.InstalledLocation.Path, "Assets", "WindowIcon.ico");
-
-	public double CaptionButtonsWidth { get; set; } = 0;
-	public double TitleBarHeight { get; set; } = 48;
-
-	/// <summary>
-	/// Event invoked when the size of the drag regions might have changed.
-	/// </summary>
-	public event EventHandler<EventArgs>? DragRegionSizeChanged;
-
 	public MainPage()
 	{
 		DataContext = Ioc.Default.GetRequiredService<MainViewModel>();
@@ -69,15 +57,28 @@ public sealed partial class MainPage : Page
 		ViewModel.GoBackCommand.CanExecuteChanged += (s, e) => UpdateBackButtonEnabled();
 		ViewModel.PropertyChanged += HandlePropertyChanged;
 		UpdateBackButtonEnabled();
-		UpdateVisiblePage();
+		UpdateCurrentRoute();
 	}
+	
+	public MainViewModel ViewModel => (MainViewModel)DataContext;
+
+	public string WindowTitle => Package.Current.DisplayName;
+	public string WindowIcon => Path.Combine(Package.Current.InstalledLocation.Path, "Assets", "WindowIcon.ico");
+
+	public double CaptionButtonsWidth { get; set; } = 0;
+	public double TitleBarHeight { get; set; } = 48;
+
+	/// <summary>
+	/// Event invoked when the size of the drag regions might have changed.
+	/// </summary>
+	public event EventHandler<EventArgs>? DragRegionSizeChanged;
 
 	private void HandlePropertyChanged(object? sender, PropertyChangedEventArgs e)
 	{
 		switch (e.PropertyName)
 		{
-			case nameof(MainViewModel.VisiblePage):
-				UpdateVisiblePage();
+			case nameof(MainViewModel.CurrentRoute):
+				UpdateCurrentRoute();
 				break;
 		}
 	}
@@ -88,12 +89,12 @@ public sealed partial class MainPage : Page
 	private void UpdateBackButtonEnabled() =>
 		NavigationView.IsBackEnabled = ViewModel.GoBackCommand.CanExecute(null);
 
-	private void UpdateVisiblePage() =>
+	private void UpdateCurrentRoute() =>
 		ContentFrame.Navigate(
-			ViewModel.VisiblePage switch
+			ViewModel.CurrentRoute.Type switch
 			{
-				MainViewModel.Page.Settings => typeof(SettingsPage),
-				MainViewModel.Page.Feed => typeof(FeedPage),
+				NavigationRouteType.Settings => typeof(SettingsPage),
+				NavigationRouteType.Feed => typeof(FeedPage),
 				_ => throw new IndexOutOfRangeException()
 			},
 			null,
