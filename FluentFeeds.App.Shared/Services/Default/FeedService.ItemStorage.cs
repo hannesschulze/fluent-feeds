@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentFeeds.App.Shared.Models.Database;
+using FluentFeeds.Feeds.Base;
 using FluentFeeds.Feeds.Base.Items;
 using FluentFeeds.Feeds.Base.Items.Content;
 using FluentFeeds.Feeds.Base.Items.ContentLoaders;
@@ -15,14 +16,11 @@ public partial class FeedService
 {
 	private sealed class ItemStorage : IItemStorage
 	{
-		public ItemStorage(
-			IDatabaseService databaseService, Guid providerIdentifier, Guid storageIdentifier,
-			IItemContentSerializer contentSerializer)
+		public ItemStorage(IDatabaseService databaseService, FeedProvider provider, Guid identifier)
 		{
 			_databaseService = databaseService;
-			_providerIdentifier = providerIdentifier;
-			_storageIdentifier = storageIdentifier;
-			_contentSerializer = contentSerializer;
+			_provider = provider;
+			_identifier = identifier;
 
 			_initialize = new Lazy<Task>(InitializeAsync);
 		}
@@ -51,8 +49,8 @@ public partial class FeedService
 					new ItemDb
 					{ 
 						Identifier = item.Identifier, 
-						ProviderIdentifier = _providerIdentifier,
-						StorageIdentifier = _storageIdentifier,
+						ProviderIdentifier = _provider.Metadata.Identifier,
+						StorageIdentifier = _identifier,
 						Url = item.Url,
 						ContentUrl = item.ContentUrl,
 						PublishedTimestamp = item.PublishedTimestamp,
@@ -60,7 +58,7 @@ public partial class FeedService
 						Title = item.Title,
 						Author = item.Author,
 						Summary = item.Summary,
-						Content = await _contentSerializer.StoreAsync(item.ContentLoader),
+						Content = await _provider.StoreContentAsync(item.ContentLoader),
 						IsRead = item.IsRead
 					});
 			}
@@ -79,7 +77,7 @@ public partial class FeedService
 			dbItem.Title = updatedItem.Title;
 			dbItem.Author = updatedItem.Author;
 			dbItem.Summary = updatedItem.Summary;
-			dbItem.Content = await _contentSerializer.StoreAsync(updatedItem.ContentLoader);
+			dbItem.Content = await _provider.StoreContentAsync(updatedItem.ContentLoader);
 		}
 
 		/// <summary>
@@ -87,9 +85,9 @@ public partial class FeedService
 		/// </summary>
 		private async Task<List<StoredItem>> LoadItemsAsync(AppDbContext database)
 		{
+			var providerIdentifier = _provider.Metadata.Identifier;
 			var dbItems = await database.Items
-				.Where(i =>
-					i.ProviderIdentifier == _providerIdentifier && i.StorageIdentifier == _storageIdentifier)
+				.Where(i => i.ProviderIdentifier == providerIdentifier && i.StorageIdentifier == _identifier)
 				.Select(i =>
 					new
 					{
@@ -115,7 +113,7 @@ public partial class FeedService
 					title: item.Title,
 					author: item.Author,
 					summary: item.Summary,
-					contentLoader: new ItemContentLoader(_databaseService, item.Identifier, _contentSerializer),
+					contentLoader: new ItemContentLoader(_databaseService, _provider, item.Identifier),
 					isRead: item.IsRead))
 				.ToList();
 		}
@@ -194,9 +192,8 @@ public partial class FeedService
 		}
 
 		private readonly IDatabaseService _databaseService;
-		private readonly Guid _providerIdentifier;
-		private readonly Guid _storageIdentifier;
-		private readonly IItemContentSerializer _contentSerializer;
+		private readonly FeedProvider _provider;
+		private readonly Guid _identifier;
 		private readonly Dictionary<Guid, StoredItem> _items = new();
 		private readonly Dictionary<Uri, StoredItem> _urlItems = new();
 		private readonly Lazy<Task> _initialize;
@@ -208,11 +205,11 @@ public partial class FeedService
 	/// </summary>
 	private sealed class ItemContentLoader : IItemContentLoader
 	{
-		public ItemContentLoader(IDatabaseService databaseService, Guid identifier, IItemContentSerializer contentSerializer)
+		public ItemContentLoader(IDatabaseService databaseService, FeedProvider provider, Guid identifier)
 		{
 			_databaseService = databaseService;
+			_provider = provider;
 			_identifier = identifier;
-			_contentSerializer = contentSerializer;
 			_fetchFromDatabase = new Lazy<Task<IItemContentLoader>>(FetchFromDatabaseAsync, isThreadSafe: false);
 		}
 		
@@ -225,7 +222,7 @@ public partial class FeedService
 						.Where(i => i.Identifier == _identifier)
 						.Select(i => i.Content)
 						.FirstAsync();
-					return await _contentSerializer.LoadAsync(serialized);
+					return await _provider.LoadContentAsync(serialized);
 				});
 		}
 		
@@ -240,8 +237,8 @@ public partial class FeedService
 		}
 
 		private readonly IDatabaseService _databaseService;
+		private readonly FeedProvider _provider;
 		private readonly Guid _identifier;
-		private readonly IItemContentSerializer _contentSerializer;
 		private readonly Lazy<Task<IItemContentLoader>> _fetchFromDatabase;
 	}
 }

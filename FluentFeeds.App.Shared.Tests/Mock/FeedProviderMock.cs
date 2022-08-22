@@ -9,10 +9,14 @@ namespace FluentFeeds.App.Shared.Tests.Mock;
 
 public sealed class FeedProviderMock : FeedProvider
 {
-	public FeedProviderMock(Guid identifier) : base(
+	public FeedProviderMock(Guid identifier, bool hasUrlFactory = true) : base(
 		new FeedProviderMetadata(identifier, "Feed Provider Mock", "Feed provider mock implementation."))
 	{
 		InitialTree = FeedNode.Group("Feed Provider Mock", Symbol.Directory, true);
+		if (hasUrlFactory)
+		{
+			UrlFeedFactory = new UrlFeedFactoryMock();
+		}
 	}
 
 	public IReadOnlyFeedNode InitialTree { get; set; }

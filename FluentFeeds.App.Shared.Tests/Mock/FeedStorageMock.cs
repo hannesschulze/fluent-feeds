@@ -28,9 +28,11 @@ public sealed class FeedStorageMock : IFeedStorage
 	
 	public FeedProvider Provider { get; }
 	
+	public bool DeleteNodeFails { get; set; }
+	
 	public event EventHandler<FeedNodesDeletedEventArgs>? NodesDeleted;
 
-	public IItemStorage GetItemStorage(Guid identifier, IItemContentSerializer? contentSerializer = null)
+	public IItemStorage GetItemStorage(Guid identifier)
 	{
 		return new ItemStorageMock();
 	}
@@ -80,6 +82,9 @@ public sealed class FeedStorageMock : IFeedStorage
 
 	public Task DeleteNodeAsync(Guid identifier)
 	{
+		if (DeleteNodeFails)
+			throw new Exception("error");
+		
 		var node = _nodes[identifier];
 		node.Parent?.Children!.Remove(node);
 		NodesDeleted?.Invoke(this, new FeedNodesDeletedEventArgs(new[] { node }));

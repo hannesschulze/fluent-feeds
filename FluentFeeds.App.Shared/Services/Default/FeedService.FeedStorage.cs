@@ -138,10 +138,9 @@ public partial class FeedService
 			return rootNode;
 		}
 		
-		public IItemStorage GetItemStorage(Guid identifier, IItemContentSerializer? contentSerializer = null)
+		public IItemStorage GetItemStorage(Guid identifier)
 		{
-			return _itemStorages.GetOrAdd(identifier, _ => new ItemStorage(
-				_databaseService, Identifier, identifier, contentSerializer ?? new DefaultItemContentSerializer()));
+			return _itemStorages.GetOrAdd(identifier, _ => new ItemStorage(_databaseService, Provider, identifier));
 		}
 
 		public IReadOnlyStoredFeedNode? GetNode(Guid identifier)

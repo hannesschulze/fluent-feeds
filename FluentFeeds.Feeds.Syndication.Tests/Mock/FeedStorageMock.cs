@@ -13,7 +13,7 @@ public sealed class FeedStorageMock : IFeedStorage
 	
 	public event EventHandler<FeedNodesDeletedEventArgs>? NodesDeleted;
 
-	public IItemStorage GetItemStorage(Guid identifier, IItemContentSerializer? contentSerializer = null) =>
+	public IItemStorage GetItemStorage(Guid identifier) => 
 		new ItemStorageMock(identifier);
 
 	public IReadOnlyStoredFeedNode GetNode(Guid identifier) =>

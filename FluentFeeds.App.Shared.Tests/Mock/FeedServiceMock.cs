@@ -16,15 +16,15 @@ public sealed class FeedServiceMock : IFeedService
 	}
 	
 	public void CompleteInitialization() =>
-		_initializationCompletionSource.TrySetResult();
+		_initializationCompletionSource?.TrySetResult();
 	
 	public void CompleteInitialization(Exception exception) =>
-		_initializationCompletionSource.TrySetException(exception);
+		_initializationCompletionSource?.TrySetException(exception);
 	
-	public async Task InitializeAsync()
+	public Task InitializeAsync()
 	{
-		await _initializationCompletionSource.Task;
-		_initializationCompletionSource = new TaskCompletionSource();
+		var completionSource = _initializationCompletionSource = new TaskCompletionSource();
+		return completionSource.Task;
 	}
 
 	public ObservableCollection<IReadOnlyStoredFeedNode> ProviderNodes { get; } = new();
@@ -35,5 +35,5 @@ public sealed class FeedServiceMock : IFeedService
 		FeedNode.Custom(new EmptyFeed(), "Overview", Symbol.Home, isUserCustomizable: false);
 
 	private readonly ReadOnlyObservableCollection<IReadOnlyStoredFeedNode> _readOnlyProviderNodes;
-	private TaskCompletionSource _initializationCompletionSource = new();
+	private TaskCompletionSource? _initializationCompletionSource;
 }

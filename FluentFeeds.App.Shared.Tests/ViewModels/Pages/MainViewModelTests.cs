@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Threading.Tasks;
 using FluentFeeds.App.Shared.Models;
 using FluentFeeds.App.Shared.Tests.Mock;
 using FluentFeeds.App.Shared.ViewModels.Items.Navigation;
 using FluentFeeds.App.Shared.ViewModels.Pages;
 using FluentFeeds.Common;
+using FluentFeeds.Feeds.Base.Nodes;
 using Xunit;
 
 namespace FluentFeeds.App.Shared.Tests.ViewModels.Pages;
@@ -20,7 +22,7 @@ public class MainViewModelTests
 	private FeedServiceMock FeedService { get; }
 
 	[Fact]
-	public void ManagesNavigationItems()
+	public void ManagesNavigationItems_Initialization_Success()
 	{
 		var viewModel = new MainViewModel(FeedService, ModalService);
 		var provider = new FeedProviderMock(Guid.Empty);
@@ -63,82 +65,74 @@ public class MainViewModelTests
 			});
 	}
 
-	/*[Fact]
-	public void UpdatesSelectionWhenPageChanges_ToOtherFeed()
+	[Fact]
+	public void ManagesNavigationItems_Initialization_Error()
+	{
+		_ = new MainViewModel(FeedService, ModalService);
+		var modal = Assert.Raises<ModalServiceMock.ShowErrorModalEventArgs>(
+			h => ModalService.ShowErrorModal += h, h => ModalService.ShowErrorModal -= h,
+			() => FeedService.CompleteInitialization(new Exception("error"))).Arguments;
+		Assert.Equal("A database error occurred", modal.ViewModel.Title);
+		Assert.Equal("FluentFeeds was unable to initialize its database.", modal.ViewModel.Message);
+	}
+
+	[Fact]
+	public void Navigation_UsingItem()
 	{
 		var viewModel = new MainViewModel(FeedService, ModalService);
+		FeedService.CompleteInitialization();
+		
+		Assert.Equal(NavigationRoute.Feed(FeedService.OverviewNode), viewModel.CurrentRoute);
 		Assert.Equal(viewModel.FeedItems[0], viewModel.SelectedItem);
-		var unread = viewModel.FeedItems[1];
-		NavigationService.Navigate(unread.Destination);
-		Assert.Equal(unread, viewModel.SelectedItem);
-	}
-
-	[Fact]
-	public void UpdatesSelectionWhenPageChanges_ToSettings()
-	{
-		var viewModel = new MainViewModel(FeedService, ModalService);
-		Assert.Equal(viewModel.FeedItems[0], viewModel.SelectedItem);
-		NavigationService.Navigate(NavigationRoute.Settings);
-		Assert.Equal(viewModel.FooterItems[0], viewModel.SelectedItem);
-	}
-
-	[Fact]
-	public void UpdatesSelectionWhenPageChanges_ToUnknownRoute()
-	{
-		var viewModel = new MainViewModel(FeedService, ModalService);
-		Assert.Equal(viewModel.FeedItems[0], viewModel.SelectedItem);
-		NavigationService.Navigate(NavigationRoute.Feed(
-			FeedNode.Custom(new EmptyFeed(), "Foo", Symbol.Feed, false)));
-		Assert.Null(viewModel.SelectedItem);
-	}
-
-	[Fact]
-	public void UpdatesPageWhenSelectionChanges()
-	{
-		var viewModel = new MainViewModel(FeedService, ModalService);
-		viewModel.SelectedItem = viewModel.FooterItems[0];
-		Assert.Equal(viewModel.FooterItems[0], viewModel.SelectedItem);
-		Assert.Equal(NavigationRoute.Settings, NavigationService.CurrentRoute);
-	}
-
-	[Fact]
-	public void UpdatesVisiblePage()
-	{
-		var viewModel = new MainViewModel(FeedService, ModalService);
-		Assert.Equal(MainViewModel.Page.Feed, viewModel.VisiblePage);
-		NavigationService.Navigate(NavigationRoute.Settings);
-		Assert.Equal(MainViewModel.Page.Settings, viewModel.VisiblePage);
-	}
-
-	[Fact]
-	public void UpdatesVisiblePage_OnlyForDifferentRouteType()
-	{
-		var viewModel = new MainViewModel(FeedService, NavigationService);
-		viewModel.PropertyChanged +=
-			(s, e) => Assert.NotEqual(nameof(MainViewModel.VisiblePage), e.PropertyName);
-		NavigationService.Navigate(viewModel.FeedItems[1].Destination);
-		Assert.Equal(MainViewModel.Page.Feed, viewModel.VisiblePage);
-	}
-
-	[Fact]
-	public void GoBack_UpdatesAvailability()
-	{
-		var viewModel = new MainViewModel(FeedService, ModalService);
 		Assert.False(viewModel.GoBackCommand.CanExecute(null));
-		var changed = false;
-		viewModel.GoBackCommand.CanExecuteChanged += (s, e) => changed = true;
-		NavigationService.Navigate(NavigationRoute.Settings);
-		Assert.True(changed);
+		viewModel.SelectedItem = viewModel.FooterItems[0];
+		Assert.Equal(NavigationRoute.Settings, viewModel.CurrentRoute);
+		Assert.Equal(viewModel.FooterItems[0], viewModel.SelectedItem);
 		Assert.True(viewModel.GoBackCommand.CanExecute(null));
 	}
 
 	[Fact]
-	public void GoBack_ExecuteCommand()
+	public void Navigation_UsingBackButton()
 	{
 		var viewModel = new MainViewModel(FeedService, ModalService);
-		NavigationService.Navigate(NavigationRoute.Settings);
+		FeedService.CompleteInitialization();
+		
+		viewModel.SelectedItem = viewModel.FooterItems[0];
 		viewModel.GoBackCommand.Execute(null);
-		Assert.Equal(viewModel.FeedItems[0].Destination, NavigationService.CurrentRoute);
+		Assert.Equal(NavigationRoute.Feed(FeedService.OverviewNode), viewModel.CurrentRoute);
+		Assert.Equal(viewModel.FeedItems[0], viewModel.SelectedItem);
 		Assert.False(viewModel.GoBackCommand.CanExecute(null));
-	}*/
+	}
+
+	[Fact]
+	public async Task Navigation_RemoveDeletedNodes()
+	{
+		var viewModel = new MainViewModel(FeedService, ModalService);
+		var provider = new FeedProviderMock(Guid.Empty);
+		var feedStorage = new FeedStorageMock(provider);
+		var rootNode = feedStorage.AddRootNode(FeedNode.Group("root", Symbol.Directory, true));
+		var nodeA = await feedStorage.AddNodeAsync(FeedNode.Group("a", Symbol.Directory, true), rootNode.Identifier);
+		var nodeB = await feedStorage.AddNodeAsync(FeedNode.Group("b", Symbol.Directory, true), rootNode.Identifier);
+		FeedService.ProviderNodes.Add(rootNode);
+		FeedService.CompleteInitialization();
+
+		viewModel.SelectedItem = viewModel.FooterItems[0];
+		viewModel.SelectedItem = viewModel.FeedItems[2].Children[0];
+		viewModel.SelectedItem = viewModel.FeedItems[2].Children[1];
+		viewModel.SelectedItem = viewModel.FeedItems[2].Children[0];
+		viewModel.SelectedItem = viewModel.FeedItems[2].Children[1];
+		
+		await feedStorage.DeleteNodeAsync(nodeB.Identifier);
+		Assert.Equal(NavigationRoute.Feed(nodeA), viewModel.CurrentRoute);
+		Assert.Equal(viewModel.FeedItems[2].Children[0], viewModel.SelectedItem);
+		Assert.True(viewModel.GoBackCommand.CanExecute(null));
+		viewModel.GoBackCommand.Execute(null);
+		Assert.Equal(NavigationRoute.Settings, viewModel.CurrentRoute);
+		Assert.Equal(viewModel.FooterItems[0], viewModel.SelectedItem);
+		Assert.True(viewModel.GoBackCommand.CanExecute(null));
+		viewModel.GoBackCommand.Execute(null);
+		Assert.Equal(NavigationRoute.Feed(FeedService.OverviewNode), viewModel.CurrentRoute);
+		Assert.Equal(viewModel.FeedItems[0], viewModel.SelectedItem);
+		Assert.False(viewModel.GoBackCommand.CanExecute(null));
+	}
 }
