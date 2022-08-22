@@ -61,7 +61,7 @@ public sealed class MainViewModel : ObservableObject
 		catch (Exception)
 		{
 			_modalService.Show(
-				new ErrorViewModel("A database error occurred", "FluentFeeds was unable to initialize its database."));
+				new ErrorViewModel("A database error occurred", "Fluent Feeds was unable to initialize its database."));
 		}
 	}
 

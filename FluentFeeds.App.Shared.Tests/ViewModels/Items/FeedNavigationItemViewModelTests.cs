@@ -356,6 +356,6 @@ public class FeedNavigationItemViewModelTests
 			() => modalArgs.ViewModel.ConfirmCommand.Execute(null)).Arguments;
 		Assert.Equal("A database error occurred", errorArgs.ViewModel.Title);
 		Assert.Equal(
-			"FluentFeeds was unable to delete the selected item from the database.", errorArgs.ViewModel.Message);
+			"Fluent Feeds was unable to delete the selected item from the database.", errorArgs.ViewModel.Message);
 	}
 }

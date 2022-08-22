@@ -73,7 +73,7 @@ public class MainViewModelTests
 			h => ModalService.ShowErrorModal += h, h => ModalService.ShowErrorModal -= h,
 			() => FeedService.CompleteInitialization(new Exception("error"))).Arguments;
 		Assert.Equal("A database error occurred", modal.ViewModel.Title);
-		Assert.Equal("FluentFeeds was unable to initialize its database.", modal.ViewModel.Message);
+		Assert.Equal("Fluent Feeds was unable to initialize its database.", modal.ViewModel.Message);
 	}
 
 	[Fact]

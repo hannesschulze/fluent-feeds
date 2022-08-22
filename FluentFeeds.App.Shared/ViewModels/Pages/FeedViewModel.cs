@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using FluentFeeds.App.Shared.Models;
+using FluentFeeds.App.Shared.Services;
 using FluentFeeds.Feeds.Base.Items;
 using FluentFeeds.Feeds.Base.Nodes;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
@@ -15,13 +16,15 @@ namespace FluentFeeds.App.Shared.ViewModels.Pages;
 /// </summary>
 public sealed class FeedViewModel : ObservableObject
 {
-	public FeedViewModel()
+	public FeedViewModel(IModalService modalService)
 	{
-		_syncCommand = new RelayCommand(() => { });
-		_markReadCommand = new RelayCommand(() => { });
-		_deleteCommand = new RelayCommand(() => { });
+		_modalService = modalService;
+		
+		_syncCommand = new RelayCommand(() => { }, () => !IsSyncInProgress);
+		_markReadCommand = new RelayCommand(() => { }, () => IsMarkReadAvailable);
+		_deleteCommand = new RelayCommand(() => { }, () => SelectedItems.Length >= 1);
 		_openDisplayOptionsCommand = new RelayCommand(() => { });
-		_reloadContentCommand = new RelayCommand(() => { });
+		_reloadContentCommand = new RelayCommand(() => { }, () => IsReloadContentAvailable);
 		_openBrowserCommand = new RelayCommand(() => { });
 		
 		Items = new ReadOnlyObservableCollection<IReadOnlyItem>(_items);
@@ -76,7 +79,14 @@ public sealed class FeedViewModel : ObservableObject
 	public ImmutableArray<IReadOnlyItem> SelectedItems
 	{
 		get => _selectedItems;
-		set => SetProperty(ref _selectedItems, value);
+		set
+		{
+			if (SetProperty(ref _selectedItems, value))
+			{
+				_deleteCommand.NotifyCanExecuteChanged();
+				IsMarkReadAvailable = SelectedItems.Length > 1;
+			}
+		}
 	}
 
 	/// <summary>
@@ -86,6 +96,21 @@ public sealed class FeedViewModel : ObservableObject
 	{
 		get => _selectedSortMode;
 		set => SetProperty(ref _selectedSortMode, value);
+	}
+
+	/// <summary>
+	/// Indicates if the app is currently fetching new feeds from the web.
+	/// </summary>
+	public bool IsSyncInProgress
+	{
+		get => _isSyncInProgress;
+		private set
+		{
+			if (SetProperty(ref _isSyncInProgress, value))
+			{
+				_syncCommand.NotifyCanExecuteChanged();
+			}
+		}
 	}
 	
 	/// <summary>
@@ -98,7 +123,13 @@ public sealed class FeedViewModel : ObservableObject
 	public bool IsMarkReadAvailable
 	{
 		get => _isMarkReadAvailable;
-		private set => SetProperty(ref _isMarkReadAvailable, value);
+		private set
+		{
+			if (SetProperty(ref _isMarkReadAvailable, value))
+			{
+				_markReadCommand.NotifyCanExecuteChanged();
+			}
+		}
 	}
 
 	/// <summary>
@@ -111,9 +142,16 @@ public sealed class FeedViewModel : ObservableObject
 	public bool IsReloadContentAvailable
 	{
 		get => _isReloadContentAvailable;
-		private set => SetProperty(ref _isReloadContentAvailable, value);
+		private set
+		{
+			if (SetProperty(ref _isReloadContentAvailable, value))
+			{
+				_reloadContentCommand.NotifyCanExecuteChanged();
+			}
+		}
 	}
 
+	private readonly IModalService _modalService;
 	private readonly RelayCommand _syncCommand;
 	private readonly RelayCommand _markReadCommand;
 	private readonly RelayCommand _deleteCommand;
@@ -123,6 +161,7 @@ public sealed class FeedViewModel : ObservableObject
 	private readonly ObservableCollection<IReadOnlyItem> _items = new();
 	private ImmutableArray<IReadOnlyItem> _selectedItems = ImmutableArray<IReadOnlyItem>.Empty;
 	private ItemSortMode _selectedSortMode = ItemSortMode.Newest;
+	private bool _isSyncInProgress;
 	private bool _isMarkReadAvailable;
 	private bool _isReloadContentAvailable;
 }

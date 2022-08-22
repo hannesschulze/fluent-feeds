@@ -10,5 +10,12 @@ public enum Symbol
 	Feed,
 	Directory,
 	Web,
+	Synchronize,
+	Refresh,
+	MailUnread,
+	Trash,
+	SortOrder,
+	OpenExternal,
+	Font,
 	Settings
 }

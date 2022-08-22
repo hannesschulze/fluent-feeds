@@ -86,6 +86,9 @@ public sealed partial class MainPage : Page
 	private void HandleDragRegionSizeChanged(object sender, SizeChangedEventArgs e) =>
 		DragRegionSizeChanged?.Invoke(this, EventArgs.Empty);
 
+	private void HandleErrorBarClosed(InfoBar sender, InfoBarClosedEventArgs args) =>
+		ErrorBar.Margin = new Thickness(0);
+
 	private void UpdateBackButtonEnabled() =>
 		NavigationView.IsBackEnabled = ViewModel.GoBackCommand.CanExecute(null);
 
