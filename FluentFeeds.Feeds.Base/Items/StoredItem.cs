@@ -1,6 +1,6 @@
 using System;
-using FluentFeeds.Feeds.Base.Items.Content;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
+using FluentFeeds.Feeds.Base.Items.ContentLoaders;
+using FluentFeeds.Feeds.Base.Storage;
 
 namespace FluentFeeds.Feeds.Base.Items;
 
@@ -12,15 +12,36 @@ namespace FluentFeeds.Feeds.Base.Items;
 public class StoredItem : Item, IReadOnlyStoredItem
 {
 	public StoredItem(
-		Guid identifier, Uri? url, Uri? contentUrl, DateTimeOffset publishedTimestamp, DateTimeOffset modifiedTimestamp,
-		string title, string? author, string? summary, ItemContent content, bool isRead)
-		: base(url, contentUrl, publishedTimestamp, modifiedTimestamp, title, author, summary, content)
+		Guid identifier, IItemStorage storage, Uri? url, Uri? contentUrl, DateTimeOffset publishedTimestamp,
+		DateTimeOffset modifiedTimestamp, string title, string? author, string? summary,
+		IItemContentLoader contentLoader, bool isRead)
+		: base(url, contentUrl, publishedTimestamp, modifiedTimestamp, title, author, summary, contentLoader)
 	{
 		Identifier = identifier;
+		Storage = storage;
 		_isRead = isRead;
 	}
 	
+	/// <summary>
+	/// Create a stored item from a base item.
+	/// </summary>
+	public StoredItem(IReadOnlyItem item, Guid identifier, IItemStorage storage, bool isRead) : base(item)
+	{
+		Identifier = identifier;
+		Storage = storage;
+		_isRead = isRead;
+	}
+
+	/// <summary>
+	/// Create a copy of another stored item.
+	/// </summary>
+	public StoredItem(IReadOnlyStoredItem item) : this(item, item.Identifier, item.Storage, item.IsRead)
+	{
+	}
+	
 	public Guid Identifier { get; }
+	
+	public IItemStorage Storage { get; }
 
 	public bool IsRead
 	{

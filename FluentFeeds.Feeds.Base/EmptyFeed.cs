@@ -10,9 +10,7 @@ namespace FluentFeeds.Feeds.Base;
 /// </summary>
 public sealed class EmptyFeed : Feed
 {
-	protected override Task<IEnumerable<IReadOnlyStoredItem>> DoLoadAsync() =>
-		Task.FromResult(Enumerable.Empty<IReadOnlyStoredItem>());
+	protected override Task DoLoadAsync() => Task.CompletedTask;
 
-	protected override Task<IEnumerable<IReadOnlyStoredItem>> DoSynchronizeAsync() =>
-		Task.FromResult(Enumerable.Empty<IReadOnlyStoredItem>());
+	protected override Task DoSynchronizeAsync() => Task.CompletedTask;
 }

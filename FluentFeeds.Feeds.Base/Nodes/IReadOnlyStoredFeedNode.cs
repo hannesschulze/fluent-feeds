@@ -1,4 +1,5 @@
 using System;
+using FluentFeeds.Feeds.Base.Storage;
 
 namespace FluentFeeds.Feeds.Base.Nodes;
 
@@ -11,4 +12,9 @@ public interface IReadOnlyStoredFeedNode : IReadOnlyFeedNode
 	/// Unique identifier for this node.
 	/// </summary>
 	Guid Identifier { get; }
+	
+	/// <summary>
+	/// Storage managing this node.
+	/// </summary>
+	IFeedStorage Storage { get; }
 }

@@ -1,7 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
+using FluentFeeds.Feeds.Base.EventArgs;
 using FluentFeeds.Feeds.Base.Items;
 
 namespace FluentFeeds.Feeds.Base;
@@ -18,12 +18,12 @@ public abstract class Feed
 	/// Event called when <see cref="Items"/> has been updated. This event is usually raised after calling either
 	/// <see cref="LoadAsync"/> or <see cref="SynchronizeAsync"/>.
 	/// </summary>
-	public event EventHandler<EventArgs>? ItemsUpdated;
+	public event EventHandler<FeedItemsUpdatedEventArgs>? ItemsUpdated;
 
 	/// <summary>
 	/// Event called when <see cref="Metadata"/> has been updated.
 	/// </summary>
-	public event EventHandler<EventArgs>? MetadataUpdated;
+	public event EventHandler<FeedMetadataUpdatedEventArgs>? MetadataUpdated;
 
 	/// <summary>
 	/// Current snapshot of items provided by the feed.
@@ -34,20 +34,20 @@ public abstract class Feed
 		protected set
 		{
 			_items = value;
-			ItemsUpdated?.Invoke(this, EventArgs.Empty);
+			ItemsUpdated?.Invoke(this, new FeedItemsUpdatedEventArgs(value));
 		}
 	}
 
 	/// <summary>
 	/// Metadata for the feed.
 	/// </summary>
-	public FeedMetadata? Metadata
+	public FeedMetadata Metadata
 	{
 		get => _metadata;
 		protected set
 		{
 			_metadata = value;
-			MetadataUpdated?.Invoke(this, EventArgs.Empty);
+			MetadataUpdated?.Invoke(this, new FeedMetadataUpdatedEventArgs(value));
 		}
 	}
 
@@ -84,19 +84,19 @@ public abstract class Feed
 	}
 
 	/// <summary>
-	/// Asynchronously return the initial selection of items which might be out of date.
+	/// Asynchronously update the list of items to the initial selection of items which might be out of date.
 	/// </summary>
-	protected abstract Task<IEnumerable<IReadOnlyStoredItem>> DoLoadAsync();
+	protected abstract Task DoLoadAsync();
 	
 	/// <summary>
-	/// Return a list of up to date items fetched from a remote server. It is ensured that <see cref="DoLoadAsync"/> has
-	/// been called before this method.
+	/// Update the list of items to an up-to-date list fetched from a remote server. It is ensured that
+	/// <see cref="DoLoadAsync"/> has been called before this method.
 	/// </summary>
-	protected abstract Task<IEnumerable<IReadOnlyStoredItem>> DoSynchronizeAsync();
+	protected abstract Task DoSynchronizeAsync();
 
 	private async Task LoadAsyncCore()
 	{
-		Items = (await DoLoadAsync()).ToImmutableHashSet();
+		await DoLoadAsync();
 		
 		_isLoaded = true;
 	}
@@ -104,14 +104,13 @@ public abstract class Feed
 	private async Task SynchronizeAsyncCore()
 	{
 		await LoadAsync();
-
-		Items = (await DoSynchronizeAsync()).ToImmutableHashSet();
+		await DoSynchronizeAsync();
 
 		_isSynchronizing = false;
 	}
 
 	private ImmutableHashSet<IReadOnlyStoredItem> _items = ImmutableHashSet<IReadOnlyStoredItem>.Empty;
-	private FeedMetadata? _metadata;
+	private FeedMetadata _metadata = new();
 	private bool _isLoaded;
 	private bool _isSynchronizing;
 	private Task? _loadTask;

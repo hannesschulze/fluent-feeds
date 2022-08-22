@@ -33,6 +33,16 @@ public interface IReadOnlyFeedNode : INotifyPropertyChanged, INotifyPropertyChan
 	/// Custom symbol for the node. If set to <c>null</c>, the feed's symbol is used.
 	/// </summary>
 	Symbol? Symbol { get; }
+	
+	/// <summary>
+	/// The actual title of the feed, using the feed's title as the fallback.
+	/// </summary>
+	string DisplayTitle { get; }
+	
+	/// <summary>
+	/// The actual symbol of the feed, using the feed's symbol as the fallback.
+	/// </summary>
+	Symbol DisplaySymbol { get; }
 
 	/// <summary>
 	/// Flag indicating whether the user should be able to customize this node.

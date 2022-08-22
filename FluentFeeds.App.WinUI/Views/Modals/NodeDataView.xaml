@@ -1,0 +1,91 @@
+﻿<ContentDialog
+	x:Class="FluentFeeds.App.WinUI.Views.Modals.NodeDataView"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:vm="using:FluentFeeds.App.Shared.ViewModels.Modals"
+	xmlns:views="using:FluentFeeds.App.WinUI.Views.Items.GroupSelection"
+	xmlns:converters="using:FluentFeeds.App.WinUI.Converters"
+	xmlns:selectors="using:FluentFeeds.App.WinUI.Selectors"
+	d:DataContext="{d:DesignInstance Type=vm:NodeDataViewModel}"
+	mc:Ignorable="d"
+	PrimaryButtonText="Save"
+	PrimaryButtonClick="HandlePrimaryButtonClick"
+	IsPrimaryButtonEnabled="{x:Bind ViewModel.IsSaveEnabled, Mode=OneWay}"
+	CloseButtonText="Cancel"
+	DefaultButton="Primary">
+
+	<ContentDialog.Resources>
+		<converters:NumberToThicknessConverter
+			x:Key="IndentationLevelToMarginConverter"
+			BaseThickness="16,0,0,0" />
+
+		<DataTemplate
+			xmlns:vm="using:FluentFeeds.App.Shared.ViewModels.Items.GroupSelection"
+			x:Key="MenuItemTemplate"
+			x:DataType="vm:GroupSelectionItemViewModel">
+			
+			<TextBlock
+				Text="{Binding Title}"
+				Margin="{Binding IndentationLevel, Converter={StaticResource IndentationLevelToMarginConverter}}" />
+			
+		</DataTemplate>
+
+		<DataTemplate
+			xmlns:vm="using:FluentFeeds.App.Shared.ViewModels.Items.GroupSelection"
+			x:Key="SelectedItemTemplate"
+			x:DataType="vm:GroupSelectionItemViewModel">
+			
+			<TextBlock Text="{Binding Title}" />
+			
+		</DataTemplate>
+
+		<selectors:ComboBoxItemTemplateSelector
+			x:Key="ItemTemplateSelector"
+			MenuTemplate="{StaticResource MenuItemTemplate}"
+			SelectedTemplate="{StaticResource SelectedItemTemplate}" />
+	</ContentDialog.Resources>
+
+	<ContentDialog.Title>
+		<StackPanel Orientation="Horizontal" Spacing="12">
+			<TextBlock Grid.Column="0" Text="{x:Bind ViewModel.Title}" />
+
+			<ProgressRing
+				Grid.Column="1"
+				IsActive="{x:Bind ViewModel.IsInProgress, Mode=OneWay}"
+				HorizontalAlignment="Right" />
+		</StackPanel>
+	</ContentDialog.Title>
+
+	<StackPanel Orientation="Vertical" Width="350">
+		<InfoBar
+			Severity="Error"
+			Title="{x:Bind ViewModel.ErrorTitle}"
+			Message="{x:Bind ViewModel.ErrorMessage}"
+			IsOpen="{x:Bind ViewModel.IsErrorVisible, Mode=TwoWay}"
+			Margin="{x:Bind GetInfoBarMargin(ViewModel.IsErrorVisible), Mode=OneWay}"/>
+
+		<StackPanel Orientation="Vertical" Width="350" Spacing="12">
+			<StackPanel Orientation="Vertical" Spacing="4">
+				<TextBlock Text="{x:Bind ViewModel.InputLabel}" LineHeight="20" />
+
+				<TextBox
+					x:Name="InputTextBox"
+					Text="{x:Bind ViewModel.Input, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+			</StackPanel>
+
+			<StackPanel Orientation="Vertical" Spacing="4">
+				<TextBlock Text="Location" LineHeight="20" />
+
+				<views:GroupSelectionComboBox
+					SelectedItem="{x:Bind ViewModel.SelectedGroup, Mode=TwoWay}"
+					ItemsSource="{x:Bind ViewModel.GroupItems}"
+					ItemTemplateSelector="{StaticResource ItemTemplateSelector}"
+					Style="{StaticResource DefaultComboBoxStyle}"
+					HorizontalAlignment="Stretch" />
+			</StackPanel>
+		</StackPanel>
+	</StackPanel>
+
+</ContentDialog>

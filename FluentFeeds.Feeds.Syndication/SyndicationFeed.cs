@@ -1,6 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using FluentFeeds.Feeds.Base;
 using FluentFeeds.Feeds.Base.Items;
@@ -16,15 +15,16 @@ namespace FluentFeeds.Feeds.Syndication;
 /// </summary>
 public sealed class SyndicationFeed : CachedFeed
 {
+	private const int ItemProcessingMaxDegreeOfParallelism = 3;
+	
 	public SyndicationFeed(
-		IFeedDownloader downloader, IItemStorage storage, Guid identifier, Uri url, 
-		FeedMetadata? initialMetadata = null)
-		: base(storage, identifier)
+		IFeedDownloader downloader, IFeedStorage feedStorage, Guid identifier, Uri url, 
+		FeedMetadata? initialMetadata = null) : base(feedStorage.GetItemStorage(identifier))
 	{
 		Downloader = downloader;
 		Identifier = identifier;
 		Url = url;
-		Metadata = initialMetadata;
+		Metadata = initialMetadata ?? new FeedMetadata();
 	}
 
 	/// <summary>
@@ -47,27 +47,41 @@ public sealed class SyndicationFeed : CachedFeed
 	/// </summary>
 	public async Task LoadMetadataAsync()
 	{
-		var feed = _prefetchedFeed = await Downloader.DownloadAsync().ConfigureAwait(false);
-		Metadata = await ConversionHelpers.ConvertFeedMetadataAsync(feed, Url).ConfigureAwait(false);
+		Metadata = await Task.Run(
+			async () =>
+			{
+				var feed = await Downloader.DownloadAsync();
+				lock (this)
+				{
+					_prefetchedFeed = feed;
+				}
+				return await ConversionHelpers.ConvertFeedMetadataAsync(feed, Url);
+			});
 	}
 
-	protected override async Task<IEnumerable<IReadOnlyItem>> DoFetchAsync()
+	protected override async Task<FetchResult> DoFetchAsync()
 	{
-		SysSyndicationFeed feed;
-		if (_prefetchedFeed != null)
+		SysSyndicationFeed? feed;
+		lock (this)
 		{
 			feed = _prefetchedFeed;
 			_prefetchedFeed = null;
 		}
-		else
+	
+		FeedMetadata? updatedMetadata = null;	
+		if (feed == null)
 		{
-			feed = await Downloader.DownloadAsync().ConfigureAwait(false);
-			Metadata = await ConversionHelpers.ConvertFeedMetadataAsync(feed, Url).ConfigureAwait(false);
+			feed = await Downloader.DownloadAsync();
+			updatedMetadata = await ConversionHelpers.ConvertFeedMetadataAsync(feed, Url);
 		}
 
 		// Process all items in parallel.
-		var tasks = feed.Items.Select(item => ConversionHelpers.ConvertItemAsync(item, Url));
-		return await Task.WhenAll(tasks).ConfigureAwait(false);
+		var result = new ConcurrentBag<IReadOnlyItem>();
+		var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = ItemProcessingMaxDegreeOfParallelism };
+		await Parallel.ForEachAsync(
+			feed.Items, parallelOptions,
+			async (item, _) => result.Add(await ConversionHelpers.ConvertItemAsync(item, Url)));
+		return new FetchResult(result.ToArray()) { UpdatedMetadata = updatedMetadata };
 	}
 
 	private SysSyndicationFeed? _prefetchedFeed;

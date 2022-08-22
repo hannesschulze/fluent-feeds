@@ -61,14 +61,14 @@ public abstract class TextContent
 	/// <param name="content">
 	/// The content (either HTML or plain text).
 	/// </param>
-	/// <param name="options">HTML parsing options if the content contains HTML.</param>
+	/// <param name="htmlOptions">HTML parsing options if the content contains HTML.</param>
 	/// <param name="isKnownHtml">
 	/// If set to true, the automatic detection is skipped and <c>content</c> is treated as HTML.
 	/// </param>
 	public static async Task<TextContent> LoadAsync(
 		string content, HtmlParsingOptions htmlOptions, bool isKnownHtml = false) =>
 		isKnownHtml || IsHtml(content)
-			? new RichTextContent(await RichText.ParseHtmlAsync(content, htmlOptions).ConfigureAwait(false))
+			? new RichTextContent(await RichText.ParseHtmlAsync(content, htmlOptions))
 			: new PlainTextContent(content);
 
 	/// <summary>

@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using FluentFeeds.Common;
 using FluentFeeds.Feeds.Base;
 using FluentFeeds.Feeds.Base.Nodes;
@@ -10,12 +11,13 @@ namespace FluentFeeds.Feeds.Syndication.Tests;
 
 public class SyndicationFeedProviderTests
 {
-	private SyndicationFeedProvider Provider { get; } = new(new FeedStorageMock());
+	private SyndicationFeedProvider Provider { get; } = new();
 	
 	[Fact]
 	public void InitialStructure()
 	{
-		var structure = Provider.CreateInitialTree();
+		var feedStorage = new FeedStorageMock();
+		var structure = Provider.CreateInitialTree(feedStorage);
 		Assert.Equal(FeedNodeType.Group, structure.Type);
 		Assert.Equal(Symbol.Feed, structure.Symbol);
 		Assert.Equal("RSS/Atom feeds", structure.Title);
@@ -27,28 +29,28 @@ public class SyndicationFeedProviderTests
 	[Fact]
 	public void Factories()
 	{
-		var factory = Assert.IsType<SyndicationUrlFeedFactory>(Provider.UrlFeedFactory);
-		Assert.Equal(Provider.Storage, factory.FeedStorage);
+		Assert.IsType<SyndicationUrlFeedFactory>(Provider.UrlFeedFactory);
 	}
 
 	[Fact]
-	public void FeedSerialization()
+	public async Task FeedSerialization()
 	{
 		var identifier = Guid.NewGuid();
 		var downloader = new FeedDownloaderMock();
-		var storage = Provider.Storage.GetItemStorage(identifier);
+		var feedStorage = new FeedStorageMock();
+		var itemStorage = feedStorage.GetItemStorage(identifier);
 		var url = new Uri("https://www.example.com/");
-		var metadata = new FeedMetadata("name", "author", "description", Symbol.Web);
-		var feed = new SyndicationFeed(downloader, storage, identifier, url, metadata);
-		var serialized = Provider.StoreFeed(feed);
-		var deserialized = Assert.IsType<SyndicationFeed>(Provider.LoadFeed(serialized));
+		var metadata =
+			new FeedMetadata { Name = "name", Author = "author", Description = "description", Symbol = Symbol.Web };
+		var feed = new SyndicationFeed(downloader, feedStorage, identifier, url, metadata);
+		var serialized = await Provider.StoreFeedAsync(feed);
+		var deserialized = Assert.IsType<SyndicationFeed>(await Provider.LoadFeedAsync(feedStorage, serialized));
 		var newDownloader = Assert.IsType<FeedDownloader>(deserialized.Downloader);
 		Assert.Equal(url, newDownloader.Url);
 		Assert.Equal(metadata, deserialized.Metadata);
 		Assert.Equal(url, deserialized.Url);
 		Assert.Equal(identifier, deserialized.Identifier);
-		Assert.Equal(identifier, deserialized.CollectionIdentifier);
-		var newStorage = Assert.IsType<ItemStorageMock>(deserialized.Storage);
-		Assert.Equal(identifier, newStorage.Identifier);
+		var newItemStorage = Assert.IsType<ItemStorageMock>(deserialized.Storage);
+		Assert.Equal(identifier, newItemStorage.Identifier);
 	}
 }

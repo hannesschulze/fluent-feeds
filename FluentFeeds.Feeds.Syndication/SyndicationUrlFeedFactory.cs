@@ -12,20 +12,12 @@ namespace FluentFeeds.Feeds.Syndication;
 /// </summary>
 public class SyndicationUrlFeedFactory : IUrlFeedFactory
 {
-	public SyndicationUrlFeedFactory(IFeedStorage feedStorage)
-	{
-		FeedStorage = feedStorage;
-	}
-	
-	public IFeedStorage FeedStorage { get; }
-	
-	public async Task<Feed> CreateAsync(Uri url)
+	public async Task<Feed> CreateAsync(IFeedStorage feedStorage, Uri url)
 	{
 		var identifier = Guid.NewGuid();
 		var downloader = CreateDownloader(url);
-		var itemStorage = FeedStorage.GetItemStorage(identifier);
-		var feed = new SyndicationFeed(downloader, itemStorage, identifier, url);
-		await feed.LoadMetadataAsync().ConfigureAwait(false);
+		var feed = new SyndicationFeed(downloader, feedStorage, identifier, url);
+		await feed.LoadMetadataAsync();
 		return feed;
 	}
 

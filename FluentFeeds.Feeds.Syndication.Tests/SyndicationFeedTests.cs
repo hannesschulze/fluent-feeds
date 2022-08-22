@@ -31,15 +31,14 @@ public class SyndicationFeedTests
 					}
 				}
 			};
-		Feed = new SyndicationFeed(
-			Downloader, new ItemStorageMock(Guid.Empty), Guid.Empty, new Uri("https://www.example.com"));
+		Feed = new SyndicationFeed(Downloader, new FeedStorageMock(), Guid.Empty, new Uri("https://www.example.com"));
 	}
 	
 	[Fact]
 	public async Task FetchContent_NotPrefetched()
 	{
 		await Feed.SynchronizeAsync();
-		Assert.Equal(new FeedMetadata(Name: "My blog", null, null, Symbol.Web), Feed.Metadata);
+		Assert.Equal(new FeedMetadata { Name = "My blog", Symbol = Symbol.Web }, Feed.Metadata);
 		Assert.Collection(
 			Feed.Items,
 			item => Assert.Equal("Test item", item.Title));
@@ -50,14 +49,14 @@ public class SyndicationFeedTests
 	{
 		await Feed.LoadMetadataAsync();
 		Downloader.Feed = new SysSyndicationFeed();
-		Assert.Equal(new FeedMetadata(Name: "My blog", null, null, Symbol.Web), Feed.Metadata);
+		Assert.Equal(new FeedMetadata { Name = "My blog", Symbol = Symbol.Web }, Feed.Metadata);
 		await Feed.SynchronizeAsync();
-		Assert.Equal(new FeedMetadata(Name: "My blog", null, null, Symbol.Web), Feed.Metadata);
+		Assert.Equal(new FeedMetadata { Name = "My blog", Symbol = Symbol.Web }, Feed.Metadata);
 		Assert.Collection(
 			Feed.Items,
 			item => Assert.Equal("Test item", item.Title));
 		await Feed.SynchronizeAsync();
-		Assert.Equal(new FeedMetadata(null, null, null, Symbol.Web), Feed.Metadata);
+		Assert.Equal(new FeedMetadata { Symbol = Symbol.Web }, Feed.Metadata);
 		Assert.Collection(
 			Feed.Items,
 			item => Assert.Equal("Test item", item.Title));

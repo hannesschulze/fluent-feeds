@@ -1,4 +1,5 @@
 using System;
+using FluentFeeds.Feeds.Base.Storage;
 
 namespace FluentFeeds.Feeds.Base.Items;
 
@@ -13,6 +14,11 @@ public interface IReadOnlyStoredItem : IReadOnlyItem
 	/// Unique identifier for this item.
 	/// </summary>
 	Guid Identifier { get; }
+	
+	/// <summary>
+	/// Storage managing this item.
+	/// </summary>
+	IItemStorage Storage { get; }
 
 	/// <summary>
 	/// Flag indicating whether the item was read.

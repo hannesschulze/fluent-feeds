@@ -212,7 +212,7 @@ public class ConversionHelperTests
 		var item = await ConversionHelpers.ConvertItemAsync(source, new Uri("about:///"));
 		var expected = new ArticleItemContent(new RichText(
 			new GenericBlock(new TextInline("Test "), new BoldInline(new TextInline("content")))));
-		Assert.Equal(expected, item.Content);
+		Assert.Equal(expected, await item.LoadContentAsync());
 	}
 
 	[Fact]
@@ -227,7 +227,7 @@ public class ConversionHelperTests
 		var item = await ConversionHelpers.ConvertItemAsync(source, new Uri("about:///"));
 		var expected = new ArticleItemContent(new RichText(new GenericBlock(
 			new HyperlinkInline(new TextInline("link")) { Target = new Uri("https://www.example.com/foo") })));
-		Assert.Equal(expected, item.Content);
+		Assert.Equal(expected, await item.LoadContentAsync());
 	}
 
 	[Fact]
@@ -241,7 +241,7 @@ public class ConversionHelperTests
 		var item = await ConversionHelpers.ConvertItemAsync(source, new Uri("https://www.example.com/"));
 		var expected = new ArticleItemContent(new RichText(new GenericBlock(
 			new HyperlinkInline(new TextInline("link")) { Target = new Uri("https://www.example.com/foo") })));
-		Assert.Equal(expected, item.Content);
+		Assert.Equal(expected, await item.LoadContentAsync());
 	}
 
 	[Fact]

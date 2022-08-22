@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using FluentFeeds.Common;
+using FluentFeeds.Feeds.Base.Storage;
 
 namespace FluentFeeds.Feeds.Base.Nodes;
 
@@ -9,12 +11,23 @@ namespace FluentFeeds.Feeds.Base.Nodes;
 /// </summary>
 public class StoredFeedNode : FeedNode, IReadOnlyStoredFeedNode
 {
-	protected StoredFeedNode(
-		Guid identifier, FeedNodeType type, Feed? feed, string? title, Symbol? symbol, bool isUserCustomizable,
-		IEnumerable<IReadOnlyFeedNode>? children) : base(type, feed, title, symbol, isUserCustomizable, children)
+	/// <summary>
+	/// Create a stored feed node from a base feed node.
+	/// </summary>
+	public StoredFeedNode(IReadOnlyFeedNode node, Guid identifier, IFeedStorage storage) : base(node)
 	{
 		Identifier = identifier;
+		Storage = storage;
 	}
 
+	/// <summary>
+	/// Create a copy of another feed node.
+	/// </summary>
+	public StoredFeedNode(IReadOnlyStoredFeedNode node) : this(node, node.Identifier, node.Storage)
+	{
+	}
+	
 	public Guid Identifier { get; }
+	
+	public IFeedStorage Storage { get; }
 }

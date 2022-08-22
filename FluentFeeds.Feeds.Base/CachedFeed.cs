@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
@@ -12,35 +11,42 @@ namespace FluentFeeds.Feeds.Base;
 /// </summary>
 public abstract class CachedFeed : Feed
 {
-	protected CachedFeed(IItemStorage storage, Guid collectionIdentifier)
+	/// <summary>
+	/// Result of a fetch request.
+	/// </summary>
+	public record FetchResult(IEnumerable<IReadOnlyItem> Items)
+	{
+		/// <summary>
+		/// Updated metadata (if the metadata has changed).
+		/// </summary>
+		public FeedMetadata? UpdatedMetadata { get; init; }
+	}
+	
+	protected CachedFeed(IItemStorage storage)
 	{
 		Storage = storage;
-		CollectionIdentifier = collectionIdentifier;
 	}
 	
 	/// <summary>
 	/// Object which stores items.
 	/// </summary>
 	public IItemStorage Storage { get; }
-	
-	/// <summary>
-	/// The item collection identifier.
-	/// </summary>
-	public Guid CollectionIdentifier { get; }
 
-	protected sealed override async Task<IEnumerable<IReadOnlyStoredItem>> DoLoadAsync()
+	protected sealed override async Task DoLoadAsync()
 	{
-		var items = await Storage.GetItemsAsync(CollectionIdentifier);
-		_items = items.ToImmutableHashSet();
-		return _items;
+		var items = await Storage.GetItemsAsync();
+		Items = items.ToImmutableHashSet();
 	}
 
-	protected sealed override async Task<IEnumerable<IReadOnlyStoredItem>> DoSynchronizeAsync()
+	protected sealed override async Task DoSynchronizeAsync()
 	{
-		var fetchedItems = await DoFetchAsync();
-		var newItems = await Storage.AddItemsAsync(fetchedItems, CollectionIdentifier);
-		_items = _items.Union(newItems);
-		return _items;
+		var fetchResult = await Task.Run(DoFetchAsync);
+		var newItems = await Storage.AddItemsAsync(fetchResult.Items);
+		Items = Items.Union(newItems);
+		if (fetchResult.UpdatedMetadata != null && fetchResult.UpdatedMetadata != Metadata)
+		{
+			Metadata = fetchResult.UpdatedMetadata;
+		}
 	}
 
 	/// <summary>
@@ -50,7 +56,9 @@ public abstract class CachedFeed : Feed
 	/// is already cached, its modified timestamp is checked and if this version is newer than the cached one, the
 	/// cached item is updated.</para>
 	/// </summary>
-	protected abstract Task<IEnumerable<IReadOnlyItem>> DoFetchAsync();
-
-	private ImmutableHashSet<IReadOnlyStoredItem> _items = ImmutableHashSet<IReadOnlyStoredItem>.Empty;
+	/// <remarks>
+	/// This method is called on the thread pool. The implementation should not update properties like metadata or
+	/// items.
+	/// </remarks>
+	protected abstract Task<FetchResult> DoFetchAsync();
 }
