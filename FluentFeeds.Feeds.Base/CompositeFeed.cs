@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentFeeds.Feeds.Base.EventArgs;
 
 namespace FluentFeeds.Feeds.Base;
 
@@ -102,7 +103,7 @@ public sealed class CompositeFeed : Feed
 		}
 	}
 
-	private void HandleItemsUpdated(object? sender, EventArgs e)
+	private void HandleItemsUpdated(object? sender, FeedItemsUpdatedEventArgs e)
 	{
 		// Coalesce all updates during load or synchronize into one event.
 		if (_ignoreUpdates || !_hasStartedLoading)

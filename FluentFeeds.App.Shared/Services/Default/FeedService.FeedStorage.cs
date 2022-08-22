@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentFeeds.App.Shared.Models.Database;
 using FluentFeeds.Feeds.Base;
+using FluentFeeds.Feeds.Base.EventArgs;
 using FluentFeeds.Feeds.Base.Nodes;
 using FluentFeeds.Feeds.Base.Storage;
 using Microsoft.EntityFrameworkCore;
@@ -25,7 +26,9 @@ public partial class FeedService
 		public FeedProvider Provider { get; }
 
 		public Guid Identifier { get; }
-		
+
+		public event EventHandler<FeedNodesDeletedEventArgs>? NodesDeleted;
+
 		/// <summary>
 		/// Load a feed node and all of its children from its database representation.
 		/// </summary>
@@ -256,6 +259,7 @@ public partial class FeedService
 			{
 				_nodes.Remove(deletedNode.Identifier);
 			}
+			NodesDeleted?.Invoke(this, new FeedNodesDeletedEventArgs(deleted));
 		}
 		
 		/// <summary>

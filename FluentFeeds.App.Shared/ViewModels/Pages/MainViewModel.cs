@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using FluentFeeds.App.Shared.Helpers;
 using FluentFeeds.App.Shared.Models;
 using FluentFeeds.App.Shared.Services;
+using FluentFeeds.App.Shared.Services.Default;
 using FluentFeeds.App.Shared.ViewModels.Items.Navigation;
 using FluentFeeds.App.Shared.ViewModels.Modals;
 using FluentFeeds.Common;
 using FluentFeeds.Feeds.Base;
+using FluentFeeds.Feeds.Base.EventArgs;
 using FluentFeeds.Feeds.Base.Nodes;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
@@ -38,9 +41,7 @@ public sealed class MainViewModel : ObservableObject
 		_feedItems.Add(overviewItem);
 		_feedItems.Add(unreadItem);
 		_feedItemTransformer = ObservableCollectionTransformer.CreateCached(
-			feedService.ProviderNodes, _feedItems,
-			rootNode => new FeedNavigationItemViewModel(modalService, rootNode, rootNode, _feedItemRegistry),
-			rootNode => rootNode, _feedItemRegistry);
+			feedService.ProviderNodes, _feedItems, CreateRootNodeViewModel, rootNode => rootNode, _feedItemRegistry);
 		_currentRoute = NavigationRoute.Feed(overviewFeedNode);
 		_backStack.Add(_currentRoute);
 		_selectedItem = overviewItem;
@@ -62,6 +63,12 @@ public sealed class MainViewModel : ObservableObject
 			_modalService.Show(
 				new ErrorViewModel("A database error occurred", "FluentFeeds was unable to initialize its database."));
 		}
+	}
+
+	private NavigationItemViewModel CreateRootNodeViewModel(IReadOnlyStoredFeedNode rootNode)
+	{
+		rootNode.Storage.NodesDeleted += HandleFeedNodesDeleted;
+		return new FeedNavigationItemViewModel(_modalService, rootNode, rootNode, _feedItemRegistry);
 	}
 
 	/// <summary>
@@ -110,6 +117,11 @@ public sealed class MainViewModel : ObservableObject
 	private void HandleGoBackCommand()
 	{
 		_backStack.RemoveAt(_backStack.Count - 1);
+		HandleBackStackChanged();
+	}
+
+	private void HandleBackStackChanged()
+	{
 		var newRoute = _backStack[^1];
 		_goBackCommand.NotifyCanExecuteChanged();
 		_isChangingSelection = true;
@@ -122,6 +134,39 @@ public sealed class MainViewModel : ObservableObject
 			};
 		_isChangingSelection = false;
 		CurrentRoute = newRoute;
+	}
+
+	private void HandleFeedNodesDeleted(object? sender, FeedNodesDeletedEventArgs e)
+	{
+		var nodes = e.Nodes.ToImmutableHashSet<IReadOnlyFeedNode>();
+
+		// Clean up cache
+		foreach (var node in nodes)
+		{
+			_feedItemRegistry.Remove(node);
+		}
+
+		// Remove nodes from the back stack
+		bool changed = false;
+		NavigationRoute? previousRoute = null;
+		for (var i = _backStack.Count - 1; i >= 0; --i)
+		{
+			var route = _backStack[i];
+			if (route == previousRoute || (route.FeedNode != null && nodes.Contains(route.FeedNode)))
+			{
+				_backStack.RemoveAt(i);
+				changed = true;
+			}
+			else
+			{
+				previousRoute = route;
+			}
+		}
+
+		if (changed)
+		{
+			HandleBackStackChanged();
+		}
 	}
 
 	private readonly IFeedService _feedService;

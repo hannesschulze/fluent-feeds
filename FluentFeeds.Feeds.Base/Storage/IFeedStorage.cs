@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using FluentFeeds.Feeds.Base.EventArgs;
 using FluentFeeds.Feeds.Base.Nodes;
 
 namespace FluentFeeds.Feeds.Base.Storage;
@@ -10,16 +11,21 @@ namespace FluentFeeds.Feeds.Base.Storage;
 public interface IFeedStorage
 {
 	/// <summary>
+	/// The provider managing this storage.
+	/// </summary>
+	FeedProvider Provider { get; }
+
+	/// <summary>
+	/// Event raised when nodes were permanently deleted from the storage.
+	/// </summary>
+	event EventHandler<FeedNodesDeletedEventArgs>? NodesDeleted;
+
+	/// <summary>
 	/// Return the item storage with the specified identifier.
 	/// </summary>
 	/// <param name="identifier">Storage identifier.</param>
 	/// <param name="contentSerializer">Custom serializer for item content loaders.</param>
 	IItemStorage GetItemStorage(Guid identifier, IItemContentSerializer? contentSerializer = null);
-	
-	/// <summary>
-	/// The provider managing this storage.
-	/// </summary>
-	FeedProvider Provider { get; }
 
 	/// <summary>
 	/// Get the local representation of a node with the provided identifier.

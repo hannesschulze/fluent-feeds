@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Linq;
 using FluentFeeds.Common;
+using FluentFeeds.Feeds.Base.EventArgs;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 
 namespace FluentFeeds.Feeds.Base.Nodes;
@@ -128,7 +129,7 @@ public class FeedNode : ObservableObject, IReadOnlyFeedNode
 		return result;
 	}
 	
-	private void HandleFeedMetadataUpdated(object? sender, EventArgs e)
+	private void HandleFeedMetadataUpdated(object? sender, FeedMetadataUpdatedEventArgs e)
 	{
 		DisplayTitle = GetDisplayTitle();
 		DisplaySymbol = GetDisplaySymbol();
