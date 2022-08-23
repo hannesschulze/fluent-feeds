@@ -5,9 +5,11 @@ using FluentFeeds.App.Shared.Models;
 using FluentFeeds.App.Shared.ViewModels.Pages;
 using FluentFeeds.App.WinUI.Helpers;
 using FluentFeeds.Feeds.Base.Items;
+using FluentFeeds.Feeds.Base.Nodes;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Input;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
 
 namespace FluentFeeds.App.WinUI.Views.Pages;
 
@@ -40,6 +42,12 @@ public sealed partial class FeedPage : Page
 	private IconElement FontSymbol { get; }
 
 	private RelayCommand<ItemSortMode> SelectSortModeCommand { get; }
+
+	protected override void OnNavigatedTo(NavigationEventArgs e)
+	{
+		base.OnNavigatedTo(e);
+		ViewModel.Load((IReadOnlyFeedNode)e.Parameter);
+	}
 
 	private void HandlePropertyChanged(object? sender, PropertyChangedEventArgs e)
 	{

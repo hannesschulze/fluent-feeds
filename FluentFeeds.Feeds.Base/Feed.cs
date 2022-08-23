@@ -26,6 +26,11 @@ public abstract class Feed
 	public event EventHandler<FeedMetadataUpdatedEventArgs>? MetadataUpdated;
 
 	/// <summary>
+	/// The timestamp at which this feed was last synchronized in the current object's lifetime.
+	/// </summary>
+	public DateTimeOffset? LastSynchronized { get; private set; }
+
+	/// <summary>
 	/// Current snapshot of items provided by the feed.
 	/// </summary>
 	public ImmutableHashSet<IReadOnlyStoredItem> Items
@@ -107,6 +112,7 @@ public abstract class Feed
 		await DoSynchronizeAsync();
 
 		_isSynchronizing = false;
+		LastSynchronized = DateTimeOffset.UtcNow;
 	}
 
 	private ImmutableHashSet<IReadOnlyStoredItem> _items = ImmutableHashSet<IReadOnlyStoredItem>.Empty;

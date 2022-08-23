@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using FluentFeeds.Feeds.Base;
 using FluentFeeds.Feeds.Base.Factories;
 using FluentFeeds.Feeds.Base.Nodes;
 
@@ -25,6 +26,20 @@ public sealed class AddFeedViewModel : NodeDataViewModel
 		var feed = await _factory.CreateAsync(storage, _parsedUrl!);
 		var node = FeedNode.Custom(feed, null, null, isUserCustomizable: true);
 		await storage.AddNodeAsync(node, selectedGroup.Identifier);
+
+		SynchronizeNewFeedAsync(feed);
+	}
+
+	private static async void SynchronizeNewFeedAsync(Feed newFeed)
+	{
+		try
+		{
+			await newFeed.SynchronizeAsync();
+		}
+		catch (Exception)
+		{
+			// TODO: Show error
+		}
 	}
 
 	protected override void HandleInputChanged()
