@@ -40,6 +40,7 @@ public static class SymbolHelper
 			Symbol.Synchronize => CreateFont("\uE11D", FontFamily_FluentSystemIcons_Resizable),
 			Symbol.Refresh => CreateFont("\uE095", FontFamily_FluentSystemIcons_Resizable),
 			Symbol.MailUnread => CreateFont("\uE883", FontFamily_FluentSystemIcons_Resizable),
+			Symbol.MailRead => CreateFont("\uE879", FontFamily_FluentSystemIcons_Resizable),
 			Symbol.Trash => CreateFont("\uE4D2", FontFamily_FluentSystemIcons_Resizable),
 			Symbol.SortOrder => CreateFont("\uE103", FontFamily_FluentSystemIcons_Resizable),
 			Symbol.OpenExternal => CreateFont("\uE92D", FontFamily_FluentSystemIcons_Resizable),

@@ -5,7 +5,9 @@
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:vm="using:FluentFeeds.App.Shared.ViewModels.Pages"
-	xmlns:helpers="using:FluentFeeds.App.WinUI.Helpers"
+	xmlns:items="using:FluentFeeds.Feeds.Base.Items"
+	xmlns:models="using:FluentFeeds.App.Shared.Models"
+	xmlns:converters="using:FluentFeeds.App.WinUI.Converters"
 	mc:Ignorable="d"
 	d:DataContext="{d:DesignInstance Type=vm:FeedViewModel}"
 	NavigationCacheMode="Required">
@@ -29,7 +31,7 @@
 		<x:Double x:Key="LeftPaneMaxWidth">325</x:Double>
 		<GridLength x:Key="PaneSeparatorWidth">1</GridLength>
 
-		<DataTemplate x:Key="ItemTemplate">
+		<DataTemplate x:Key="ItemTemplate" x:DataType="items:StoredItem">
 			<StackPanel Orientation="Vertical" Padding="0,8">
 				<Grid ColumnSpacing="8">
 					<Grid.ColumnDefinitions>
@@ -44,7 +46,7 @@
 						LineHeight="17"
 						TextTrimming="CharacterEllipsis"
 						Foreground="{ThemeResource SystemControlForegroundBaseMediumLowBrush}"
-						Text="John Doe" />
+						Text="{Binding DisplayAuthor}" />
 
 					<TextBlock
 						Grid.Column="1"
@@ -52,7 +54,7 @@
 						FontSize="12"
 						LineHeight="17"
 						Foreground="{ThemeResource SystemControlForegroundBaseMediumLowBrush}"
-						Text="11:50" />
+						Text="{Binding PublishedTimestamp, Converter={StaticResource TimestampToStringConverter}}" />
 				</Grid>
 
 				<Grid>
@@ -67,7 +69,7 @@
 						Fill="{ThemeResource AccentFillColorDefaultBrush}"
 						Margin="0,0,8,0"
 						VerticalAlignment="Center"
-						Visibility="Collapsed" />
+						Visibility="{Binding IsRead, Converter={StaticResource InvertedBoolToVisibilityConverter}}" />
 
 					<TextBlock
 						Grid.Column="1"
@@ -75,14 +77,14 @@
 						MaxLines="2"
 						TextWrapping="WrapWholeWords"
 						TextTrimming="WordEllipsis"
-						Text="{Binding}" />
+						Text="{Binding Title}" />
 				</Grid>
 
 				<TextBlock
 					MaxLines="2"
 					TextWrapping="WrapWholeWords"
 					TextTrimming="WordEllipsis"
-					Text="Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut" />
+					Text="{Binding DisplaySummary}" />
 			</StackPanel>
 		</DataTemplate>
 
@@ -205,26 +207,46 @@
 					<ColumnDefinition Width="Auto" />
 				</Grid.ColumnDefinitions>
 
-				<Button Grid.Column="0" Style="{StaticResource ToolbarButtonStyle}">
+				<Button
+					Grid.Column="0"
+					Style="{StaticResource ToolbarButtonStyle}"
+					Command="{x:Bind ViewModel.SyncCommand}">
+					
 					<StackPanel Orientation="Horizontal" Spacing="{StaticResource ToolbarItemIconSpacing}">
 						<Viewbox Height="{StaticResource ToolbarItemIconSize}" Child="{x:Bind SynchronizeSymbol}" />
 
 						<TextBlock Text="Sync" />
 					</StackPanel>
+					
 				</Button>
 
 				<ProgressRing
 					Grid.Column="1"
+					IsActive="{x:Bind ViewModel.IsSyncInProgress, Mode=OneWay}"
 					Margin="{StaticResource ToolbarItemPadding}"
 					Width="{StaticResource ToolbarItemProgressRingSize}"
 					Height="{StaticResource ToolbarItemProgressRingSize}" />
 
-				<Button Grid.Column="3" Style="{StaticResource ToolbarButtonStyle}">
-					<Viewbox Height="{StaticResource ToolbarItemIconSize}" Child="{x:Bind MailUnreadSymbol}" />
+				<Button
+					Grid.Column="3"
+					Style="{StaticResource ToolbarButtonStyle}"
+					Command="{x:Bind ViewModel.ToggleReadCommand}"
+					Visibility="{x:Bind ViewModel.IsItemSelected, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
+					
+					<Viewbox
+						Height="{StaticResource ToolbarItemIconSize}"
+						Child="{x:Bind ViewModel.ToggleReadSymbol, Converter={StaticResource SymbolToIconElementConverter}, Mode=OneWay}" />
+					
 				</Button>
 				
-				<Button Grid.Column="4" Style="{StaticResource ToolbarButtonStyle}">
+				<Button
+					Grid.Column="4"
+					Style="{StaticResource ToolbarButtonStyle}"
+					Command="{x:Bind ViewModel.DeleteCommand}"
+					Visibility="{x:Bind ViewModel.IsItemSelected, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
+					
 					<Viewbox Height="{StaticResource ToolbarItemIconSize}" Child="{x:Bind TrashSymbol}" />
+					
 				</Button>
 
 				<Button Grid.Column="5" Style="{StaticResource ToolbarButtonStyle}">
@@ -232,8 +254,27 @@
 
 					<Button.Flyout>
 						<MenuFlyout Placement="BottomEdgeAlignedRight">
-							<RadioMenuFlyoutItem Text="Newest" />
-							<RadioMenuFlyoutItem Text="Oldest" />
+							<RadioMenuFlyoutItem
+								Text="Newest"
+								IsChecked="{x:Bind IsSortModeSelected(ViewModel.SelectedSortMode, models:ItemSortMode.Newest), Mode=OneWay}"
+								Command="{x:Bind SelectSortModeCommand}">
+								
+								<RadioMenuFlyoutItem.CommandParameter>
+									<models:ItemSortMode>Newest</models:ItemSortMode>
+								</RadioMenuFlyoutItem.CommandParameter>
+								
+							</RadioMenuFlyoutItem>
+
+							<RadioMenuFlyoutItem
+								Text="Oldest"
+								IsChecked="{x:Bind IsSortModeSelected(ViewModel.SelectedSortMode, models:ItemSortMode.Oldest), Mode=OneWay}"
+								Command="{x:Bind SelectSortModeCommand}">
+								
+								<RadioMenuFlyoutItem.CommandParameter>
+									<models:ItemSortMode>Oldest</models:ItemSortMode>
+								</RadioMenuFlyoutItem.CommandParameter>
+								
+							</RadioMenuFlyoutItem>
 						</MenuFlyout>
 					</Button.Flyout>
 				</Button>
@@ -258,20 +299,36 @@
 					<ColumnDefinition Width="Auto" />
 				</Grid.ColumnDefinitions>
 
-				<Button Grid.Column="0" Style="{StaticResource ToolbarButtonStyle}">
+				<Button
+					Grid.Column="0"
+					Style="{StaticResource ToolbarButtonStyle}"
+					Command="{x:Bind ViewModel.ReloadContentCommand}"
+					Visibility="{x:Bind ViewModel.IsReloadContentAvailable, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
+					
 					<StackPanel Orientation="Horizontal" Spacing="{StaticResource ToolbarItemIconSpacing}">
 						<Viewbox Height="{StaticResource ToolbarItemIconSize}" Child="{x:Bind RefreshSymbol}" />
 
 						<TextBlock Text="Reload" />
 					</StackPanel>
+					
 				</Button>
 
-				<Button Grid.Column="2" Style="{StaticResource ToolbarButtonStyle}">
+				<Button
+					Grid.Column="2"
+					Style="{StaticResource ToolbarButtonStyle}"
+					Command="{x:Bind ViewModel.OpenDisplayOptionsCommand}">
+					
 					<Viewbox Height="{StaticResource ToolbarItemIconSize}" Child="{x:Bind FontSymbol}" />
+					
 				</Button>
 
-				<Button Grid.Column="3" Style="{StaticResource ToolbarButtonStyle}">
+				<Button
+					Grid.Column="3"
+					Style="{StaticResource ToolbarButtonStyle}"
+					Command="{x:Bind ViewModel.OpenBrowserCommand}">
+					
 					<Viewbox Height="{StaticResource ToolbarItemIconSize}" Child="{x:Bind OpenExternalSymbol}" />
+					
 				</Button>
 
 			</Grid>
@@ -297,22 +354,9 @@
 				Grid.Column="0"
 				Padding="0,2"
 				SelectionMode="Extended"
-				ItemTemplate="{StaticResource ItemTemplate}">
-
-				<ListView.Items>
-					<x:String>Title of Item 1</x:String>
-					<x:String>Title of Item 2</x:String>
-					<x:String>Title of Item 3</x:String>
-					<x:String>Title of Item 4</x:String>
-					<x:String>Title of Item 5</x:String>
-					<x:String>Title of Item 6</x:String>
-					<x:String>Title of Item 7</x:String>
-					<x:String>Title of Item 8</x:String>
-					<x:String>Title of Item 9</x:String>
-					<x:String>Title of Item 10</x:String>
-				</ListView.Items>
-
-			</ListView>
+				ItemsSource="{x:Bind ViewModel.Items}"
+				ItemTemplate="{StaticResource ItemTemplate}"
+				SelectionChanged="HandleSelectionChanged" />
 
 			<Rectangle
 				x:Name="MainSeparator"

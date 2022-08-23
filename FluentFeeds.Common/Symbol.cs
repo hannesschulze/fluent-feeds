@@ -13,6 +13,7 @@ public enum Symbol
 	Synchronize,
 	Refresh,
 	MailUnread,
+	MailRead,
 	Trash,
 	SortOrder,
 	OpenExternal,

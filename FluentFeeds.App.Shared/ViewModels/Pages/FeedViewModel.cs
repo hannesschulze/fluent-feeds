@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Windows.Input;
 using FluentFeeds.App.Shared.Models;
 using FluentFeeds.App.Shared.Services;
+using FluentFeeds.Common;
 using FluentFeeds.Feeds.Base.Items;
 using FluentFeeds.Feeds.Base.Nodes;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
@@ -21,13 +22,13 @@ public sealed class FeedViewModel : ObservableObject
 		_modalService = modalService;
 		
 		_syncCommand = new RelayCommand(() => { }, () => !IsSyncInProgress);
-		_markReadCommand = new RelayCommand(() => { }, () => IsMarkReadAvailable);
-		_deleteCommand = new RelayCommand(() => { }, () => SelectedItems.Length >= 1);
+		_toggleReadCommand = new RelayCommand(() => { }, () => IsItemSelected);
+		_deleteCommand = new RelayCommand(() => { }, () => IsItemSelected);
 		_openDisplayOptionsCommand = new RelayCommand(() => { });
 		_reloadContentCommand = new RelayCommand(() => { }, () => IsReloadContentAvailable);
 		_openBrowserCommand = new RelayCommand(() => { });
-		
-		Items = new ReadOnlyObservableCollection<IReadOnlyItem>(_items);
+
+		Items = new ReadOnlyObservableCollection<IReadOnlyStoredItem>(_items);
 	}
 	
 	/// <summary>
@@ -44,9 +45,9 @@ public sealed class FeedViewModel : ObservableObject
 	public ICommand SyncCommand => _syncCommand;
 
 	/// <summary>
-	/// Mark the currently selected item(s) as "read".
+	/// Toggle the currently selected item's "read" state.
 	/// </summary>
-	public ICommand MarkReadCommand => _markReadCommand;
+	public ICommand ToggleReadCommand => _toggleReadCommand;
 
 	/// <summary>
 	/// Delete the currently selected item(s).
@@ -71,20 +72,19 @@ public sealed class FeedViewModel : ObservableObject
 	/// <summary>
 	/// Items provided by the feed, sorted using the current sort mode.
 	/// </summary>
-	public ReadOnlyObservableCollection<IReadOnlyItem> Items { get; }
+	public ReadOnlyObservableCollection<IReadOnlyStoredItem> Items { get; }
 
 	/// <summary>
 	/// List of currently selected items.
 	/// </summary>
-	public ImmutableArray<IReadOnlyItem> SelectedItems
+	public ImmutableArray<IReadOnlyStoredItem> SelectedItems
 	{
 		get => _selectedItems;
 		set
 		{
 			if (SetProperty(ref _selectedItems, value))
 			{
-				_deleteCommand.NotifyCanExecuteChanged();
-				IsMarkReadAvailable = SelectedItems.Length > 1;
+				IsItemSelected = SelectedItems.Length >= 1;
 			}
 		}
 	}
@@ -96,6 +96,15 @@ public sealed class FeedViewModel : ObservableObject
 	{
 		get => _selectedSortMode;
 		set => SetProperty(ref _selectedSortMode, value);
+	}
+
+	/// <summary>
+	/// Symbol for <see cref="ToggleReadCommand"/>.
+	/// </summary>
+	public Symbol ToggleReadSymbol
+	{
+		get => _toggleReadSymbol;
+		private set => SetProperty(ref _toggleReadSymbol, value);
 	}
 
 	/// <summary>
@@ -114,20 +123,21 @@ public sealed class FeedViewModel : ObservableObject
 	}
 	
 	/// <summary>
-	/// Flag indicating if the option to execute <see cref="MarkReadCommand"/> should be shown.
+	/// Flag indicating if an item is currently selected.
 	/// </summary>
 	/// <remarks>
-	/// The option is hidden if a single item or no items are selected because those items are marked as "read"
-	/// automatically.
+	/// Based on this property, the visibility for the options to execute <see cref="ToggleReadCommand"/> and
+	/// <see cref="DeleteCommand"/> should be updated.
 	/// </remarks>
-	public bool IsMarkReadAvailable
+	public bool IsItemSelected
 	{
-		get => _isMarkReadAvailable;
+		get => _isItemSelected;
 		private set
 		{
-			if (SetProperty(ref _isMarkReadAvailable, value))
+			if (SetProperty(ref _isItemSelected, value))
 			{
-				_markReadCommand.NotifyCanExecuteChanged();
+				_toggleReadCommand.NotifyCanExecuteChanged();
+				_deleteCommand.NotifyCanExecuteChanged();
 			}
 		}
 	}
@@ -153,15 +163,16 @@ public sealed class FeedViewModel : ObservableObject
 
 	private readonly IModalService _modalService;
 	private readonly RelayCommand _syncCommand;
-	private readonly RelayCommand _markReadCommand;
+	private readonly RelayCommand _toggleReadCommand;
 	private readonly RelayCommand _deleteCommand;
 	private readonly RelayCommand _openDisplayOptionsCommand;
 	private readonly RelayCommand _reloadContentCommand;
 	private readonly RelayCommand _openBrowserCommand;
-	private readonly ObservableCollection<IReadOnlyItem> _items = new();
-	private ImmutableArray<IReadOnlyItem> _selectedItems = ImmutableArray<IReadOnlyItem>.Empty;
+	private readonly ObservableCollection<IReadOnlyStoredItem> _items = new();
+	private ImmutableArray<IReadOnlyStoredItem> _selectedItems = ImmutableArray<IReadOnlyStoredItem>.Empty;
 	private ItemSortMode _selectedSortMode = ItemSortMode.Newest;
+	private Symbol _toggleReadSymbol = Symbol.MailUnread;
 	private bool _isSyncInProgress;
-	private bool _isMarkReadAvailable;
+	private bool _isItemSelected;
 	private bool _isReloadContentAvailable;
 }

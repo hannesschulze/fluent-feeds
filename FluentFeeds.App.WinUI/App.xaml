@@ -11,6 +11,12 @@
 			</ResourceDictionary.MergedDictionaries>
 
 			<converters:SymbolToIconElementConverter x:Key="SymbolToIconElementConverter" />
+
+			<converters:TimestampToStringConverter x:Key="TimestampToStringConverter" />
+
+			<converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+
+			<converters:BoolToVisibilityConverter x:Key="InvertedBoolToVisibilityConverter" IsInverted="True" />
 		</ResourceDictionary>
 	</Application.Resources>
 	
