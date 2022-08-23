@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.IO;
 using Windows.ApplicationModel;
-using FluentFeeds.App.Shared.Models;
 using FluentFeeds.App.Shared.ViewModels.Pages;
 using FluentFeeds.App.WinUI.Helpers;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
@@ -11,6 +10,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
 using FluentFeeds.App.Shared.Services;
 using FluentFeeds.App.WinUI.Services;
+using FluentFeeds.App.Shared.Models.Navigation;
 
 namespace FluentFeeds.App.WinUI.Views.Pages;
 
@@ -96,10 +96,10 @@ public sealed partial class MainPage : Page
 	{
 		switch (ViewModel.CurrentRoute.Type)
 		{
-			case NavigationRouteType.Settings:
+			case MainNavigationRouteType.Settings:
 				ContentFrame.Navigate(typeof(SettingsPage), null, new EntranceNavigationTransitionInfo());
 				break;
-			case NavigationRouteType.Feed:
+			case MainNavigationRouteType.Feed:
 				ContentFrame.Navigate(
 					typeof(FeedPage), ViewModel.CurrentRoute.FeedNode, new EntranceNavigationTransitionInfo());
 				break;
