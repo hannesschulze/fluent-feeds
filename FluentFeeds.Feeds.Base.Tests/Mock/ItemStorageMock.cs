@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using FluentFeeds.Feeds.Base.EventArgs;
 using FluentFeeds.Feeds.Base.Items;
 using FluentFeeds.Feeds.Base.Storage;
 
@@ -8,10 +9,18 @@ namespace FluentFeeds.Feeds.Base.Tests.Mock;
 
 public sealed class ItemStorageMock : IItemStorage
 {
+	public event EventHandler<ItemsDeletedEventArgs>? ItemsDeleted;
+	
 	public Task<IEnumerable<IReadOnlyStoredItem>> GetItemsAsync() => Task.FromResult(GetItems());
 
 	public Task<IEnumerable<IReadOnlyStoredItem>> AddItemsAsync(IEnumerable<IReadOnlyItem> items) =>
 		Task.FromResult(AddItems(items));
+
+	public Task<IReadOnlyStoredItem> SetItemReadAsync(Guid identifier, bool isRead) =>
+		throw new NotSupportedException();
+
+	public Task DeleteItemsAsync(IReadOnlyCollection<Guid> identifiers) =>
+		throw new NotSupportedException();
 
 	public IEnumerable<IReadOnlyStoredItem> GetItems()
 	{

@@ -34,6 +34,8 @@ public sealed class FeedViewModel : ObservableObject
 		MarkRead,
 		MarkUnread
 	}
+
+	public event EventHandler? ItemsUpdated;
 	
 	public FeedViewModel(IModalService modalService, IFeedService feedService)
 	{
@@ -161,7 +163,7 @@ public sealed class FeedViewModel : ObservableObject
 		get => _selectedSortMode;
 		set
 		{
-			if (SetProperty(ref _selectedSortMode, value))
+			if (SetProperty(ref _selectedSortMode, value) && _items.Count != 0)
 			{
 				UpdateItems(reload: true);
 			}
@@ -293,12 +295,18 @@ public sealed class FeedViewModel : ObservableObject
 		var item = SelectedItems[0];
 		var token = new object();
 		_loadItemContentToken = token;
-		CurrentRoute = FeedNavigationRoute.Loading(item);
+
+		var contentTask = item.LoadContentAsync(reload);
+		if (!contentTask.IsCompletedSuccessfully)
+		{
+			CurrentRoute = FeedNavigationRoute.Loading(item);
+			IsReloadContentAvailable = false;
+		}
 
 		ItemContent content;
 		try
 		{
-			content = await item.LoadContentAsync(reload);
+			content = await contentTask;
 		}
 		catch (Exception)
 		{
@@ -349,6 +357,7 @@ public sealed class FeedViewModel : ObservableObject
 					_items.Add(item);
 				}
 				_itemSet = newItems;
+				ItemsUpdated?.Invoke(this, EventArgs.Empty);
 			}
 		}
 		else
@@ -386,8 +395,8 @@ public sealed class FeedViewModel : ObservableObject
 					{
 						if (ShouldInsertSortedItem(_items[i], added[addedIndex], sortMode))
 						{
-							_items.Insert(i, added[addedIndex]);
-							if (++addedIndex >= added.Count)
+							_items.Insert(i, added[addedIndex++]);
+							if (addedIndex >= added.Count)
 							{
 								break;
 							}
@@ -402,6 +411,7 @@ public sealed class FeedViewModel : ObservableObject
 
 				_itemSet = newItems;
 				SelectedItems = SelectedItems.Where(i => !removed.Contains(i)).ToImmutableArray();
+				ItemsUpdated?.Invoke(this, EventArgs.Empty);
 			}
 		}
 	}
@@ -521,5 +531,5 @@ public sealed class FeedViewModel : ObservableObject
 	private bool _isItemSelected;
 	private bool _isReloadContentAvailable;
 	private FeedNavigationRoute _currentRoute = FeedNavigationRoute.Placeholder(0);
-	private ToggleReadAction _currentToggleReadAction;
+	private ToggleReadAction _currentToggleReadAction = ToggleReadAction.MarkUnread;
 }
