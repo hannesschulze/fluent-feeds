@@ -44,7 +44,7 @@ public sealed class DeleteNodeViewModel : ObservableObject
 			_modalService.Show(
 				new ErrorViewModel(
 					"A database error occurred",
-					"FluentFeeds was unable to delete the selected item from the database."));
+					"Fluent Feeds was unable to delete the selected item from the database."));
 		}
 	}
 

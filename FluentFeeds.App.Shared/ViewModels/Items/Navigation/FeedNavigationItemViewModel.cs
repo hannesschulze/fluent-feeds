@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel;
 using FluentFeeds.App.Shared.Helpers;
-using FluentFeeds.App.Shared.Models;
+using FluentFeeds.App.Shared.Models.Navigation;
 using FluentFeeds.App.Shared.Services;
 using FluentFeeds.App.Shared.ViewModels.Modals;
 using FluentFeeds.Feeds.Base.Nodes;
@@ -28,8 +28,8 @@ public sealed class FeedNavigationItemViewModel : NavigationItemViewModel
 			if (urlFactory != null)
 			{
 				result.Add(new NavigationItemActionViewModel(
-					new RelayCommand(() =>
-						_modalService.Show(new AddFeedViewModel(urlFactory, RootNode, storedNode), this)),
+					new RelayCommand(() => _modalService.Show(
+						new AddFeedViewModel(_modalService, urlFactory, RootNode, storedNode), this)),
 					"Add feed…", null));
 			}
 			result.Add(new NavigationItemActionViewModel(
@@ -53,7 +53,7 @@ public sealed class FeedNavigationItemViewModel : NavigationItemViewModel
 	public FeedNavigationItemViewModel(
 		IModalService modalService, IReadOnlyFeedNode feedNode, IReadOnlyStoredFeedNode? rootNode,
 		Dictionary<IReadOnlyFeedNode, NavigationItemViewModel> feedItemRegistry) : base(
-			NavigationRoute.Feed(feedNode), isExpandable: feedNode.Children != null, feedNode.DisplayTitle,
+			MainNavigationRoute.Feed(feedNode), isExpandable: feedNode.Children != null, feedNode.DisplayTitle,
 			feedNode.DisplaySymbol)
 	{
 		_modalService = modalService;

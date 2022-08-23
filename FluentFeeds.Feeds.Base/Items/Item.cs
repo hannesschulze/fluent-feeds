@@ -22,6 +22,8 @@ public class Item : ObservableObject, IReadOnlyItem
 		_title = title;
 		_author = author;
 		_summary = summary;
+		_displayAuthor = GetDisplayAuthor();
+		_displaySummary = GetDisplaySummary();
 		_contentLoader = contentLoader;
 	}
 
@@ -67,13 +69,37 @@ public class Item : ObservableObject, IReadOnlyItem
 	public string? Author
 	{
 		get => _author;
-		set => SetProperty(ref _author, value);
+		set
+		{
+			if (SetProperty(ref _author, value))
+			{
+				DisplayAuthor = GetDisplayAuthor();
+			}
+		}
 	}
 
 	public string? Summary
 	{
 		get => _summary;
-		set => SetProperty(ref _summary, value);
+		set
+		{
+			if (SetProperty(ref _summary, value))
+			{
+				DisplaySummary = GetDisplaySummary();
+			}
+		}
+	}
+
+	public string DisplayAuthor
+	{
+		get => _displayAuthor;
+		private set => SetProperty(ref _displayAuthor, value);
+	}
+
+	public string DisplaySummary
+	{
+		get => _displaySummary;
+		private set => SetProperty(ref _displaySummary, value);
 	}
 
 	public IItemContentLoader ContentLoader
@@ -84,6 +110,10 @@ public class Item : ObservableObject, IReadOnlyItem
 
 	public Task<ItemContent> LoadContentAsync(bool reload = false) => ContentLoader.LoadAsync(reload);
 
+	private string GetDisplayAuthor() => Author ?? "Unknown author";
+
+	private string GetDisplaySummary() => Summary ?? "This item does not have a summary.";
+
 	private Uri? _url;
 	private Uri? _contentUrl;
 	private DateTimeOffset _publishedTimestamp;
@@ -91,5 +121,7 @@ public class Item : ObservableObject, IReadOnlyItem
 	private string _title;
 	private string? _author;
 	private string? _summary;
+	private string _displayAuthor;
+	private string _displaySummary;
 	private IItemContentLoader _contentLoader;
 }

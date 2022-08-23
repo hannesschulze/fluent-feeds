@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.IO;
 using Windows.ApplicationModel;
-using FluentFeeds.App.Shared.Models;
 using FluentFeeds.App.Shared.ViewModels.Pages;
 using FluentFeeds.App.WinUI.Helpers;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
@@ -11,6 +10,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
 using FluentFeeds.App.Shared.Services;
 using FluentFeeds.App.WinUI.Services;
+using FluentFeeds.App.Shared.Models.Navigation;
 
 namespace FluentFeeds.App.WinUI.Views.Pages;
 
@@ -86,19 +86,25 @@ public sealed partial class MainPage : Page
 	private void HandleDragRegionSizeChanged(object sender, SizeChangedEventArgs e) =>
 		DragRegionSizeChanged?.Invoke(this, EventArgs.Empty);
 
+	private void HandleErrorBarClosed(InfoBar sender, InfoBarClosedEventArgs args) =>
+		ErrorBar.Margin = new Thickness(0);
+
 	private void UpdateBackButtonEnabled() =>
 		NavigationView.IsBackEnabled = ViewModel.GoBackCommand.CanExecute(null);
 
-	private void UpdateCurrentRoute() =>
-		ContentFrame.Navigate(
-			ViewModel.CurrentRoute.Type switch
-			{
-				NavigationRouteType.Settings => typeof(SettingsPage),
-				NavigationRouteType.Feed => typeof(FeedPage),
-				_ => throw new IndexOutOfRangeException()
-			},
-			null,
-			new EntranceNavigationTransitionInfo());
+	private void UpdateCurrentRoute()
+	{
+		switch (ViewModel.CurrentRoute.Type)
+		{
+			case MainNavigationRouteType.Settings:
+				ContentFrame.Navigate(typeof(SettingsPage), null, new EntranceNavigationTransitionInfo());
+				break;
+			case MainNavigationRouteType.Feed:
+				ContentFrame.Navigate(
+					typeof(FeedPage), ViewModel.CurrentRoute.FeedNode, new EntranceNavigationTransitionInfo());
+				break;
+		}
+	}
 
 	/// <summary>
 	/// Update the title's margin. Spacing is added before the title when the navigation bar is collapsed.

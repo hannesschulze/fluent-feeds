@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using FluentFeeds.App.Shared.Models;
+using FluentFeeds.App.Shared.Models.Navigation;
 using FluentFeeds.App.Shared.Tests.Mock;
 using FluentFeeds.App.Shared.ViewModels.Items.Navigation;
 using FluentFeeds.Common;
@@ -23,7 +23,7 @@ public class FeedNavigationItemViewModelTests
 			ModalService, node, null, new Dictionary<IReadOnlyFeedNode, NavigationItemViewModel>());
 		Assert.Equal("Title",item.Title);
 		Assert.Equal(Symbol.Directory, item.Symbol);
-		Assert.Equal(NavigationRoute.Feed(node), item.Destination);
+		Assert.Equal(MainNavigationRoute.Feed(node), item.Destination);
 		Assert.True(item.IsExpandable);
 		Assert.Empty(item.Children);
 
@@ -43,7 +43,7 @@ public class FeedNavigationItemViewModelTests
 			ModalService, node, null, new Dictionary<IReadOnlyFeedNode, NavigationItemViewModel>());
 		Assert.Equal("Feed",item.Title);
 		Assert.Equal(Symbol.Web, item.Symbol);
-		Assert.Equal(NavigationRoute.Feed(node), item.Destination);
+		Assert.Equal(MainNavigationRoute.Feed(node), item.Destination);
 		Assert.False(item.IsExpandable);
 		Assert.Empty(item.Children);
 	}
@@ -356,6 +356,6 @@ public class FeedNavigationItemViewModelTests
 			() => modalArgs.ViewModel.ConfirmCommand.Execute(null)).Arguments;
 		Assert.Equal("A database error occurred", errorArgs.ViewModel.Title);
 		Assert.Equal(
-			"FluentFeeds was unable to delete the selected item from the database.", errorArgs.ViewModel.Message);
+			"Fluent Feeds was unable to delete the selected item from the database.", errorArgs.ViewModel.Message);
 	}
 }

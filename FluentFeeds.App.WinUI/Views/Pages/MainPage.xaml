@@ -177,6 +177,9 @@
 					Grid.Row="0"
 					Severity="Error"
 					IsOpen="False"
+					Closed="HandleErrorBarClosed"
+					CornerRadius="8,0,0,8"
+					BorderThickness="1,1,0,1"
 					IsClosable="True" />
 
 				<Frame 

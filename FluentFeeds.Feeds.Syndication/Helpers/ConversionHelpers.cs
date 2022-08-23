@@ -65,13 +65,35 @@ public static class ConversionHelpers
 	}
 
 	/// <summary>
+	/// Convert a syndication item's content to a string.
+	/// </summary>
+	/// <param name="item"></param>
+	/// <returns></returns>
+	public static string? ConvertItemAuthor(SyndicationItem item)
+	{
+		var author = ConvertAuthor(item.Authors);
+		if (author != null)
+		{
+			return author;
+		}
+
+		var creator = item.ElementExtensions.ReadElementExtensions<string>("creator", "http://purl.org/dc/elements/1.1/");
+		if (creator != null && creator.Count != 0)
+		{
+			return creator.Last();
+		}
+
+		return null;
+	}
+
+	/// <summary>
 	/// Convert a syndication item into a generic <see cref="Item"/> object.
 	/// </summary>
 	public static async Task<IReadOnlyItem> ConvertItemAsync(SyndicationItem item, Uri feedUrl)
 	{
 		var htmlOptions = new HtmlParsingOptions { BaseUri = item.BaseUri ?? feedUrl };
 		var title = item.Title != null ? await TextContent.LoadAsync(item.Title, htmlOptions) : null;
-		var author = item.Authors != null ? ConvertAuthor(item.Authors) : null;
+		var author = ConvertItemAuthor(item);
 		var summary = item.Summary != null ? await TextContent.LoadAsync(item.Summary, htmlOptions) : null;
 		var content = await ConvertItemContentAsync(item, summary, htmlOptions);
 		var url = ConvertItemUrl(item);

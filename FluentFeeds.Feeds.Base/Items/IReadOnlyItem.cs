@@ -45,6 +45,16 @@ public interface IReadOnlyItem : INotifyPropertyChanging, INotifyPropertyChanged
 	/// Summary of the item content (usually a short excerpt formatted as plain text).
 	/// </summary>
 	string? Summary { get; }
+
+	/// <summary>
+	/// The displayed author, using a fallback if <see cref="Author"/> is not set.
+	/// </summary>
+	string DisplayAuthor { get; }
+
+	/// <summary>
+	/// The displayed summary, using a fallback if <see cref="Summary"/> is not set.
+	/// </summary>
+	string DisplaySummary { get; }
 	
 	/// <summary>
 	/// An object used to dynamically load the item's content.

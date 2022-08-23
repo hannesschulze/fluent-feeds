@@ -30,13 +30,23 @@ public static class SymbolHelper
 	public static MUXC.IconSource ToIconSource(this Symbol symbol) =>
 		symbol switch
 		{
-			Symbol.Home => CreateFont("\xE77E", FontFamily_FluentSystemIcons_Resizable),
-			Symbol.Sparkle => CreateFont("\xEC10", FontFamily_FluentSystemIcons_Resizable),
-			Symbol.Feed => CreateFont("\xEB08", FontFamily_FluentSystemIcons_Resizable),
-			Symbol.Directory => CreateFont("\xE6AD", FontFamily_FluentSystemIcons_Resizable),
-			Symbol.Web => CreateFont("\xE71F", FontFamily_FluentSystemIcons_Resizable),
+			// Glyphs values from:
+			// https://github.com/microsoft/fluentui-system-icons/blob/f54ade5c858c4577c3fe7dbaaa2551ddd086e592/fonts/FluentSystemIcons-Resizable.json
+			Symbol.Home => CreateFont("\uE77E", FontFamily_FluentSystemIcons_Resizable),
+			Symbol.Sparkle => CreateFont("\uEC10", FontFamily_FluentSystemIcons_Resizable),
+			Symbol.Feed => CreateFont("\uEB08", FontFamily_FluentSystemIcons_Resizable),
+			Symbol.Directory => CreateFont("\uE6AD", FontFamily_FluentSystemIcons_Resizable),
+			Symbol.Web => CreateFont("\uE71F", FontFamily_FluentSystemIcons_Resizable),
+			Symbol.Synchronize => CreateFont("\uE11D", FontFamily_FluentSystemIcons_Resizable),
+			Symbol.Refresh => CreateFont("\uE095", FontFamily_FluentSystemIcons_Resizable),
+			Symbol.MailUnread => CreateFont("\uE883", FontFamily_FluentSystemIcons_Resizable),
+			Symbol.MailRead => CreateFont("\uE879", FontFamily_FluentSystemIcons_Resizable),
+			Symbol.Trash => CreateFont("\uE4D2", FontFamily_FluentSystemIcons_Resizable),
+			Symbol.SortOrder => CreateFont("\uE103", FontFamily_FluentSystemIcons_Resizable),
+			Symbol.OpenExternal => CreateFont("\uE92D", FontFamily_FluentSystemIcons_Resizable),
+			Symbol.Font => CreateFont("\uEDEA", FontFamily_FluentSystemIcons_Resizable),
 			Symbol.Settings => CreateAnimated(
-				new AnimatedSettingsVisualSource(), 
+				new AnimatedSettingsVisualSource(),
 				CreateFont("\xEB70", FontFamily_FluentSystemIcons_Resizable)),
 			_ => throw new IndexOutOfRangeException()
 		};

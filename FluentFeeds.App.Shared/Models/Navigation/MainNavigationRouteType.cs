@@ -1,9 +1,9 @@
-﻿namespace FluentFeeds.App.Shared.Models;
+﻿namespace FluentFeeds.App.Shared.Models.Navigation;
 
 /// <summary>
-/// Type of a <see cref="NavigationRoute"/>.
+/// Type of a <see cref="MainNavigationRoute"/>.
 /// </summary>
-public enum NavigationRouteType
+public enum MainNavigationRouteType
 {
 	/// <summary>
 	/// App settings.

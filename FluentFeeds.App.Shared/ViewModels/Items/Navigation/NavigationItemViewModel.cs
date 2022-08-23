@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
-using FluentFeeds.App.Shared.Models;
+using FluentFeeds.App.Shared.Models.Navigation;
 using FluentFeeds.Common;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 
@@ -11,7 +11,7 @@ namespace FluentFeeds.App.Shared.ViewModels.Items.Navigation;
 /// </summary>
 public class NavigationItemViewModel : ObservableObject
 {
-	public NavigationItemViewModel(NavigationRoute destination, bool isExpandable, string title, Symbol symbol)
+	public NavigationItemViewModel(MainNavigationRoute destination, bool isExpandable, string title, Symbol symbol)
 	{
 		Destination = destination;
 		IsExpandable = isExpandable;
@@ -23,7 +23,7 @@ public class NavigationItemViewModel : ObservableObject
 	/// <summary>
 	/// The destination navigation route associated with this item.
 	/// </summary>
-	public NavigationRoute Destination { get; }
+	public MainNavigationRoute Destination { get; }
 
 	/// <summary>
 	/// Check whether this item can be expanded to show child elements.

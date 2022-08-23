@@ -10,7 +10,7 @@ namespace FluentFeeds.Feeds.Base.Items.Content;
 /// </summary>
 public sealed class ArticleItemContent : ItemContent
 {
-	public ArticleItemContent(RichText body)
+	public ArticleItemContent(RichText body, bool isReloadable = false) : base(isReloadable)
 	{
 		Body = body;
 	}

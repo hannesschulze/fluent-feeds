@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
+using FluentFeeds.Feeds.Base.EventArgs;
 using FluentFeeds.Feeds.Base.Items;
 using FluentFeeds.Feeds.Base.Storage;
 
@@ -34,8 +35,8 @@ public abstract class CachedFeed : Feed
 
 	protected sealed override async Task DoLoadAsync()
 	{
-		var items = await Storage.GetItemsAsync();
-		Items = items.ToImmutableHashSet();
+		await UpdateItemsAsync();
+		Storage.ItemsDeleted += HandleItemsDeleted;
 	}
 
 	protected sealed override async Task DoSynchronizeAsync()
@@ -47,6 +48,17 @@ public abstract class CachedFeed : Feed
 		{
 			Metadata = fetchResult.UpdatedMetadata;
 		}
+	}
+
+	private async void HandleItemsDeleted(object? sender, ItemsDeletedEventArgs e)
+	{
+		await UpdateItemsAsync();
+	}
+
+	private async ValueTask UpdateItemsAsync()
+	{
+		var items = await Storage.GetItemsAsync();
+		Items = items.ToImmutableHashSet();
 	}
 
 	/// <summary>

@@ -24,6 +24,7 @@ public partial class App : Application
 				.AddSingleton<IFeedService, FeedService>()
 				.AddSingleton<IModalService, ModalService>()
 				.AddTransient<MainViewModel>()
+				.AddTransient<FeedViewModel>()
 				.BuildServiceProvider());
 
 		_window = new MainWindow();

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using FluentFeeds.Feeds.Base.EventArgs;
 using FluentFeeds.Feeds.Base.Items;
 
 namespace FluentFeeds.Feeds.Base.Storage;
@@ -10,6 +11,11 @@ namespace FluentFeeds.Feeds.Base.Storage;
 /// </summary>
 public interface IItemStorage
 {
+	/// <summary>
+	/// Event raised when items were permanently deleted from the storage.
+	/// </summary>
+	event EventHandler<ItemsDeletedEventArgs>? ItemsDeleted;
+	
 	/// <summary>
 	/// Return all saved items in this storage.
 	/// </summary>
@@ -22,4 +28,14 @@ public interface IItemStorage
 	/// Stored representations of all items.
 	/// </returns>
 	Task<IEnumerable<IReadOnlyStoredItem>> AddItemsAsync(IEnumerable<IReadOnlyItem> items);
+
+	/// <summary>
+	/// Mark an item as read/unread.
+	/// </summary>
+	Task<IReadOnlyStoredItem> SetItemReadAsync(Guid identifier, bool isRead);
+
+	/// <summary>
+	/// Delete the provided items from the storage.
+	/// </summary>
+	Task DeleteItemsAsync(IReadOnlyCollection<Guid> identifiers);
 }

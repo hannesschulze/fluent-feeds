@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using FluentFeeds.App.Shared.Models;
+using FluentFeeds.App.Shared.Models.Navigation;
 using FluentFeeds.App.Shared.Tests.Mock;
 using FluentFeeds.App.Shared.ViewModels.Items.Navigation;
 using FluentFeeds.App.Shared.ViewModels.Pages;
@@ -58,7 +58,7 @@ public class MainViewModelTests
 			{
 				Assert.Equal("Settings", item.Title);
 				Assert.Equal(Symbol.Settings, item.Symbol);
-				Assert.Equal(NavigationRoute.Settings, item.Destination);
+				Assert.Equal(MainNavigationRoute.Settings, item.Destination);
 				Assert.False(item.IsExpandable);
 				Assert.Empty(item.Children);
 				Assert.Empty(item.Actions);
@@ -73,7 +73,7 @@ public class MainViewModelTests
 			h => ModalService.ShowErrorModal += h, h => ModalService.ShowErrorModal -= h,
 			() => FeedService.CompleteInitialization(new Exception("error"))).Arguments;
 		Assert.Equal("A database error occurred", modal.ViewModel.Title);
-		Assert.Equal("FluentFeeds was unable to initialize its database.", modal.ViewModel.Message);
+		Assert.Equal("Fluent Feeds was unable to initialize its database.", modal.ViewModel.Message);
 	}
 
 	[Fact]
@@ -82,11 +82,11 @@ public class MainViewModelTests
 		var viewModel = new MainViewModel(FeedService, ModalService);
 		FeedService.CompleteInitialization();
 		
-		Assert.Equal(NavigationRoute.Feed(FeedService.OverviewNode), viewModel.CurrentRoute);
+		Assert.Equal(MainNavigationRoute.Feed(FeedService.OverviewNode), viewModel.CurrentRoute);
 		Assert.Equal(viewModel.FeedItems[0], viewModel.SelectedItem);
 		Assert.False(viewModel.GoBackCommand.CanExecute(null));
 		viewModel.SelectedItem = viewModel.FooterItems[0];
-		Assert.Equal(NavigationRoute.Settings, viewModel.CurrentRoute);
+		Assert.Equal(MainNavigationRoute.Settings, viewModel.CurrentRoute);
 		Assert.Equal(viewModel.FooterItems[0], viewModel.SelectedItem);
 		Assert.True(viewModel.GoBackCommand.CanExecute(null));
 	}
@@ -99,7 +99,7 @@ public class MainViewModelTests
 		
 		viewModel.SelectedItem = viewModel.FooterItems[0];
 		viewModel.GoBackCommand.Execute(null);
-		Assert.Equal(NavigationRoute.Feed(FeedService.OverviewNode), viewModel.CurrentRoute);
+		Assert.Equal(MainNavigationRoute.Feed(FeedService.OverviewNode), viewModel.CurrentRoute);
 		Assert.Equal(viewModel.FeedItems[0], viewModel.SelectedItem);
 		Assert.False(viewModel.GoBackCommand.CanExecute(null));
 	}
@@ -123,15 +123,15 @@ public class MainViewModelTests
 		viewModel.SelectedItem = viewModel.FeedItems[2].Children[1];
 		
 		await feedStorage.DeleteNodeAsync(nodeB.Identifier);
-		Assert.Equal(NavigationRoute.Feed(nodeA), viewModel.CurrentRoute);
+		Assert.Equal(MainNavigationRoute.Feed(nodeA), viewModel.CurrentRoute);
 		Assert.Equal(viewModel.FeedItems[2].Children[0], viewModel.SelectedItem);
 		Assert.True(viewModel.GoBackCommand.CanExecute(null));
 		viewModel.GoBackCommand.Execute(null);
-		Assert.Equal(NavigationRoute.Settings, viewModel.CurrentRoute);
+		Assert.Equal(MainNavigationRoute.Settings, viewModel.CurrentRoute);
 		Assert.Equal(viewModel.FooterItems[0], viewModel.SelectedItem);
 		Assert.True(viewModel.GoBackCommand.CanExecute(null));
 		viewModel.GoBackCommand.Execute(null);
-		Assert.Equal(NavigationRoute.Feed(FeedService.OverviewNode), viewModel.CurrentRoute);
+		Assert.Equal(MainNavigationRoute.Feed(FeedService.OverviewNode), viewModel.CurrentRoute);
 		Assert.Equal(viewModel.FeedItems[0], viewModel.SelectedItem);
 		Assert.False(viewModel.GoBackCommand.CanExecute(null));
 	}

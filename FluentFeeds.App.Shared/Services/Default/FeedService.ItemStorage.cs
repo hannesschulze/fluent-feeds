@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentFeeds.App.Shared.Models.Database;
 using FluentFeeds.Feeds.Base;
+using FluentFeeds.Feeds.Base.EventArgs;
 using FluentFeeds.Feeds.Base.Items;
 using FluentFeeds.Feeds.Base.Items.Content;
 using FluentFeeds.Feeds.Base.Items.ContentLoaders;
@@ -24,6 +25,8 @@ public partial class FeedService
 
 			_initialize = new Lazy<Task>(InitializeAsync);
 		}
+
+		public event EventHandler<ItemsDeletedEventArgs>? ItemsDeleted;
 
 		/// <summary>
 		/// Add an item to the cache.
@@ -189,6 +192,52 @@ public partial class FeedService
 			}
 
 			return result;
+		}
+
+		public async Task<IReadOnlyStoredItem> SetItemReadAsync(Guid identifier, bool isRead)
+		{
+			var item = _items[identifier];
+			
+			// Update database
+			await _databaseService.ExecuteAsync(
+				async database =>
+				{
+					var dbItem = await database.Items.Where(i => i.Identifier == identifier).FirstAsync();
+					dbItem.IsRead = isRead;
+					await database.SaveChangesAsync();
+				});
+			
+			// Update local copy
+			item.IsRead = isRead;
+			return item;
+		}
+
+		public async Task DeleteItemsAsync(IReadOnlyCollection<Guid> identifiers)
+		{
+			// Update database
+			await _databaseService.ExecuteAsync(
+				async database =>
+				{
+					foreach (var identifier in identifiers)
+					{
+						var dbItem = await database.Items.Where(i => i.Identifier == identifier).FirstAsync();
+						database.Remove(dbItem);
+					}
+					await database.SaveChangesAsync();
+				});
+			
+			// Update local copy
+			var items = new List<IReadOnlyStoredItem> { Capacity = identifiers.Count };
+			foreach (var identifier in identifiers)
+			{
+				if (_items.Remove(identifier, out var item) && item.Url != null)
+				{
+					_urlItems.Remove(item.Url);
+					items.Add(item);
+				}
+			}
+			
+			ItemsDeleted?.Invoke(this, new ItemsDeletedEventArgs(items));
 		}
 
 		private readonly IDatabaseService _databaseService;

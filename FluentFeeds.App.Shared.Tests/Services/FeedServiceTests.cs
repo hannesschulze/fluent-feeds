@@ -380,4 +380,35 @@ public class FeedServiceTests
 		var itemStorageB = await CreateItemStorageAsync(Guid.Parse("6f778c4d-4969-476f-8e36-413d8f5e7a20"));
 		Assert.Empty(await itemStorageB.GetItemsAsync());
 	}
+
+	[Fact]
+	public async Task ItemStorage_SetRead()
+	{
+		var itemStorage = await CreateItemStorageAsync();
+		var item = CreateDummyItem();
+		var storedItem = Assert.Single(await itemStorage.AddItemsAsync(new[] { item }));
+		var updatedItem = await itemStorage.SetItemReadAsync(storedItem.Identifier, isRead: true);
+		Assert.Equal(storedItem, updatedItem);
+		Assert.True(storedItem.IsRead);
+		var newItemStorage = await CreateItemStorageAsync();
+		var newStoredItem = Assert.Single(await newItemStorage.GetItemsAsync());
+		Assert.True(newStoredItem.IsRead);
+	}
+
+	[Fact]
+	public async Task ItemStorage_Delete()
+	{
+		var itemStorage = await CreateItemStorageAsync();
+		var item = CreateDummyItem();
+		var storedItem = Assert.Single(await itemStorage.AddItemsAsync(new[] { item }));
+		var deletedArgs = await Assert.RaisesAsync<ItemsDeletedEventArgs>(
+			h => itemStorage.ItemsDeleted += h, h => itemStorage.ItemsDeleted -= h,
+			() => itemStorage.DeleteItemsAsync(new[] { storedItem.Identifier }));
+		Assert.Collection(
+			deletedArgs.Arguments.Items,
+			deleted => Assert.Equal(storedItem, deleted));
+		Assert.Empty(await itemStorage.GetItemsAsync());
+		var newItemStorage = await CreateItemStorageAsync();
+		Assert.Empty(await newItemStorage.GetItemsAsync());
+	}
 }

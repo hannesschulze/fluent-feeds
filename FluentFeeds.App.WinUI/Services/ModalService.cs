@@ -60,6 +60,7 @@ public sealed class ModalService : IModalService
 			errorBar.Title = viewModel.Title;
 			errorBar.Message = viewModel.Message;
 			errorBar.IsOpen = true;
+			errorBar.Margin = new Thickness(0, 0, 0, bottom: 8);
 		}
 	}
 }

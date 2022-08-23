@@ -142,6 +142,40 @@ public class ConversionHelperTests
 	}
 
 	[Fact]
+	public void ConvertItemAuthor_DefaultAuthors()
+	{
+		var source = new SyndicationItem { Authors = { new SyndicationPerson { Name = "John Doe" } } };
+		var author = ConversionHelpers.ConvertItemAuthor(source);
+		Assert.Equal("John Doe", author);
+	}
+
+	[Fact]
+	public void ConvertItemAuthor_CreatorAsAuthor()
+	{
+		const string input =
+			"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
+			"<rss version=\"2.0\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\">\n" +
+			"  <channel>\n" +
+			"    <item>\n" +
+			"      <dc:creator>John Doe</dc:creator>\n" +
+			"    </item>\n" +
+			"  </channel>\n" +
+			"</rss>";
+		using var reader = XmlReader.Create(new StringReader(input));
+		var source = SysSyndicationFeed.Load(reader).Items.First();
+		var author = ConversionHelpers.ConvertItemAuthor(source);
+		Assert.Equal("John Doe", author);
+	}
+
+	[Fact]
+	public void ConvertItemAuthor_Missing()
+	{
+		var source = new SyndicationItem { Authors = { } };
+		var author = ConversionHelpers.ConvertItemAuthor(source);
+		Assert.Null(author);
+	}
+
+	[Fact]
 	public async Task ConvertItem_Title_Missing()
 	{
 		var source = new SyndicationItem();
