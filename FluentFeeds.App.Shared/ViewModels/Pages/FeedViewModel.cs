@@ -3,17 +3,21 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using AngleSharp.Dom;
 using FluentFeeds.App.Shared.Models;
+using FluentFeeds.App.Shared.Models.Navigation;
 using FluentFeeds.App.Shared.Services;
+using FluentFeeds.App.Shared.ViewModels.Modals;
 using FluentFeeds.Common;
 using FluentFeeds.Feeds.Base;
 using FluentFeeds.Feeds.Base.EventArgs;
 using FluentFeeds.Feeds.Base.Items;
+using FluentFeeds.Feeds.Base.Items.Content;
 using FluentFeeds.Feeds.Base.Nodes;
+using FluentFeeds.Feeds.Base.Storage;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
 
@@ -25,17 +29,23 @@ namespace FluentFeeds.App.Shared.ViewModels.Pages;
 /// </summary>
 public sealed class FeedViewModel : ObservableObject
 {
+	private enum ToggleReadAction
+	{
+		MarkRead,
+		MarkUnread
+	}
+	
 	public FeedViewModel(IModalService modalService, IFeedService feedService)
 	{
 		_modalService = modalService;
 		_feedService = feedService;
 		
 		_syncCommand = new RelayCommand(HandleSyncCommand, () => !IsSyncInProgress);
-		_toggleReadCommand = new RelayCommand(() => { }, () => IsItemSelected);
-		_deleteCommand = new RelayCommand(() => { }, () => IsItemSelected);
+		_toggleReadCommand = new RelayCommand(HandleToggleReadCommand, () => IsItemSelected);
+		_deleteCommand = new RelayCommand(HandleDeleteCommand, () => IsItemSelected);
 		_openDisplayOptionsCommand = new RelayCommand(() => { });
-		_reloadContentCommand = new RelayCommand(() => { }, () => IsReloadContentAvailable);
-		_openBrowserCommand = new RelayCommand(() => { });
+		_reloadContentCommand = new RelayCommand(HandleReloadContentCommand, () => IsReloadContentAvailable);
+		_openBrowserCommand = new RelayCommand(HandleOpenBrowserCommand, () => SelectedItems.Length == 1);
 
 		Items = new ReadOnlyObservableCollection<IReadOnlyStoredItem>(_items);
 	}
@@ -43,7 +53,7 @@ public sealed class FeedViewModel : ObservableObject
 	/// <summary>
 	/// Called after navigating to the feed view.
 	/// </summary>
-	/// <param name="node">The node of the current <see cref="NavigationRoute"/>.</param>
+	/// <param name="node">The node of the current <see cref="MainNavigationRoute"/>.</param>
 	public void Load(IReadOnlyFeedNode node)
 	{
 		if (_feed != null)
@@ -108,8 +118,36 @@ public sealed class FeedViewModel : ObservableObject
 		get => _selectedItems;
 		set
 		{
-			if (SetProperty(ref _selectedItems, value))
+			var oldItems = _selectedItems;
+			if (SetProperty(ref _selectedItems, value) && !oldItems.SequenceEqual(value))
 			{
+				if (oldItems.Length == 1)
+				{
+					oldItems[0].PropertyChanged -= HandleItemPropertyChanged;
+				}
+				
+				_loadItemContentToken = null;
+				_openBrowserCommand.NotifyCanExecuteChanged();
+				IsReloadContentAvailable = false;
+				if (_selectedItems.Length == 1)
+				{
+					// Single selection automatically marks the item as "read"
+					_currentToggleReadAction = ToggleReadAction.MarkRead;
+					HandleToggleReadCommand();
+					LoadItemContent();
+					_selectedItems[0].PropertyChanged += HandleItemPropertyChanged;
+				}
+				else
+				{
+					CurrentRoute = FeedNavigationRoute.Placeholder(_selectedItems.Length);
+					if (_selectedItems.Length > 1)
+					{
+						CurrentToggleReadAction = _selectedItems.All(item => item.IsRead)
+							? ToggleReadAction.MarkUnread
+							: ToggleReadAction.MarkRead;
+					}
+				}
+
 				IsItemSelected = SelectedItems.Length >= 1;
 			}
 		}
@@ -192,6 +230,34 @@ public sealed class FeedViewModel : ObservableObject
 			}
 		}
 	}
+	
+	/// <summary>
+	/// The currently active navigation route.
+	/// </summary>
+	public FeedNavigationRoute CurrentRoute
+	{
+		get => _currentRoute;
+		private set => SetProperty(ref _currentRoute, value);
+	}
+
+	private ToggleReadAction CurrentToggleReadAction
+	{
+		get => _currentToggleReadAction;
+		set
+		{
+			if (_currentToggleReadAction != value)
+			{
+				_currentToggleReadAction = value;
+				ToggleReadSymbol =
+					value switch
+					{
+						ToggleReadAction.MarkRead => Symbol.MailRead,
+						ToggleReadAction.MarkUnread => Symbol.MailUnread,
+						_ => throw new IndexOutOfRangeException()
+					};
+			}
+		}
+	}
 
 	private static IEnumerable<IReadOnlyStoredItem> SortItems(
 		IEnumerable<IReadOnlyStoredItem> items, ItemSortMode sortMode)
@@ -205,8 +271,7 @@ public sealed class FeedViewModel : ObservableObject
 			};
 	}
 
-	private static bool ShouldInsertSortedItem(
-		IReadOnlyStoredItem existing, IReadOnlyStoredItem added, ItemSortMode sortMode)
+	private static bool ShouldInsertSortedItem(IReadOnlyItem existing, IReadOnlyItem added, ItemSortMode sortMode)
 	{
 		return
 			sortMode switch
@@ -215,6 +280,43 @@ public sealed class FeedViewModel : ObservableObject
 				ItemSortMode.Oldest => existing.PublishedTimestamp > added.PublishedTimestamp,
 				_ => false
 			};
+	}
+
+	/// <summary>
+	/// Load the content for the currently selected item.
+	/// </summary>
+	private async void LoadItemContent(bool reload = false)
+	{
+		if (SelectedItems.IsEmpty)
+			return;
+
+		var item = SelectedItems[0];
+		var token = new object();
+		_loadItemContentToken = token;
+		CurrentRoute = FeedNavigationRoute.Loading(item);
+
+		ItemContent content;
+		try
+		{
+			content = await item.LoadContentAsync(reload);
+		}
+		catch (Exception)
+		{
+			_modalService.Show(new ErrorViewModel(
+				"Unable to load content", "An error occurred while trying to load the selected item's content."));
+			return;
+		}
+
+		if (_loadItemContentToken == token)
+		{
+			CurrentRoute =
+				content.Type switch
+				{
+					ItemContentType.Article => FeedNavigationRoute.Article(item, (ArticleItemContent)content),
+					_ => throw new IndexOutOfRangeException()
+				};
+			IsReloadContentAvailable = content.IsReloadable;
+		}
 	}
 
 	/// <summary>
@@ -299,6 +401,7 @@ public sealed class FeedViewModel : ObservableObject
 				}
 
 				_itemSet = newItems;
+				SelectedItems = SelectedItems.Where(i => !removed.Contains(i)).ToImmutableArray();
 			}
 		}
 	}
@@ -306,6 +409,11 @@ public sealed class FeedViewModel : ObservableObject
 	private void HandleItemsUpdated(object? sender, FeedItemsUpdatedEventArgs e)
 	{
 		UpdateItems();
+	}
+
+	private void HandleItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
+	{
+		LoadItemContent();
 	}
 
 	private async void HandleSyncCommand()
@@ -326,7 +434,10 @@ public sealed class FeedViewModel : ObservableObject
 			}
 			catch (Exception)
 			{
-				// TODO: Show error
+				_modalService.Show(
+					new ErrorViewModel(
+						"Synchronization failed",
+						"An error occurred while trying to synchronize your feeds. Please try again later."));
 			}
 		}
 		catch (Exception)
@@ -337,6 +448,55 @@ public sealed class FeedViewModel : ObservableObject
 		if (_syncToken == token)
 		{
 			IsSyncInProgress = false;
+		}
+	}
+
+	private async void HandleToggleReadCommand()
+	{
+		var isRead = CurrentToggleReadAction == ToggleReadAction.MarkRead;
+		CurrentToggleReadAction = isRead ? ToggleReadAction.MarkUnread : ToggleReadAction.MarkRead;
+		foreach (var item in SelectedItems.Where(item => item.IsRead != isRead))
+		{
+			await item.Storage.SetItemReadAsync(item.Identifier, isRead);
+		}
+	}
+
+	private async void HandleDeleteCommand()
+	{
+		// Execute deletes for each storage.
+		var itemsPerStorage = new Dictionary<IItemStorage, List<Guid>>();
+		foreach (var item in SelectedItems)
+		{
+			if (itemsPerStorage.TryGetValue(item.Storage, out var list))
+			{
+				list.Add(item.Identifier);
+			}
+			else
+			{
+				itemsPerStorage.Add(item.Storage, new List<Guid> { item.Identifier });
+			}
+		}
+
+		foreach (var (storage, items) in itemsPerStorage)
+		{
+			await storage.DeleteItemsAsync(items);
+		}
+	}
+
+	private void HandleReloadContentCommand()
+	{
+		LoadItemContent(reload: true);
+	}
+
+	private void HandleOpenBrowserCommand()
+	{
+		if (SelectedItems.IsEmpty)
+			return;
+		
+		var url = SelectedItems[0].ContentUrl ?? SelectedItems[0].Url;
+		if (url != null)
+		{
+			Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = url.ToString() });
 		}
 	}
 
@@ -352,6 +512,7 @@ public sealed class FeedViewModel : ObservableObject
 	private ImmutableHashSet<IReadOnlyStoredItem> _itemSet = ImmutableHashSet<IReadOnlyStoredItem>.Empty;
 	private object? _syncToken;
 	private object? _updateItemsToken;
+	private object? _loadItemContentToken;
 	private Feed? _feed;
 	private ImmutableArray<IReadOnlyStoredItem> _selectedItems = ImmutableArray<IReadOnlyStoredItem>.Empty;
 	private ItemSortMode _selectedSortMode = ItemSortMode.Newest;
@@ -359,4 +520,6 @@ public sealed class FeedViewModel : ObservableObject
 	private bool _isSyncInProgress;
 	private bool _isItemSelected;
 	private bool _isReloadContentAvailable;
+	private FeedNavigationRoute _currentRoute = FeedNavigationRoute.Placeholder(0);
+	private ToggleReadAction _currentToggleReadAction;
 }

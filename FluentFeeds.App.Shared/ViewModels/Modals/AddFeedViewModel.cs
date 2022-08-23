@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using FluentFeeds.App.Shared.Services;
 using FluentFeeds.Feeds.Base;
 using FluentFeeds.Feeds.Base.Factories;
 using FluentFeeds.Feeds.Base.Nodes;
@@ -11,12 +12,15 @@ namespace FluentFeeds.App.Shared.ViewModels.Modals;
 /// </summary>
 public sealed class AddFeedViewModel : NodeDataViewModel
 {
-	public AddFeedViewModel(IUrlFeedFactory factory, IReadOnlyStoredFeedNode rootNode, IReadOnlyFeedNode? parentGroup)
+	public AddFeedViewModel(
+		IModalService modalService, IUrlFeedFactory factory, IReadOnlyStoredFeedNode rootNode,
+		IReadOnlyFeedNode? parentGroup)
 		: base(
 			title: "Add a feed", errorTitle: "Unable to create the feed",
 			errorMessage: "An error occurred while trying to create a feed for the provided URL.", inputLabel: "URL",
 			showProgressSpinner: true, rootNode, parentGroup, null)
 	{
+		_modalService = modalService;
 		_factory = factory;
 	}
 
@@ -30,7 +34,7 @@ public sealed class AddFeedViewModel : NodeDataViewModel
 		SynchronizeNewFeedAsync(feed);
 	}
 
-	private static async void SynchronizeNewFeedAsync(Feed newFeed)
+	private async void SynchronizeNewFeedAsync(Feed newFeed)
 	{
 		try
 		{
@@ -38,7 +42,10 @@ public sealed class AddFeedViewModel : NodeDataViewModel
 		}
 		catch (Exception)
 		{
-			// TODO: Show error
+			_modalService.Show(
+				new ErrorViewModel(
+					"Synchronization failed",
+					"An error occurred while trying to synchronize your feeds. Please try again later."));
 		}
 	}
 
@@ -49,6 +56,7 @@ public sealed class AddFeedViewModel : NodeDataViewModel
 		IsInputValid = _parsedUrl != null;
 	}
 
+	private readonly IModalService _modalService;
 	private readonly IUrlFeedFactory _factory;
 	private Uri? _parsedUrl;
 }

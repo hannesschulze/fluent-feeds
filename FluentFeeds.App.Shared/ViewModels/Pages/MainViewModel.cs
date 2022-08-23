@@ -4,9 +4,8 @@ using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using FluentFeeds.App.Shared.Helpers;
-using FluentFeeds.App.Shared.Models;
+using FluentFeeds.App.Shared.Models.Navigation;
 using FluentFeeds.App.Shared.Services;
-using FluentFeeds.App.Shared.Services.Default;
 using FluentFeeds.App.Shared.ViewModels.Items.Navigation;
 using FluentFeeds.App.Shared.ViewModels.Modals;
 using FluentFeeds.Common;
@@ -30,7 +29,7 @@ public sealed class MainViewModel : ObservableObject
 		
 		_goBackCommand = new RelayCommand(HandleGoBackCommand, () => _backStack.Count > 1);
 		_settingsItem =
-			new NavigationItemViewModel(NavigationRoute.Settings, isExpandable: false, "Settings", Symbol.Settings);
+			new NavigationItemViewModel(MainNavigationRoute.Settings, isExpandable: false, "Settings", Symbol.Settings);
 		_footerItems.Add(_settingsItem);
 		var overviewFeedNode = feedService.OverviewNode;
 		var overviewItem = new FeedNavigationItemViewModel(modalService, overviewFeedNode, null, _feedItemRegistry);
@@ -42,7 +41,7 @@ public sealed class MainViewModel : ObservableObject
 		_feedItems.Add(unreadItem);
 		_feedItemTransformer = ObservableCollectionTransformer.CreateCached(
 			feedService.ProviderNodes, _feedItems, CreateRootNodeViewModel, rootNode => rootNode, _feedItemRegistry);
-		_currentRoute = NavigationRoute.Feed(overviewFeedNode);
+		_currentRoute = MainNavigationRoute.Feed(overviewFeedNode);
 		_backStack.Add(_currentRoute);
 		_selectedItem = overviewItem;
 
@@ -79,7 +78,7 @@ public sealed class MainViewModel : ObservableObject
 	/// <summary>
 	/// The currently active navigation route.
 	/// </summary>
-	public NavigationRoute CurrentRoute
+	public MainNavigationRoute CurrentRoute
 	{
 		get => _currentRoute;
 		private set => SetProperty(ref _currentRoute, value);
@@ -128,8 +127,8 @@ public sealed class MainViewModel : ObservableObject
 		SelectedItem =
 			newRoute.Type switch
 			{
-				NavigationRouteType.Settings => _settingsItem,
-				NavigationRouteType.Feed => _feedItemRegistry.GetValueOrDefault(newRoute.FeedNode!),
+				MainNavigationRouteType.Settings => _settingsItem,
+				MainNavigationRouteType.Feed => _feedItemRegistry.GetValueOrDefault(newRoute.FeedNode!),
 				_ => null
 			};
 		_isChangingSelection = false;
@@ -148,7 +147,7 @@ public sealed class MainViewModel : ObservableObject
 
 		// Remove nodes from the back stack
 		bool changed = false;
-		NavigationRoute? previousRoute = null;
+		MainNavigationRoute? previousRoute = null;
 		for (var i = _backStack.Count - 1; i >= 0; --i)
 		{
 			var route = _backStack[i];
@@ -171,14 +170,14 @@ public sealed class MainViewModel : ObservableObject
 
 	private readonly IFeedService _feedService;
 	private readonly IModalService _modalService;
-	private readonly List<NavigationRoute> _backStack = new();
+	private readonly List<MainNavigationRoute> _backStack = new();
 	private readonly RelayCommand _goBackCommand;
 	private readonly NavigationItemViewModel _settingsItem;
 	private readonly ObservableCollection<NavigationItemViewModel> _feedItems = new();
 	private readonly ObservableCollection<NavigationItemViewModel> _footerItems = new();
 	private readonly ObservableCollectionTransformer<IReadOnlyStoredFeedNode, NavigationItemViewModel> _feedItemTransformer;
 	private readonly Dictionary<IReadOnlyFeedNode, NavigationItemViewModel> _feedItemRegistry = new();
-	private NavigationRoute _currentRoute;
+	private MainNavigationRoute _currentRoute;
 	private NavigationItemViewModel? _selectedItem;
 	private bool _isChangingSelection;
 }

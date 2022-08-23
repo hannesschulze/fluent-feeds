@@ -5,7 +5,7 @@ using FluentFeeds.Feeds.Base.Storage;
 namespace FluentFeeds.Feeds.Base.EventArgs;
 
 /// <summary>
-/// Event args when feed nodes were deleted from a <see cref="IFeedStorage"/>.
+/// Event args when feed nodes were deleted from an <see cref="IFeedStorage"/>.
 /// </summary>
 public sealed class FeedNodesDeletedEventArgs : System.EventArgs
 {
