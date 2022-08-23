@@ -10,7 +10,11 @@
 	d:DataContext="{d:DesignInstance Type=vm:ArticleViewModel}"
 	NavigationCacheMode="Required">
 
-	<ScrollViewer HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+	<ScrollViewer
+		x:Name="MainScrollViewer"
+		HorizontalAlignment="Stretch"
+		VerticalAlignment="Stretch">
+		
 		<StackPanel Orientation="Vertical" Margin="16">
 			<TextBlock
 				Text="{x:Bind ViewModel.Title, Mode=OneWay}"
@@ -28,6 +32,7 @@
 				RichText="{x:Bind ViewModel.Content, Mode=OneWay}"
 				Margin="0,16,0,0" />
 		</StackPanel>
+		
 	</ScrollViewer>
 	
 </Page>

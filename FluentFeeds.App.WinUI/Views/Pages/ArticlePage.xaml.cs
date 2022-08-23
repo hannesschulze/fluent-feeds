@@ -24,6 +24,7 @@ public sealed partial class ArticlePage : Page
 	protected override void OnNavigatedTo(NavigationEventArgs e)
 	{
 		base.OnNavigatedTo(e);
+		MainScrollViewer.ScrollToVerticalOffset(0);
 		ViewModel.Load((FeedNavigationRoute)e.Parameter);
 	}
 }
