@@ -12,14 +12,8 @@ public readonly struct FeedNavigationRoute : IEquatable<FeedNavigationRoute>
 	/// <summary>
 	/// Page showing information about the current item selection (shown if zero or more than one items are selected).
 	/// </summary>
-	public static FeedNavigationRoute Placeholder(int selectionCount) =>
-		new(FeedNavigationRouteType.Placeholder, selectionCount, null, null);
-
-	/// <summary>
-	/// Page indicating loading progress for an item.
-	/// </summary>
-	public static FeedNavigationRoute Loading(IReadOnlyStoredItem item) =>
-		new(FeedNavigationRouteType.Loading, 1, item, null);
+	public static FeedNavigationRoute Selection(int count) =>
+		new(FeedNavigationRouteType.Selection, count, null, null);
 
 	/// <summary>
 	/// Page displaying article content for an item.
@@ -38,37 +32,38 @@ public readonly struct FeedNavigationRoute : IEquatable<FeedNavigationRoute>
 	public int SelectionCount { get; }
 	
 	/// <summary>
-	/// The single item selected (not set for <see cref="FeedNavigationRouteType.Placeholder"/>.
+	/// The single item selected (not set for <see cref="FeedNavigationRouteType.Selection"/>.
 	/// </summary>
 	public IReadOnlyStoredItem? Item { get; }
 	
 	/// <summary>
-	/// The loaded content for the item (only set for content routes).
+	/// The loaded content for the article item (only set for <see cref="FeedNavigationRouteType.Article"/>).
 	/// </summary>
-	public ItemContent? Content { get; }
+	public ArticleItemContent? ArticleContent { get; }
 
 	private FeedNavigationRoute(
-		FeedNavigationRouteType type, int selectionCount, IReadOnlyStoredItem? item, ItemContent? content)
+		FeedNavigationRouteType type, int selectionCount, IReadOnlyStoredItem? item,
+		ArticleItemContent? articleContent)
 	{
 		Type = type;
 		SelectionCount = selectionCount;
 		Item = item;
-		Content = content;
+		ArticleContent = articleContent;
 	}
 
 	public override string ToString() =>
 		Type switch
 		{
-			FeedNavigationRouteType.Placeholder => $"Placeholder {{ SelectionCount = {SelectionCount} }}",
-			FeedNavigationRouteType.Loading => $"Loading {{ Item = {Item} }}",
-			FeedNavigationRouteType.Article => $"Article {{ Item = {Item}, Content = {Content} }}",
+			FeedNavigationRouteType.Selection => $"Selection {{ Count = {SelectionCount} }}",
+			FeedNavigationRouteType.Article => $"Article {{ Item = {Item}, Content = {ArticleContent} }}",
 			_ => throw new IndexOutOfRangeException()
 		};
 
-	public override int GetHashCode() => HashCode.Combine(Type, SelectionCount, Item, Content);
+	public override int GetHashCode() => HashCode.Combine(Type, SelectionCount, Item, ArticleContent);
 	public override bool Equals(object? other) => other is FeedNavigationRoute casted && Equals(casted);
 	public bool Equals(FeedNavigationRoute other) =>
-		Type == other.Type && SelectionCount == other.SelectionCount && Item == other.Item && Content == other.Content;
+		Type == other.Type && SelectionCount == other.SelectionCount && Item == other.Item &&
+		ArticleContent == other.ArticleContent;
 
 	public static bool operator ==(FeedNavigationRoute left, FeedNavigationRoute right) => left.Equals(right);
 	public static bool operator !=(FeedNavigationRoute left, FeedNavigationRoute right) => !left.Equals(right);

@@ -76,6 +76,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Page Update="Views\Pages\SelectionPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
+	</ItemGroup>
+
+	<ItemGroup>
 		<Page Update="Views\Modals\NodeDataView.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>

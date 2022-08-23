@@ -1,25 +1,23 @@
 ﻿using FluentFeeds.App.Shared.Models.Navigation;
-using System;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Navigation;
 using FluentFeeds.App.Shared.ViewModels.Pages;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using FluentFeeds.Feeds.Base.Items.Content;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
 
 namespace FluentFeeds.App.WinUI.Views.Pages;
 
 /// <summary>
-/// Page displaying an article.
+/// Page showing information about the currently selected items.
 /// </summary>
-public sealed partial class ArticlePage : Page
+public sealed partial class SelectionPage : Page
 {
-	public ArticlePage()
+	public SelectionPage()
 	{
-		DataContext = Ioc.Default.GetRequiredService<ArticleViewModel>();
+		DataContext = Ioc.Default.GetRequiredService<SelectionViewModel>();
 		InitializeComponent();
 	}
 
-	public ArticleViewModel ViewModel => (ArticleViewModel)DataContext;
+	public SelectionViewModel ViewModel => (SelectionViewModel)DataContext;
 
 	protected override void OnNavigatedTo(NavigationEventArgs e)
 	{

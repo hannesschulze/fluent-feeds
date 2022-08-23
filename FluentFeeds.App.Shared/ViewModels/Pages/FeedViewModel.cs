@@ -51,19 +51,22 @@ public sealed class FeedViewModel : ObservableObject
 
 		Items = new ReadOnlyObservableCollection<IReadOnlyStoredItem>(_items);
 	}
-	
+
 	/// <summary>
 	/// Called after navigating to the feed view.
 	/// </summary>
-	/// <param name="node">The node of the current <see cref="MainNavigationRoute"/>.</param>
-	public void Load(IReadOnlyFeedNode node)
+	/// <param name="route">Route containing parameters.</param>
+	public void Load(MainNavigationRoute route)
 	{
+		if (route.Type != MainNavigationRouteType.Feed)
+			throw new Exception("Invalid route type.");
+
 		if (_feed != null)
 		{
 			_feed.ItemsUpdated -= HandleItemsUpdated;
 		}
 
-		_feed = node.Feed;
+		_feed = route.FeedNode!.Feed;
 		_syncToken = _updateItemsToken = null;
 		IsSyncInProgress = false;
 
@@ -131,6 +134,7 @@ public sealed class FeedViewModel : ObservableObject
 				_loadItemContentToken = null;
 				_openBrowserCommand.NotifyCanExecuteChanged();
 				IsReloadContentAvailable = false;
+				IsLoadContentInProgress = false;
 				if (_selectedItems.Length == 1)
 				{
 					// Single selection automatically marks the item as "read"
@@ -141,7 +145,7 @@ public sealed class FeedViewModel : ObservableObject
 				}
 				else
 				{
-					CurrentRoute = FeedNavigationRoute.Placeholder(_selectedItems.Length);
+					CurrentRoute = FeedNavigationRoute.Selection(_selectedItems.Length);
 					if (_selectedItems.Length > 1)
 					{
 						CurrentToggleReadAction = _selectedItems.All(item => item.IsRead)
@@ -193,7 +197,16 @@ public sealed class FeedViewModel : ObservableObject
 			}
 		}
 	}
-	
+
+	/// <summary>
+	/// Indicates if the app is currently loading the content for the selected item.
+	/// </summary>
+	public bool IsLoadContentInProgress
+	{
+		get => _isLoadContentInProgress;
+		private set => SetProperty(ref _isLoadContentInProgress, value);
+	}
+
 	/// <summary>
 	/// Flag indicating if an item is currently selected.
 	/// </summary>
@@ -299,7 +312,7 @@ public sealed class FeedViewModel : ObservableObject
 		var contentTask = item.LoadContentAsync(reload);
 		if (!contentTask.IsCompletedSuccessfully)
 		{
-			CurrentRoute = FeedNavigationRoute.Loading(item);
+			IsLoadContentInProgress = true;
 			IsReloadContentAvailable = false;
 		}
 
@@ -312,6 +325,7 @@ public sealed class FeedViewModel : ObservableObject
 		{
 			_modalService.Show(new ErrorViewModel(
 				"Unable to load content", "An error occurred while trying to load the selected item's content."));
+			IsLoadContentInProgress = false;
 			return;
 		}
 
@@ -323,6 +337,7 @@ public sealed class FeedViewModel : ObservableObject
 					ItemContentType.Article => FeedNavigationRoute.Article(item, (ArticleItemContent)content),
 					_ => throw new IndexOutOfRangeException()
 				};
+			IsLoadContentInProgress = false;
 			IsReloadContentAvailable = content.IsReloadable;
 		}
 	}
@@ -423,7 +438,12 @@ public sealed class FeedViewModel : ObservableObject
 
 	private void HandleItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
 	{
-		LoadItemContent();
+		switch (e.PropertyName)
+		{
+			case nameof(IReadOnlyItem.ContentLoader):
+				LoadItemContent();
+				break;
+		}
 	}
 
 	private async void HandleSyncCommand()
@@ -528,8 +548,9 @@ public sealed class FeedViewModel : ObservableObject
 	private ItemSortMode _selectedSortMode = ItemSortMode.Newest;
 	private Symbol _toggleReadSymbol = Symbol.MailUnread;
 	private bool _isSyncInProgress;
+	private bool _isLoadContentInProgress;
 	private bool _isItemSelected;
 	private bool _isReloadContentAvailable;
-	private FeedNavigationRoute _currentRoute = FeedNavigationRoute.Placeholder(0);
+	private FeedNavigationRoute _currentRoute = FeedNavigationRoute.Selection(0);
 	private ToggleReadAction _currentToggleReadAction = ToggleReadAction.MarkUnread;
 }

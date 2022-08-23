@@ -1,14 +1,16 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Linq;
 using FluentFeeds.App.Shared.Models;
+using FluentFeeds.App.Shared.Models.Navigation;
 using FluentFeeds.App.Shared.ViewModels.Pages;
 using FluentFeeds.App.WinUI.Helpers;
 using FluentFeeds.Feeds.Base.Items;
-using FluentFeeds.Feeds.Base.Nodes;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Input;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 
 namespace FluentFeeds.App.WinUI.Views.Pages;
@@ -29,6 +31,7 @@ public sealed partial class FeedPage : Page
 		SelectSortModeCommand = new RelayCommand<ItemSortMode>(sortMode => ViewModel.SelectedSortMode = sortMode);
 
 		UpdateSelectedItems();
+		UpdateCurrentRoute();
 		ViewModel.PropertyChanged += HandlePropertyChanged;
 	}
 
@@ -46,7 +49,7 @@ public sealed partial class FeedPage : Page
 	protected override void OnNavigatedTo(NavigationEventArgs e)
 	{
 		base.OnNavigatedTo(e);
-		ViewModel.Load((IReadOnlyFeedNode)e.Parameter);
+		ViewModel.Load((MainNavigationRoute)e.Parameter);
 	}
 
 	private void HandlePropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -55,6 +58,9 @@ public sealed partial class FeedPage : Page
 		{
 			case nameof(FeedViewModel.SelectedItems):
 				UpdateSelectedItems();
+				break;
+			case nameof(FeedViewModel.CurrentRoute):
+				UpdateCurrentRoute();
 				break;
 		}
 	}
@@ -82,6 +88,15 @@ public sealed partial class FeedPage : Page
 			MainItemList.SelectedItems.Add(item);
 		_isChangingSelection = false;
 	}
+
+	private void UpdateCurrentRoute() =>
+		MainContentFrame.Navigate(
+			ViewModel.CurrentRoute.Type switch
+			{
+				FeedNavigationRouteType.Article => typeof(ArticlePage),
+				FeedNavigationRouteType.Selection => typeof(SelectionPage),
+				_ => throw new IndexOutOfRangeException()
+			}, ViewModel.CurrentRoute, new EntranceNavigationTransitionInfo());
 
 	private bool IsSortModeSelected(ItemSortMode sortMode, ItemSortMode itemMode) =>
 		sortMode == itemMode;

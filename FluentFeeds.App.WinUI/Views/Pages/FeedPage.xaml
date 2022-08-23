@@ -42,8 +42,7 @@
 					<TextBlock
 						Grid.Column="0"
 						Grid.Row="0"
-						FontSize="12"
-						LineHeight="17"
+						Style="{StaticResource CaptionTextBlockStyle}"
 						TextTrimming="CharacterEllipsis"
 						Foreground="{ThemeResource SystemControlForegroundBaseMediumLowBrush}"
 						Text="{Binding DisplayAuthor}" />
@@ -51,8 +50,7 @@
 					<TextBlock
 						Grid.Column="1"
 						Grid.Row="0"
-						FontSize="12"
-						LineHeight="17"
+						Style="{StaticResource CaptionTextBlockStyle}"
 						Foreground="{ThemeResource SystemControlForegroundBaseMediumLowBrush}"
 						Text="{Binding PublishedTimestamp, Converter={StaticResource TimestampToStringConverter}}" />
 				</Grid>
@@ -294,6 +292,7 @@
 
 				<Grid.ColumnDefinitions>
 					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="Auto" />
 					<ColumnDefinition Width="*" />
 					<ColumnDefinition Width="Auto" />
 					<ColumnDefinition Width="Auto" />
@@ -310,11 +309,18 @@
 
 						<TextBlock Text="Reload" />
 					</StackPanel>
-					
+
 				</Button>
 
+				<ProgressRing
+					Grid.Column="1"
+					IsActive="{x:Bind ViewModel.IsLoadContentInProgress, Mode=OneWay}"
+					Margin="{StaticResource ToolbarItemPadding}"
+					Width="{StaticResource ToolbarItemProgressRingSize}"
+					Height="{StaticResource ToolbarItemProgressRingSize}" />
+
 				<Button
-					Grid.Column="2"
+					Grid.Column="3"
 					Style="{StaticResource ToolbarButtonStyle}"
 					Command="{x:Bind ViewModel.OpenDisplayOptionsCommand}">
 					
@@ -323,7 +329,7 @@
 				</Button>
 
 				<Button
-					Grid.Column="3"
+					Grid.Column="4"
 					Style="{StaticResource ToolbarButtonStyle}"
 					Command="{x:Bind ViewModel.OpenBrowserCommand}">
 					
