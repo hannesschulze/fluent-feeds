@@ -13,7 +13,7 @@ public sealed class SelectionViewModel : ObservableObject
 	{
 		_title = "No items selected";
 		_isInfoTextVisible = true;
-		InfoText = "Content for the selected item will be shown here.";
+		InfoText = "The content of the selected item will be shown here.";
 	}
 
 	/// <summary>
