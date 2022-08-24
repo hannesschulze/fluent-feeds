@@ -92,19 +92,14 @@ public sealed partial class MainPage : Page
 	private void UpdateBackButtonEnabled() =>
 		NavigationView.IsBackEnabled = ViewModel.GoBackCommand.CanExecute(null);
 
-	private void UpdateCurrentRoute()
-	{
-		switch (ViewModel.CurrentRoute.Type)
-		{
-			case MainNavigationRouteType.Settings:
-				ContentFrame.Navigate(typeof(SettingsPage), null, new EntranceNavigationTransitionInfo());
-				break;
-			case MainNavigationRouteType.Feed:
-				ContentFrame.Navigate(
-					typeof(FeedPage), ViewModel.CurrentRoute.FeedNode, new EntranceNavigationTransitionInfo());
-				break;
-		}
-	}
+	private void UpdateCurrentRoute() =>
+		ContentFrame.Navigate(
+			ViewModel.CurrentRoute.Type switch
+			{
+				MainNavigationRouteType.Settings => typeof(SettingsPage),
+				MainNavigationRouteType.Feed => typeof(FeedPage),
+				_ => throw new IndexOutOfRangeException()
+			}, ViewModel.CurrentRoute, new EntranceNavigationTransitionInfo());
 
 	/// <summary>
 	/// Update the title's margin. Spacing is added before the title when the navigation bar is collapsed.

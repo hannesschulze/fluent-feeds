@@ -22,9 +22,12 @@ public partial class App : Application
 				.AddSingleton<IPluginService, PluginService>()
 				.AddSingleton<IDatabaseService, DatabaseService>()
 				.AddSingleton<IFeedService, FeedService>()
+				.AddSingleton<ISettingsService, SettingsService>()
 				.AddSingleton<IModalService, ModalService>()
 				.AddTransient<MainViewModel>()
 				.AddTransient<FeedViewModel>()
+				.AddTransient<SelectionViewModel>()
+				.AddTransient<ArticleViewModel>()
 				.BuildServiceProvider());
 
 		_window = new MainWindow();

@@ -8,11 +8,7 @@ public enum FeedNavigationRouteType
 	/// <summary>
 	/// Page showing information about the current item selection (shown if zero or more than one items are selected).
 	/// </summary>
-	Placeholder,
-	/// <summary>
-	/// Page indicating loading progress for an item.
-	/// </summary>
-	Loading,
+	Selection,
 	/// <summary>
 	/// Page displaying article content for an item.
 	/// </summary>

@@ -38,7 +38,7 @@ public readonly struct MainNavigationRoute : IEquatable<MainNavigationRoute>
 		Type switch
 		{
 			MainNavigationRouteType.Settings => "Settings",
-			MainNavigationRouteType.Feed=> $"Feed {{ FeedNode = {FeedNode} }}",
+			MainNavigationRouteType.Feed=> $"Feed {{ Node = {FeedNode} }}",
 			_ => throw new IndexOutOfRangeException()
 		};
 

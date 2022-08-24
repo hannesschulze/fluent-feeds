@@ -142,8 +142,12 @@ internal sealed class HtmlBlockProcessor : HtmlProcessor
 		{
 			if (fallbackItemProcessor == null)
 				return;
-					
-			items.Add(new ListItem { Blocks = fallbackItemProcessor.GetResult() });
+
+			var blocks = fallbackItemProcessor.GetResult();
+			if (blocks.Length != 0)
+			{
+				items.Add(new ListItem { Blocks = blocks });
+			}
 			fallbackItemProcessor = null;
 		}
 

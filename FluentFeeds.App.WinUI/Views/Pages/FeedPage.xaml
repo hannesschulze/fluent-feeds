@@ -42,8 +42,7 @@
 					<TextBlock
 						Grid.Column="0"
 						Grid.Row="0"
-						FontSize="12"
-						LineHeight="17"
+						Style="{StaticResource CaptionTextBlockStyle}"
 						TextTrimming="CharacterEllipsis"
 						Foreground="{ThemeResource SystemControlForegroundBaseMediumLowBrush}"
 						Text="{Binding DisplayAuthor}" />
@@ -51,8 +50,7 @@
 					<TextBlock
 						Grid.Column="1"
 						Grid.Row="0"
-						FontSize="12"
-						LineHeight="17"
+						Style="{StaticResource CaptionTextBlockStyle}"
 						Foreground="{ThemeResource SystemControlForegroundBaseMediumLowBrush}"
 						Text="{Binding PublishedTimestamp, Converter={StaticResource TimestampToStringConverter}}" />
 				</Grid>
@@ -217,6 +215,11 @@
 
 						<TextBlock Text="Sync" />
 					</StackPanel>
+
+					<Button.KeyboardAccelerators>
+						<KeyboardAccelerator Key="R" Modifiers="Control" />
+						<KeyboardAccelerator Key="F5" />
+					</Button.KeyboardAccelerators>
 					
 				</Button>
 
@@ -236,6 +239,10 @@
 					<Viewbox
 						Height="{StaticResource ToolbarItemIconSize}"
 						Child="{x:Bind ViewModel.ToggleReadSymbol, Converter={StaticResource SymbolToIconElementConverter}, Mode=OneWay}" />
+
+					<Button.KeyboardAccelerators>
+						<KeyboardAccelerator Key="R" Modifiers="Shift" />
+					</Button.KeyboardAccelerators>
 					
 				</Button>
 				
@@ -246,7 +253,11 @@
 					Visibility="{x:Bind ViewModel.IsItemSelected, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
 					
 					<Viewbox Height="{StaticResource ToolbarItemIconSize}" Child="{x:Bind TrashSymbol}" />
-					
+
+					<Button.KeyboardAccelerators>
+						<KeyboardAccelerator Key="Delete" />
+					</Button.KeyboardAccelerators>
+
 				</Button>
 
 				<Button Grid.Column="5" Style="{StaticResource ToolbarButtonStyle}">
@@ -256,6 +267,7 @@
 						<MenuFlyout Placement="BottomEdgeAlignedRight">
 							<RadioMenuFlyoutItem
 								Text="Newest"
+								GroupName="SortModes"
 								IsChecked="{x:Bind IsSortModeSelected(ViewModel.SelectedSortMode, models:ItemSortMode.Newest), Mode=OneWay}"
 								Command="{x:Bind SelectSortModeCommand}">
 								
@@ -267,6 +279,7 @@
 
 							<RadioMenuFlyoutItem
 								Text="Oldest"
+								GroupName="SortModes"
 								IsChecked="{x:Bind IsSortModeSelected(ViewModel.SelectedSortMode, models:ItemSortMode.Oldest), Mode=OneWay}"
 								Command="{x:Bind SelectSortModeCommand}">
 								
@@ -294,6 +307,7 @@
 
 				<Grid.ColumnDefinitions>
 					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="Auto" />
 					<ColumnDefinition Width="*" />
 					<ColumnDefinition Width="Auto" />
 					<ColumnDefinition Width="Auto" />
@@ -304,26 +318,108 @@
 					Style="{StaticResource ToolbarButtonStyle}"
 					Command="{x:Bind ViewModel.ReloadContentCommand}"
 					Visibility="{x:Bind ViewModel.IsReloadContentAvailable, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
-					
+
 					<StackPanel Orientation="Horizontal" Spacing="{StaticResource ToolbarItemIconSpacing}">
 						<Viewbox Height="{StaticResource ToolbarItemIconSize}" Child="{x:Bind RefreshSymbol}" />
 
 						<TextBlock Text="Reload" />
 					</StackPanel>
-					
+
+					<Button.KeyboardAccelerators>
+						<KeyboardAccelerator Key="R" Modifiers="Control,Shift" />
+						<KeyboardAccelerator Key="F5" Modifiers="Shift" />
+					</Button.KeyboardAccelerators>
+
 				</Button>
 
-				<Button
-					Grid.Column="2"
-					Style="{StaticResource ToolbarButtonStyle}"
-					Command="{x:Bind ViewModel.OpenDisplayOptionsCommand}">
-					
+				<ProgressRing
+					Grid.Column="1"
+					IsActive="{x:Bind ViewModel.IsLoadContentInProgress, Mode=OneWay}"
+					Margin="{StaticResource ToolbarItemPadding}"
+					Width="{StaticResource ToolbarItemProgressRingSize}"
+					Height="{StaticResource ToolbarItemProgressRingSize}" />
+
+				<Button Grid.Column="3" Style="{StaticResource ToolbarButtonStyle}">
 					<Viewbox Height="{StaticResource ToolbarItemIconSize}" Child="{x:Bind FontSymbol}" />
-					
+
+					<Button.Flyout>
+						<MenuFlyout Placement="Bottom">
+							<MenuFlyoutSubItem Text="Font family" Icon="{x:Bind FontFamilySymbol}">
+								<RadioMenuFlyoutItem
+									Text="Sans Serif"
+									GroupName="FontFamilies"
+									IsChecked="{x:Bind IsFontFamilySelected(ViewModel.DisplayOptions.SelectedFontFamily, models:FontFamily.SansSerif), Mode=OneWay}"
+									Command="{x:Bind SelectFontFamilyCommand}">
+
+									<RadioMenuFlyoutItem.CommandParameter>
+										<models:FontFamily>SansSerif</models:FontFamily>
+									</RadioMenuFlyoutItem.CommandParameter>
+
+								</RadioMenuFlyoutItem>
+								
+								<RadioMenuFlyoutItem
+									Text="Serif"
+									GroupName="FontFamilies"
+									IsChecked="{x:Bind IsFontFamilySelected(ViewModel.DisplayOptions.SelectedFontFamily, models:FontFamily.Serif), Mode=OneWay}"
+									Command="{x:Bind SelectFontFamilyCommand}">
+
+									<RadioMenuFlyoutItem.CommandParameter>
+										<models:FontFamily>Serif</models:FontFamily>
+									</RadioMenuFlyoutItem.CommandParameter>
+
+								</RadioMenuFlyoutItem>
+
+								<RadioMenuFlyoutItem
+									Text="Monospace"
+									GroupName="FontFamilies"
+									IsChecked="{x:Bind IsFontFamilySelected(ViewModel.DisplayOptions.SelectedFontFamily, models:FontFamily.Monospace), Mode=OneWay}"
+									Command="{x:Bind SelectFontFamilyCommand}">
+
+									<RadioMenuFlyoutItem.CommandParameter>
+										<models:FontFamily>Monospace</models:FontFamily>
+									</RadioMenuFlyoutItem.CommandParameter>
+
+								</RadioMenuFlyoutItem>
+							</MenuFlyoutSubItem>
+
+							<MenuFlyoutItem
+								Text="Increase font size"
+								Icon="{x:Bind FontSizeIncreaseSymbol}"
+								Command="{x:Bind ViewModel.DisplayOptions.IncreaseFontSizeCommand}">
+
+								<MenuFlyoutItem.KeyboardAccelerators>
+									<KeyboardAccelerator Key="Add" Modifiers="Control" />
+								</MenuFlyoutItem.KeyboardAccelerators>
+								
+							</MenuFlyoutItem>
+
+							<MenuFlyoutItem
+								Text="Decrease font size"
+								Icon="{x:Bind FontSizeDecreaseSymbol}"
+								Command="{x:Bind ViewModel.DisplayOptions.DecreaseFontSizeCommand}">
+
+								<MenuFlyoutItem.KeyboardAccelerators>
+									<KeyboardAccelerator Key="Subtract" Modifiers="Control" />
+								</MenuFlyoutItem.KeyboardAccelerators>
+								
+							</MenuFlyoutItem>
+
+							<MenuFlyoutItem
+								Text="Reset font size"
+								Icon="{x:Bind FontSizeResetSymbol}"
+								Command="{x:Bind ViewModel.DisplayOptions.ResetFontSizeCommand}">
+								
+								<MenuFlyoutItem.KeyboardAccelerators>
+									<KeyboardAccelerator Key="Number0" Modifiers="Control" />
+								</MenuFlyoutItem.KeyboardAccelerators>
+
+							</MenuFlyoutItem>
+						</MenuFlyout>
+					</Button.Flyout>
 				</Button>
 
 				<Button
-					Grid.Column="3"
+					Grid.Column="4"
 					Style="{StaticResource ToolbarButtonStyle}"
 					Command="{x:Bind ViewModel.OpenBrowserCommand}">
 					

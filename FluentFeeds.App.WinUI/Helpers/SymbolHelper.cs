@@ -44,7 +44,10 @@ public static class SymbolHelper
 			Symbol.Trash => CreateFont("\uE4D2", FontFamily_FluentSystemIcons_Resizable),
 			Symbol.SortOrder => CreateFont("\uE103", FontFamily_FluentSystemIcons_Resizable),
 			Symbol.OpenExternal => CreateFont("\uE92D", FontFamily_FluentSystemIcons_Resizable),
-			Symbol.Font => CreateFont("\uEDEA", FontFamily_FluentSystemIcons_Resizable),
+			Symbol.Font or Symbol.FontFamily => CreateFont("\uEDEA", FontFamily_FluentSystemIcons_Resizable),
+			Symbol.FontSizeIncrease => CreateFont("\uE6D1", FontFamily_FluentSystemIcons_Resizable),
+			Symbol.FontSizeDecrease => CreateFont("\uE6CF", FontFamily_FluentSystemIcons_Resizable),
+			Symbol.FontSizeReset => CreateFont("\uE09B", FontFamily_FluentSystemIcons_Resizable),
 			Symbol.Settings => CreateAnimated(
 				new AnimatedSettingsVisualSource(),
 				CreateFont("\xEB70", FontFamily_FluentSystemIcons_Resizable)),

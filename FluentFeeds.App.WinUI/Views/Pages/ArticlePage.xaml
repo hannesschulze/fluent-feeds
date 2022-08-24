@@ -1,12 +1,61 @@
 ﻿<Page
-    x:Class="FluentFeeds.App.WinUI.Views.Pages.ArticlePage"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
+	x:Class="FluentFeeds.App.WinUI.Views.Pages.ArticlePage"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:vm="using:FluentFeeds.App.Shared.ViewModels.Pages"
+	xmlns:controls="using:FluentFeeds.App.WinUI.Controls"
+	mc:Ignorable="d"
+	d:DataContext="{d:DesignInstance Type=vm:ArticleViewModel}"
+	NavigationCacheMode="Required">
 
-    <Grid>
-
-    </Grid>
+	<ScrollViewer
+		x:Name="MainScrollViewer"
+		HorizontalAlignment="Stretch"
+		VerticalAlignment="Stretch">
+		
+		<StackPanel Orientation="Vertical" Margin="16">
+			<TextBlock
+				Text="{x:Bind ViewModel.Title, Mode=OneWay}"
+				Style="{StaticResource TitleTextBlockStyle}"
+				IsTextSelectionEnabled="True" />
+			
+			<TextBlock
+				Text="{x:Bind ViewModel.ItemInfo, Mode=OneWay}"
+				Style="{StaticResource CaptionTextBlockStyle}"
+				Foreground="{ThemeResource SystemControlForegroundBaseMediumLowBrush}"
+				Margin="0,8,0,0"
+				IsTextSelectionEnabled="True" />
+			
+			<controls:RichTextViewer
+				RichText="{x:Bind ViewModel.Content, Mode=OneWay}"
+				Margin="0,16,0,0"
+				BodyFontSize="{x:Bind GetBodyFontSize(ViewModel.FontSize), Mode=OneWay}"
+				BodyLineHeight="{x:Bind GetBodyLineHeight(ViewModel.FontSize), Mode=OneWay}"
+				BodyFontFamily="{x:Bind GetFontFamily(ViewModel.FontFamily), Mode=OneWay}"
+				CodeFontSize="{x:Bind GetBodyFontSize(ViewModel.FontSize), Mode=OneWay}"
+				CodeLineHeight="{x:Bind GetBodyLineHeight(ViewModel.FontSize), Mode=OneWay}"
+				Heading1FontSize="{x:Bind GetHeading1FontSize(ViewModel.FontSize), Mode=OneWay}"
+				Heading1LineHeight="{x:Bind GetHeading1LineHeight(ViewModel.FontSize), Mode=OneWay}"
+				Heading1FontFamily="{x:Bind GetFontFamily(ViewModel.FontFamily), Mode=OneWay}"
+				Heading2FontSize="{x:Bind GetHeading2FontSize(ViewModel.FontSize), Mode=OneWay}"
+				Heading2LineHeight="{x:Bind GetHeading2LineHeight(ViewModel.FontSize), Mode=OneWay}"
+				Heading2FontFamily="{x:Bind GetFontFamily(ViewModel.FontFamily), Mode=OneWay}"
+				Heading3FontSize="{x:Bind GetHeading3FontSize(ViewModel.FontSize), Mode=OneWay}"
+				Heading3LineHeight="{x:Bind GetHeading3LineHeight(ViewModel.FontSize), Mode=OneWay}"
+				Heading3FontFamily="{x:Bind GetFontFamily(ViewModel.FontFamily), Mode=OneWay}"
+				Heading4FontSize="{x:Bind GetHeading4FontSize(ViewModel.FontSize), Mode=OneWay}"
+				Heading4LineHeight="{x:Bind GetHeading4LineHeight(ViewModel.FontSize), Mode=OneWay}"
+				Heading4FontFamily="{x:Bind GetFontFamily(ViewModel.FontFamily), Mode=OneWay}"
+				Heading5FontSize="{x:Bind GetHeading5FontSize(ViewModel.FontSize), Mode=OneWay}"
+				Heading5LineHeight="{x:Bind GetHeading5LineHeight(ViewModel.FontSize), Mode=OneWay}"
+				Heading5FontFamily="{x:Bind GetFontFamily(ViewModel.FontFamily), Mode=OneWay}"
+				Heading6FontSize="{x:Bind GetHeading6FontSize(ViewModel.FontSize), Mode=OneWay}"
+				Heading6LineHeight="{x:Bind GetHeading6LineHeight(ViewModel.FontSize), Mode=OneWay}"
+				Heading6FontFamily="{x:Bind GetFontFamily(ViewModel.FontFamily), Mode=OneWay}" />
+		</StackPanel>
+		
+	</ScrollViewer>
+	
 </Page>

@@ -18,5 +18,9 @@ public enum Symbol
 	SortOrder,
 	OpenExternal,
 	Font,
+	FontFamily,
+	FontSizeIncrease,
+	FontSizeDecrease,
+	FontSizeReset,
 	Settings
 }
