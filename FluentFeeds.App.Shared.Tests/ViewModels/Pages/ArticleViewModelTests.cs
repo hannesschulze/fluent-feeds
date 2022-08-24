@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.Linq;
 using System.Threading;
+using FluentFeeds.App.Shared.Models;
 using FluentFeeds.App.Shared.Models.Navigation;
 using FluentFeeds.App.Shared.Tests.Mock;
 using FluentFeeds.App.Shared.ViewModels.Pages;
@@ -21,6 +22,8 @@ public class ArticleViewModelTests
 	{
 		Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 	}
+	
+	private SettingsServiceMock SettingsService { get; } = new();
 
 	private static IReadOnlyStoredItem CreateItem(
 		string title, string? author, DateTimeOffset publishedTimestamp, ArticleItemContent content)
@@ -42,7 +45,7 @@ public class ArticleViewModelTests
 	{
 		var content = new ArticleItemContent(new RichText(new GenericBlock(new TextInline("content"))));
 		var item = CreateItem("title", author, new DateTime(2022, 8, 23, 22, 33, 15, DateTimeKind.Local), content);
-		var viewModel = new ArticleViewModel();
+		var viewModel = new ArticleViewModel(SettingsService);
 		viewModel.Load(FeedNavigationRoute.Article(item, content));
 		Assert.Equal("title", viewModel.Title);
 		Assert.Equal(expectedItemInfo, viewModel.ItemInfo);
@@ -54,12 +57,26 @@ public class ArticleViewModelTests
 	{
 		var content = new ArticleItemContent(new RichText(new GenericBlock(new TextInline("content"))));
 		var item = CreateItem("title", "author", new DateTime(2022, 8, 23, 22, 33, 15, DateTimeKind.Local), content);
-		var viewModel = new ArticleViewModel();
+		var viewModel = new ArticleViewModel(SettingsService);
 		viewModel.Load(FeedNavigationRoute.Article(item, content));
 		((StoredItem)item).Title = "updated title";
 		((StoredItem)item).Author = "updated author";
 		Assert.Equal("updated title", viewModel.Title);
 		Assert.Equal("Published by updated author on Tuesday, 23 August 2022 22:33", viewModel.ItemInfo);
 		Assert.Equal(content.Body, viewModel.Content);
+	}
+
+	[Fact]
+	public void UpdateDisplaySettings()
+	{
+		SettingsService.ContentFontFamily = FontFamily.Serif;
+		SettingsService.ContentFontSize = FontSize.Small;
+		var viewModel = new ArticleViewModel(SettingsService);
+		Assert.Equal(FontFamily.Serif, viewModel.FontFamily);
+		Assert.Equal(FontSize.Small, viewModel.FontSize);
+		SettingsService.ContentFontFamily = FontFamily.Monospace;
+		Assert.Equal(FontFamily.Monospace, viewModel.FontFamily);
+		SettingsService.ContentFontSize = FontSize.Large;
+		Assert.Equal(FontSize.Large, viewModel.FontSize);
 	}
 }
