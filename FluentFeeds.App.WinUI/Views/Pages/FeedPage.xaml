@@ -215,6 +215,11 @@
 
 						<TextBlock Text="Sync" />
 					</StackPanel>
+
+					<Button.KeyboardAccelerators>
+						<KeyboardAccelerator Key="R" Modifiers="Control" />
+						<KeyboardAccelerator Key="F5" />
+					</Button.KeyboardAccelerators>
 					
 				</Button>
 
@@ -234,6 +239,10 @@
 					<Viewbox
 						Height="{StaticResource ToolbarItemIconSize}"
 						Child="{x:Bind ViewModel.ToggleReadSymbol, Converter={StaticResource SymbolToIconElementConverter}, Mode=OneWay}" />
+
+					<Button.KeyboardAccelerators>
+						<KeyboardAccelerator Key="R" Modifiers="Shift" />
+					</Button.KeyboardAccelerators>
 					
 				</Button>
 				
@@ -244,7 +253,11 @@
 					Visibility="{x:Bind ViewModel.IsItemSelected, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
 					
 					<Viewbox Height="{StaticResource ToolbarItemIconSize}" Child="{x:Bind TrashSymbol}" />
-					
+
+					<Button.KeyboardAccelerators>
+						<KeyboardAccelerator Key="Delete" />
+					</Button.KeyboardAccelerators>
+
 				</Button>
 
 				<Button Grid.Column="5" Style="{StaticResource ToolbarButtonStyle}">
@@ -305,12 +318,17 @@
 					Style="{StaticResource ToolbarButtonStyle}"
 					Command="{x:Bind ViewModel.ReloadContentCommand}"
 					Visibility="{x:Bind ViewModel.IsReloadContentAvailable, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
-					
+
 					<StackPanel Orientation="Horizontal" Spacing="{StaticResource ToolbarItemIconSpacing}">
 						<Viewbox Height="{StaticResource ToolbarItemIconSize}" Child="{x:Bind RefreshSymbol}" />
 
 						<TextBlock Text="Reload" />
 					</StackPanel>
+
+					<Button.KeyboardAccelerators>
+						<KeyboardAccelerator Key="R" Modifiers="Control,Shift" />
+						<KeyboardAccelerator Key="F5" Modifiers="Shift" />
+					</Button.KeyboardAccelerators>
 
 				</Button>
 
@@ -367,17 +385,35 @@
 							<MenuFlyoutItem
 								Text="Increase font size"
 								Icon="{x:Bind FontSizeIncreaseSymbol}"
-								Command="{x:Bind ViewModel.DisplayOptions.IncreaseFontSizeCommand}" />
+								Command="{x:Bind ViewModel.DisplayOptions.IncreaseFontSizeCommand}">
+
+								<MenuFlyoutItem.KeyboardAccelerators>
+									<KeyboardAccelerator Key="Add" Modifiers="Control" />
+								</MenuFlyoutItem.KeyboardAccelerators>
+								
+							</MenuFlyoutItem>
 
 							<MenuFlyoutItem
 								Text="Decrease font size"
 								Icon="{x:Bind FontSizeDecreaseSymbol}"
-								Command="{x:Bind ViewModel.DisplayOptions.DecreaseFontSizeCommand}" />
+								Command="{x:Bind ViewModel.DisplayOptions.DecreaseFontSizeCommand}">
+
+								<MenuFlyoutItem.KeyboardAccelerators>
+									<KeyboardAccelerator Key="Subtract" Modifiers="Control" />
+								</MenuFlyoutItem.KeyboardAccelerators>
+								
+							</MenuFlyoutItem>
 
 							<MenuFlyoutItem
 								Text="Reset font size"
 								Icon="{x:Bind FontSizeResetSymbol}"
-								Command="{x:Bind ViewModel.DisplayOptions.ResetFontSizeCommand}" />
+								Command="{x:Bind ViewModel.DisplayOptions.ResetFontSizeCommand}">
+								
+								<MenuFlyoutItem.KeyboardAccelerators>
+									<KeyboardAccelerator Key="Number0" Modifiers="Control" />
+								</MenuFlyoutItem.KeyboardAccelerators>
+
+							</MenuFlyoutItem>
 						</MenuFlyout>
 					</Button.Flyout>
 				</Button>
