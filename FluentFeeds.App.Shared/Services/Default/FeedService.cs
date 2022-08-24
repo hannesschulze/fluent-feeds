@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentFeeds.App.Shared.Models.Database;
+using FluentFeeds.App.Shared.Models.Feeds.Loaders;
 using FluentFeeds.Common;
 using FluentFeeds.Feeds.Base;
 using FluentFeeds.Feeds.Base.Nodes;

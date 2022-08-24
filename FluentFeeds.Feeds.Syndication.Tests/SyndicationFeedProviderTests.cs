@@ -18,7 +18,7 @@ public class SyndicationFeedProviderTests
 		Assert.Equal(Symbol.Feed, root.Symbol);
 		Assert.Equal("RSS/Atom feeds", root.Name);
 		Assert.True(root.IsUserCustomizable);
-		Assert.False(root.IsContentIgnoredInGroup);
+		Assert.False(root.IsExcludedFromGroup);
 		Assert.Empty(root.Children);
 	}
 

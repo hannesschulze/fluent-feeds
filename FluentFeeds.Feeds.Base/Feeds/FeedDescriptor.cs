@@ -31,7 +31,7 @@ public abstract class FeedDescriptor : IEquatable<FeedDescriptor>
 	/// <summary>
 	/// If set to true, the feed's content will not be shown in its parent group.
 	/// </summary>
-	public bool IsContentIgnoredInGroup { get; init; } = false;
+	public bool IsExcludedFromGroup { get; init; } = false;
 
 	public virtual bool Equals(FeedDescriptor? other)
 	{
@@ -41,7 +41,7 @@ public abstract class FeedDescriptor : IEquatable<FeedDescriptor>
 			return false;
 		return
 			Type == other.Type && Name == other.Name && Symbol == other.Symbol &&
-			IsUserCustomizable == other.IsUserCustomizable && IsContentIgnoredInGroup == other.IsContentIgnoredInGroup;
+			IsUserCustomizable == other.IsUserCustomizable && IsExcludedFromGroup == other.IsExcludedFromGroup;
 	}
 
 	public override bool Equals(object? obj)
@@ -53,12 +53,12 @@ public abstract class FeedDescriptor : IEquatable<FeedDescriptor>
 	
 	public override int GetHashCode()
 	{
-		return HashCode.Combine(Type, Name, Symbol, IsUserCustomizable, IsContentIgnoredInGroup);
+		return HashCode.Combine(Type, Name, Symbol, IsUserCustomizable, IsExcludedFromGroup);
 	}
 
 	public override string ToString() =>
 		$"FeedDescriptor {{ Type = {Type}, Name = {Name}, Symbol = {Symbol}, " +
-		$"IsUserCustomizable = {IsUserCustomizable}, IsContentIgnoredInGroup = {IsContentIgnoredInGroup} }}";
+		$"IsUserCustomizable = {IsUserCustomizable}, IsExcludedFromGroup = {IsExcludedFromGroup} }}";
 
 	public static bool operator ==(FeedDescriptor? lhs, FeedDescriptor? rhs) => lhs?.Equals(rhs) ?? ReferenceEquals(rhs, null);
 	

@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentFeeds.App.Shared.EventArgs;
+using FluentFeeds.App.Shared.Models.Feeds.Loaders;
 using FluentFeeds.App.Shared.Models.Storage;
 using FluentFeeds.App.Shared.Services.Default;
 using FluentFeeds.App.Shared.Tests.Mock;

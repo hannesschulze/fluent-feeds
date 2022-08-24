@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using FluentFeeds.App.Shared.Models.Feeds;
 using FluentFeeds.App.Shared.Models.Storage;
 using FluentFeeds.Common;
 using FluentFeeds.Feeds.Base;

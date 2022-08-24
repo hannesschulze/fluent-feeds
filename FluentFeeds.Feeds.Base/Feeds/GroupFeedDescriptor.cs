@@ -32,7 +32,7 @@ public sealed class GroupFeedDescriptor : FeedDescriptor
 	
 	public override string ToString() =>
 		$"GroupFeedDescriptor {{ Name = {Name}, Symbol = {Symbol}, IsUserCustomizable = {IsUserCustomizable}, " +
-		$"IsContentIgnoredInGroup = {IsContentIgnoredInGroup}, Children = {Children.SequenceString()} }}";
+		$"IsExcludedFromGroup = {IsExcludedFromGroup}, Children = {Children.SequenceString()} }}";
 
 	public override int GetHashCode() => HashCode.Combine(base.GetHashCode(), Children.SequenceHashCode());
 

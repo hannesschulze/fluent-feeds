@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Immutable;
+using FluentFeeds.App.Shared.Models.Feeds;
+using FluentFeeds.App.Shared.Models.Feeds.Loaders;
 using FluentFeeds.Feeds.Base.Tests.Mock;
 using Xunit;
 

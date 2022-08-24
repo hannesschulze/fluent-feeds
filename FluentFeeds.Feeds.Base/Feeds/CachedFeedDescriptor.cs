@@ -28,7 +28,7 @@ public sealed class CachedFeedDescriptor : FeedDescriptor
 	
 	public override string ToString() =>
 		$"CachedFeedDescriptor {{ Name = {Name}, Symbol = {Symbol}, IsUserCustomizable = {IsUserCustomizable}, " +
-		$"IsContentIgnoredInGroup = {IsContentIgnoredInGroup}, ContentLoader = {ContentLoader}, " +
+		$"IsExcludedFromGroup = {IsExcludedFromGroup}, ContentLoader = {ContentLoader}, " +
 		$"ItemCacheIdentifier = {ItemCacheIdentifier} }}";
 
 	public override int GetHashCode() => HashCode.Combine(base.GetHashCode(), ContentLoader);

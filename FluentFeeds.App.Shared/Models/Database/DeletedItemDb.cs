@@ -4,11 +4,12 @@ using System.ComponentModel.DataAnnotations;
 namespace FluentFeeds.App.Shared.Models.Database;
 
 /// <summary>
-/// Database object describing a previously loaded feed provider.
+/// An item which was deleted by the user and should not appear again.
 /// </summary>
-public class FeedProviderDb
+public class DeletedItemDb
 {
 	[Key]
 	public Guid Identifier { get; set; }
-	public FeedDb RootNode { get; set; } = null!;
+
+	public string UserIdentifier { get; set; } = String.Empty;
 }

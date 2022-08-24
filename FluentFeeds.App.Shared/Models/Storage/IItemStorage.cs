@@ -2,12 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentFeeds.App.Shared.EventArgs;
+using FluentFeeds.App.Shared.Models.Items;
 using FluentFeeds.Feeds.Base.Items;
 
 namespace FluentFeeds.App.Shared.Models.Storage;
 
 /// <summary>
-/// Storage abstraction for caching <see cref="IReadOnlyItem"/> objects.
+/// Storage abstraction for caching <see cref="Item"/> objects.
 /// </summary>
 public interface IItemStorage
 {
@@ -17,22 +18,23 @@ public interface IItemStorage
 	event EventHandler<ItemsDeletedEventArgs>? ItemsDeleted;
 	
 	/// <summary>
-	/// Return all saved items in this storage.
+	/// Return all saved items in this storage associated with a given feed.
 	/// </summary>
-	Task<IEnumerable<IReadOnlyStoredItem>> GetItemsAsync();
+	Task<IEnumerable<IItemView>> GetItemsAsync(Guid feedIdentifier);
 
 	/// <summary>
-	/// Save the provided set of items or update them if they are already saved in the storage and have changed.
+	/// Save the provided set of items and associate them with a given feed or update them if they are already saved in
+	/// the storage and have changed.
 	/// </summary>
 	/// <returns>
-	/// Stored representations of all items.
+	/// Stored representations of the input items.
 	/// </returns>
-	Task<IEnumerable<IReadOnlyStoredItem>> AddItemsAsync(IEnumerable<IReadOnlyItem> items);
+	Task<IEnumerable<IItemView>> AddItemsAsync(IEnumerable<ItemDescriptor> items, Guid feedIdentifier);
 
 	/// <summary>
 	/// Mark an item as read/unread.
 	/// </summary>
-	Task<IReadOnlyStoredItem> SetItemReadAsync(Guid identifier, bool isRead);
+	Task<IItemView> SetItemReadAsync(Guid identifier, bool isRead);
 
 	/// <summary>
 	/// Delete the provided items from the storage.

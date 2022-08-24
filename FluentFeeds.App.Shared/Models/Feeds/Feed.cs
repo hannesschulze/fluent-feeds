@@ -1,125 +1,131 @@
 using System;
-using System.Collections.Immutable;
-using System.Threading.Tasks;
-using FluentFeeds.Feeds.Base.EventArgs;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using FluentFeeds.App.Shared.Models.Feeds.Loaders;
+using FluentFeeds.App.Shared.Models.Storage;
+using FluentFeeds.Common;
 using FluentFeeds.Feeds.Base.Feeds.Content;
-using FluentFeeds.Feeds.Base.Items;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
 
-namespace FluentFeeds.Feeds.Base;
+namespace FluentFeeds.App.Shared.Models.Feeds;
 
 /// <summary>
-/// <para>A feed which manages a set of items and can be synchronized with a remote server.</para>
-///
-/// <para>The items in the feed are not sorted. This is to allow for easy chaining of feeds without needing to keep
-/// track of the order. The set is sorted and converted to a list only in the final stage.</para>
+/// Stored representation of a feed.
 /// </summary>
-public abstract class Feed
+public sealed class Feed : ObservableObject, IFeedView
 {
-	/// <summary>
-	/// Event called when <see cref="Items"/> has been updated. This event is usually raised after calling either
-	/// <see cref="LoadAsync"/> or <see cref="SynchronizeAsync"/>.
-	/// </summary>
-	public event EventHandler<FeedItemsUpdatedEventArgs>? ItemsUpdated;
-
-	/// <summary>
-	/// Event called when <see cref="Metadata"/> has been updated.
-	/// </summary>
-	public event EventHandler<FeedMetadataUpdatedEventArgs>? MetadataUpdated;
-
-	/// <summary>
-	/// The timestamp at which this feed was last synchronized in the current object's lifetime.
-	/// </summary>
-	public DateTimeOffset? LastSynchronized { get; private set; }
-
-	/// <summary>
-	/// Current snapshot of items provided by the feed.
-	/// </summary>
-	public ImmutableHashSet<IReadOnlyStoredItem> Items
+	public Feed(
+		Guid identifier, IFeedStorage? storage, Func<IFeedView, FeedLoader> loader, IEnumerable<IFeedView>? children,
+		IFeedView? parent, string? name, Symbol? symbol, FeedMetadata metadata, bool isUserCustomizable,
+		bool isExcludedFromGroup)
 	{
-		get => _items;
-		protected set
+		Identifier = identifier;
+		Storage = storage;
+		_loader = new Lazy<FeedLoader>(() => loader.Invoke(this));
+		if (children != null)
 		{
-			_items = value;
-			ItemsUpdated?.Invoke(this, new FeedItemsUpdatedEventArgs(value));
+			Children = new ObservableCollection<IFeedView>(children);
+			_readOnlyChildren = new ReadOnlyObservableCollection<IFeedView>(Children);
+		}
+		_parent = parent;
+		_name = name;
+		_symbol = symbol;
+		_metadata = metadata;
+		_displayName = GetDisplayName();
+		_displaySymbol = GetDisplaySymbol();
+		_isUserCustomizable = isUserCustomizable;
+		_isExcludedFromGroup = isExcludedFromGroup;
+	}
+	
+	public Guid Identifier { get; }
+	
+	public IFeedStorage? Storage { get; }
+
+	public FeedLoader Loader => _loader.Value;
+
+	public ObservableCollection<IFeedView>? Children { get; }
+
+	ReadOnlyObservableCollection<IFeedView>? IFeedView.Children => _readOnlyChildren;
+
+	public IFeedView? Parent
+	{
+		get => _parent;
+		set => SetProperty(ref _parent, value);
+	}
+
+	public string? Name
+	{
+		get => _name;
+		set
+		{
+			if (SetProperty(ref _name, value))
+			{
+				DisplayName = GetDisplayName();
+			}
 		}
 	}
 
-	/// <summary>
-	/// Metadata for the feed.
-	/// </summary>
+	public Symbol? Symbol
+	{
+		get => _symbol;
+		set
+		{
+			if (SetProperty(ref _symbol, value))
+			{
+				DisplaySymbol = GetDisplaySymbol();
+			}
+		}
+	}
+
 	public FeedMetadata Metadata
 	{
 		get => _metadata;
-		protected set
+		set
 		{
-			_metadata = value;
-			MetadataUpdated?.Invoke(this, new FeedMetadataUpdatedEventArgs(value));
+			if (SetProperty(ref _metadata, value))
+			{
+				DisplayName = GetDisplayName();
+				DisplaySymbol = GetDisplaySymbol();
+			}
 		}
 	}
 
-	/// <summary>
-	/// <para>Asynchronously load the initial selection of items. The result might be out of date and need to be
-	/// synchronized.</para>
-	///
-	/// <para>This class ensures that there is only one load request for the whole lifetime of the feed. Subsequent
-	/// calls either return the same task or a completed task.</para>
-	/// </summary>
-	public Task LoadAsync()
+	public string DisplayName
 	{
-		if (_isLoaded)
-			return Task.CompletedTask;
-		
-		_loadTask ??= LoadAsyncCore();
-		return _loadTask;
+		get => _displayName;
+		private set => SetProperty(ref _displayName, value);
 	}
 
-	/// <summary>
-	/// <para>Fetch an up to date list of items from a remote server and update <see cref="Items"/>.</para>
-	///
-	/// <para>This class ensures that there is only one synchronization operation at a time.</para>
-	/// </summary>
-	public Task SynchronizeAsync()
+	public Symbol DisplaySymbol
 	{
-		if (_synchronizeTask == null || !_isSynchronizing)
-		{
-			_isSynchronizing = true;
-			_synchronizeTask = SynchronizeAsyncCore();
-		}
-		
-		return _synchronizeTask;
+		get => _displaySymbol;
+		private set => SetProperty(ref _displaySymbol, value);
 	}
 
-	/// <summary>
-	/// Asynchronously update the list of items to the initial selection of items which might be out of date.
-	/// </summary>
-	protected abstract Task DoLoadAsync();
+	public bool IsUserCustomizable
+	{
+		get => _isUserCustomizable;
+		set => SetProperty(ref _isUserCustomizable, value);
+	}
+
+	public bool IsExcludedFromGroup
+	{
+		get => _isExcludedFromGroup;
+		set => SetProperty(ref _isExcludedFromGroup, value);
+	}
 	
-	/// <summary>
-	/// Update the list of items to an up-to-date list fetched from a remote server. It is ensured that
-	/// <see cref="DoLoadAsync"/> has been called before this method.
-	/// </summary>
-	protected abstract Task DoSynchronizeAsync();
+	private string GetDisplayName() => Name ?? Metadata.Name ?? "Unnamed feed";
 
-	private async Task LoadAsyncCore()
-	{
-		await DoLoadAsync();
-		
-		_isLoaded = true;
-	}
+	private Symbol GetDisplaySymbol() => Symbol ?? Metadata.Symbol ?? Common.Symbol.Feed;
 
-	private async Task SynchronizeAsyncCore()
-	{
-		await LoadAsync();
-		await DoSynchronizeAsync();
-
-		_isSynchronizing = false;
-		LastSynchronized = DateTimeOffset.UtcNow;
-	}
-
-	private ImmutableHashSet<IReadOnlyStoredItem> _items = ImmutableHashSet<IReadOnlyStoredItem>.Empty;
-	private FeedMetadata _metadata = new();
-	private bool _isLoaded;
-	private bool _isSynchronizing;
-	private Task? _loadTask;
-	private Task? _synchronizeTask;
+	private readonly Lazy<FeedLoader> _loader;
+	private readonly ReadOnlyObservableCollection<IFeedView>? _readOnlyChildren;
+	private IFeedView? _parent;
+	private string? _name;
+	private Symbol? _symbol;
+	private FeedMetadata _metadata;
+	private string _displayName;
+	private Symbol _displaySymbol;
+	private bool _isUserCustomizable;
+	private bool _isExcludedFromGroup;
 }

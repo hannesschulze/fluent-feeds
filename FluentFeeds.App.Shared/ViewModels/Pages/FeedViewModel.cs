@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using FluentFeeds.App.Shared.EventArgs;
 using FluentFeeds.App.Shared.Models;
+using FluentFeeds.App.Shared.Models.Feeds;
 using FluentFeeds.App.Shared.Models.Navigation;
 using FluentFeeds.App.Shared.Models.Storage;
 using FluentFeeds.App.Shared.Services;

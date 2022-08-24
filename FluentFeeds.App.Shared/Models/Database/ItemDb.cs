@@ -14,13 +14,14 @@ public class ItemDb
 	public Guid Identifier { get; set; }
 	public Guid ProviderIdentifier { get; set; }
 	public Guid StorageIdentifier { get; set; }
-	public Uri? Url { get; set; }
-	public Uri? ContentUrl { get; set; }
-	public DateTimeOffset PublishedTimestamp { get; set; }
-	public DateTimeOffset ModifiedTimestamp { get; set; }
+	public string? UserIdentifier { get; set; }
 	public string Title { get; set; } = String.Empty;
 	public string? Author { get; set; }
 	public string? Summary { get; set; }
 	public string Content { get; set; } = String.Empty;
+	public DateTimeOffset PublishedTimestamp { get; set; }
+	public DateTimeOffset ModifiedTimestamp { get; set; }
+	public Uri? Url { get; set; }
+	public Uri? ContentUrl { get; set; }
 	public bool IsRead { get; set; }
 }

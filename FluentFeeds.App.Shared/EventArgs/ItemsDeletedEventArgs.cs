@@ -1,5 +1,6 @@
 using System.Collections.Generic;
-using FluentFeeds.Feeds.Base.Items;
+using FluentFeeds.App.Shared.Models.Items;
+using FluentFeeds.App.Shared.Models.Storage;
 
 namespace FluentFeeds.App.Shared.EventArgs;
 
@@ -8,7 +9,7 @@ namespace FluentFeeds.App.Shared.EventArgs;
 /// </summary>
 public sealed class ItemsDeletedEventArgs : System.EventArgs
 {
-	public ItemsDeletedEventArgs(IReadOnlyCollection<IReadOnlyStoredItem> items)
+	public ItemsDeletedEventArgs(IReadOnlyCollection<IItemView> items)
 	{
 		Items = items;
 	}
@@ -16,5 +17,5 @@ public sealed class ItemsDeletedEventArgs : System.EventArgs
 	/// <summary>
 	/// The deleted items.
 	/// </summary>
-	public IReadOnlyCollection<IReadOnlyStoredItem> Items { get; }
+	public IReadOnlyCollection<IItemView> Items { get; }
 }

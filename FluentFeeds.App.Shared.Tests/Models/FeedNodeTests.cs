@@ -1,3 +1,4 @@
+using FluentFeeds.App.Shared.Models.Feeds.Loaders;
 using FluentFeeds.Common;
 using FluentFeeds.Feeds.Base.Nodes;
 using Xunit;

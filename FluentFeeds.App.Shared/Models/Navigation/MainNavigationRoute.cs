@@ -1,5 +1,5 @@
 ﻿using System;
-using FluentFeeds.Feeds.Base.Nodes;
+using FluentFeeds.App.Shared.Models.Feeds;
 
 namespace FluentFeeds.App.Shared.Models.Navigation;
 
@@ -16,7 +16,7 @@ public readonly struct MainNavigationRoute : IEquatable<MainNavigationRoute>
 	/// <summary>
 	/// Navigation entry for a feed.
 	/// </summary>
-	public static MainNavigationRoute Feed(IReadOnlyFeedNode node) => new(MainNavigationRouteType.Feed, node);
+	public static MainNavigationRoute Feed(IFeedView selectedFeed) => new(MainNavigationRouteType.Feed, selectedFeed);
 
 	/// <summary>
 	/// The type of this route.
@@ -24,27 +24,27 @@ public readonly struct MainNavigationRoute : IEquatable<MainNavigationRoute>
 	public MainNavigationRouteType Type { get; }
 
 	/// <summary>
-	/// The feed node of this entry (only available for <see cref="MainNavigationRouteType.Feed"/> routes).
+	/// The feed of this entry (only available for <see cref="MainNavigationRouteType.Feed"/> routes).
 	/// </summary>
-	public IReadOnlyFeedNode? FeedNode { get; }
+	public IFeedView? SelectedFeed { get; }
 
-	private MainNavigationRoute(MainNavigationRouteType type, IReadOnlyFeedNode? feedNode)
+	private MainNavigationRoute(MainNavigationRouteType type, IFeedView? selectedFeed)
 	{
 		Type = type;
-		FeedNode = feedNode;
+		SelectedFeed = selectedFeed;
 	}
 
 	public override string ToString() =>
 		Type switch
 		{
 			MainNavigationRouteType.Settings => "Settings",
-			MainNavigationRouteType.Feed=> $"Feed {{ Node = {FeedNode} }}",
+			MainNavigationRouteType.Feed=> $"Feed {{ SelectedFeed = {SelectedFeed} }}",
 			_ => throw new IndexOutOfRangeException()
 		};
 
-	public override int GetHashCode() => HashCode.Combine(Type, FeedNode);
+	public override int GetHashCode() => HashCode.Combine(Type, SelectedFeed);
 	public override bool Equals(object? other) => other is MainNavigationRoute casted && Equals(casted);
-	public bool Equals(MainNavigationRoute other) => Type == other.Type && FeedNode == other.FeedNode;
+	public bool Equals(MainNavigationRoute other) => Type == other.Type && SelectedFeed == other.SelectedFeed;
 
 	public static bool operator ==(MainNavigationRoute left, MainNavigationRoute right) => left.Equals(right);
 	public static bool operator !=(MainNavigationRoute left, MainNavigationRoute right) => !left.Equals(right);
