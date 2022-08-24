@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentFeeds.Feeds.Base.Feeds.Content;
 using FluentFeeds.Feeds.Base.Items;
 
 namespace FluentFeeds.Feeds.Base.Tests.Mock;

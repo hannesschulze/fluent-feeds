@@ -1,4 +1,7 @@
-﻿namespace FluentFeeds.Feeds.Base.EventArgs;
+﻿using FluentFeeds.Feeds.Base;
+using FluentFeeds.Feeds.Base.Feeds.Content;
+
+namespace FluentFeeds.App.Shared.EventArgs;
 
 /// <summary>
 /// Event args when the metadata of a <see cref="Feed"/> was updated.

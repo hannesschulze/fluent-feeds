@@ -1,16 +1,15 @@
 using System;
-using System.Threading.Tasks;
-using FluentFeeds.Feeds.Base.Storage;
+using FluentFeeds.Feeds.Base.Feeds.Content;
 
 namespace FluentFeeds.Feeds.Base.Factories;
 
 /// <summary>
-/// A factory for creating feeds from a URL.
+/// A factory for creating feed content loaders from a URL.
 /// </summary>
 public interface IUrlFeedFactory
 {
 	/// <summary>
-	/// Asynchronously try to create a feed for the provided URL.
+	/// Create a content loader which loads feed content from the provided URL.
 	/// </summary>
-	Task<Feed> CreateAsync(IFeedStorage feedStorage, Uri url);
+	IFeedContentLoader Create(Uri url);
 }

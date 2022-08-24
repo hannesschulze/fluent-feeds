@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
+using FluentFeeds.App.Shared.Models.Storage;
 using FluentFeeds.Feeds.Base;
 using FluentFeeds.Feeds.Base.Factories;
-using FluentFeeds.Feeds.Base.Storage;
 
 namespace FluentFeeds.App.Shared.Tests.Mock;
 

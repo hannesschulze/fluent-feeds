@@ -1,10 +1,9 @@
 using System.Threading.Tasks;
-using FluentFeeds.Feeds.Base.Items.Content;
 
-namespace FluentFeeds.Feeds.Base.Items.ContentLoaders;
+namespace FluentFeeds.Feeds.Base.Items.Content;
 
 /// <summary>
-/// Content loader implementation for static content.
+/// Simple loader implementation for static content.
 /// </summary>
 public sealed class StaticItemContentLoader : IItemContentLoader
 {

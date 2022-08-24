@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using FluentFeeds.Feeds.Base.EventArgs;
+using FluentFeeds.App.Shared.EventArgs;
 using FluentFeeds.Feeds.Base.Items;
 
-namespace FluentFeeds.Feeds.Base.Storage;
+namespace FluentFeeds.App.Shared.Models.Storage;
 
 /// <summary>
 /// Storage abstraction for caching <see cref="IReadOnlyItem"/> objects.

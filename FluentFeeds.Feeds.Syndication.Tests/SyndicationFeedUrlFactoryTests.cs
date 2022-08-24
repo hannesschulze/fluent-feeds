@@ -3,6 +3,7 @@ using System.ServiceModel.Syndication;
 using System.Threading.Tasks;
 using FluentFeeds.Common;
 using FluentFeeds.Feeds.Base;
+using FluentFeeds.Feeds.Base.Feeds.Content;
 using FluentFeeds.Feeds.Syndication.Download;
 using FluentFeeds.Feeds.Syndication.Tests.Mock;
 using Xunit;

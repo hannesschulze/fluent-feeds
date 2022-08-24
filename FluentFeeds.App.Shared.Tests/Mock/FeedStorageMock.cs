@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using FluentFeeds.App.Shared.EventArgs;
+using FluentFeeds.App.Shared.Models.Storage;
 using FluentFeeds.Feeds.Base;
-using FluentFeeds.Feeds.Base.EventArgs;
 using FluentFeeds.Feeds.Base.Nodes;
-using FluentFeeds.Feeds.Base.Storage;
 
 namespace FluentFeeds.App.Shared.Tests.Mock;
 

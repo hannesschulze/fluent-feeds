@@ -1,14 +1,14 @@
 using FluentFeeds.Common;
 
-namespace FluentFeeds.Feeds.Base;
+namespace FluentFeeds.Feeds.Base.Feeds.Content;
 
 /// <summary>
-/// Metadata for a <see cref="Feed"/>.
+/// Metadata for a feed.
 /// </summary>
 public record FeedMetadata
 {
 	/// <summary>
-	/// Name of the feed, used as the fallback title for a node.
+	/// Name of the feed, used as the fallback title.
 	/// </summary>
 	public string? Name { get; init; }
 	

@@ -1,9 +1,10 @@
 using System;
 using System.Threading.Tasks;
-using FluentFeeds.Feeds.Base.EventArgs;
+using FluentFeeds.App.Shared.EventArgs;
+using FluentFeeds.Feeds.Base;
 using FluentFeeds.Feeds.Base.Nodes;
 
-namespace FluentFeeds.Feeds.Base.Storage;
+namespace FluentFeeds.App.Shared.Models.Storage;
 
 /// <summary>
 /// Storage abstraction for feed node objects.

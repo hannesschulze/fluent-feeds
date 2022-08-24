@@ -6,6 +6,7 @@ using FluentFeeds.App.Shared.Tests.Mock;
 using FluentFeeds.App.Shared.ViewModels.Items.Navigation;
 using FluentFeeds.Common;
 using FluentFeeds.Feeds.Base;
+using FluentFeeds.Feeds.Base.Feeds.Content;
 using FluentFeeds.Feeds.Base.Nodes;
 using Xunit;
 

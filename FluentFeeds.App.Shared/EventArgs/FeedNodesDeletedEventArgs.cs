@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using FluentFeeds.Feeds.Base.Nodes;
-using FluentFeeds.Feeds.Base.Storage;
 
-namespace FluentFeeds.Feeds.Base.EventArgs;
+namespace FluentFeeds.App.Shared.EventArgs;
 
 /// <summary>
 /// Event args when feed nodes were deleted from an <see cref="IFeedStorage"/>.

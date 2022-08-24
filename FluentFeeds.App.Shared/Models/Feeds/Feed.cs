@@ -2,6 +2,7 @@ using System;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
 using FluentFeeds.Feeds.Base.EventArgs;
+using FluentFeeds.Feeds.Base.Feeds.Content;
 using FluentFeeds.Feeds.Base.Items;
 
 namespace FluentFeeds.Feeds.Base;

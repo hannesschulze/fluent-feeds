@@ -3,8 +3,8 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using FluentFeeds.Common;
 using FluentFeeds.Feeds.Base;
-using FluentFeeds.Feeds.Base.Nodes;
-using FluentFeeds.Feeds.Base.Storage;
+using FluentFeeds.Feeds.Base.Feeds;
+using FluentFeeds.Feeds.Base.Feeds.Content;
 using FluentFeeds.Feeds.Syndication.Download;
 
 namespace FluentFeeds.Feeds.Syndication;
@@ -14,7 +14,7 @@ namespace FluentFeeds.Feeds.Syndication;
 /// </summary>
 public sealed class SyndicationFeedProvider : FeedProvider
 {
-	private record FeedDescription(Guid Identifier, Uri Url, string? Name, string? Author, string? Description);
+	private record FeedDescription(Uri Url);
 
 	public SyndicationFeedProvider()
 		: base(new FeedProviderMetadata(
@@ -25,35 +25,22 @@ public sealed class SyndicationFeedProvider : FeedProvider
 		UrlFeedFactory = new SyndicationUrlFeedFactory();
 	}
 
-	public override IReadOnlyFeedNode CreateInitialTree(IFeedStorage feedStorage)
+	public override GroupFeedDescriptor CreateInitialTree()
 	{
-		return FeedNode.Group(title: "RSS/Atom feeds", symbol: Symbol.Feed, isUserCustomizable: true);
+		return new GroupFeedDescriptor(name: "RSS/Atom feeds", symbol: Symbol.Feed);
 	}
 
-	public override Task<Feed> LoadFeedAsync(IFeedStorage feedStorage, string serialized)
+	public override Task<IFeedContentLoader> LoadFeedAsync(string serialized)
 	{
 		var description = JsonSerializer.Deserialize<FeedDescription>(serialized) ?? throw new JsonException();
 		var downloader = new FeedDownloader(description.Url);
-		return Task.FromResult<Feed>(new SyndicationFeed(
-			downloader, feedStorage, description.Identifier, description.Url,
-			new FeedMetadata
-			{
-				Name = description.Name,
-				Author = description.Author,
-				Description = description.Description,
-				Symbol = Symbol.Web
-			}));
+		return Task.FromResult<IFeedContentLoader>(new SyndicationFeedContentLoader(downloader, description.Url));
 	}
 
-	public override Task<string> StoreFeedAsync(Feed feed)
+	public override Task<string> StoreFeedAsync(IFeedContentLoader feed)
 	{
-		var syndicationFeed = (SyndicationFeed)feed;
-		var description = new FeedDescription(
-			Identifier: syndicationFeed.Identifier,
-			Url: syndicationFeed.Url,
-			Name: syndicationFeed.Metadata.Name,
-			Author: syndicationFeed.Metadata.Author,
-			Description: syndicationFeed.Metadata.Description);
+		var syndicationFeed = (SyndicationFeedContentLoader)feed;
+		var description = new FeedDescription(Url: syndicationFeed.Url);
 		return Task.FromResult(JsonSerializer.Serialize(description));
 	}
 }

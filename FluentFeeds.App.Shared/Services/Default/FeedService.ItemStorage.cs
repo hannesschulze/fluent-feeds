@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentFeeds.App.Shared.EventArgs;
 using FluentFeeds.App.Shared.Models.Database;
+using FluentFeeds.App.Shared.Models.Storage;
 using FluentFeeds.Feeds.Base;
-using FluentFeeds.Feeds.Base.EventArgs;
 using FluentFeeds.Feeds.Base.Items;
 using FluentFeeds.Feeds.Base.Items.Content;
-using FluentFeeds.Feeds.Base.Items.ContentLoaders;
-using FluentFeeds.Feeds.Base.Storage;
 using Microsoft.EntityFrameworkCore;
 
 namespace FluentFeeds.App.Shared.Services.Default;

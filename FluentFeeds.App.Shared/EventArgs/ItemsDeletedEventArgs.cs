@@ -1,8 +1,7 @@
 using System.Collections.Generic;
 using FluentFeeds.Feeds.Base.Items;
-using FluentFeeds.Feeds.Base.Storage;
 
-namespace FluentFeeds.Feeds.Base.EventArgs;
+namespace FluentFeeds.App.Shared.EventArgs;
 
 /// <summary>
 /// Event args when items were deleted from an <see cref="IItemStorage"/>.

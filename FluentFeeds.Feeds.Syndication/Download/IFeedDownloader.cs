@@ -1,5 +1,5 @@
+using System.ServiceModel.Syndication;
 using System.Threading.Tasks;
-using SysSyndicationFeed = System.ServiceModel.Syndication.SyndicationFeed;
 
 namespace FluentFeeds.Feeds.Syndication.Download;
 
@@ -8,5 +8,5 @@ namespace FluentFeeds.Feeds.Syndication.Download;
 /// </summary>
 public interface IFeedDownloader
 {
-	Task<SysSyndicationFeed> DownloadAsync();
+	Task<SyndicationFeed> DownloadAsync();
 }

@@ -1,7 +1,8 @@
 ﻿using System.Collections.Immutable;
+using FluentFeeds.Feeds.Base;
 using FluentFeeds.Feeds.Base.Items;
 
-namespace FluentFeeds.Feeds.Base.EventArgs;
+namespace FluentFeeds.App.Shared.EventArgs;
 
 /// <summary>
 /// Event args when the items of a <see cref="Feed"/> were updated.

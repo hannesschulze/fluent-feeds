@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
 using FluentFeeds.Feeds.Base.Items.Content;
-using FluentFeeds.Feeds.Base.Items.ContentLoaders;
 
 namespace FluentFeeds.App.Shared.Tests.Mock;
 

@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace FluentFeeds.Documents.Helpers;
+namespace FluentFeeds.Common.Helpers;
 
-internal static class CollectionHelper
+public static class CollectionHelper
 {
-	internal static int SequenceHashCode<TSource>(this IEnumerable<TSource> source) =>
+	public static int SequenceHashCode<TSource>(this IEnumerable<TSource> source) =>
 		source
 			.Aggregate(new HashCode(), (hash, item) =>
 			{
@@ -15,6 +15,6 @@ internal static class CollectionHelper
 			})
 			.ToHashCode();
 
-	internal static string SequenceString<TSource>(this IReadOnlyCollection<TSource> source) =>
+	public static string SequenceString<TSource>(this IReadOnlyCollection<TSource> source) =>
 		$"[{source.Count} {(source.Count == 1 ? "element" : "elements")}]";
 }

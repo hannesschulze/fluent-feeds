@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using FluentFeeds.Common;
 using FluentFeeds.Feeds.Base;
+using FluentFeeds.Feeds.Base.Feeds.Content;
 using FluentFeeds.Feeds.Base.Nodes;
 using FluentFeeds.Feeds.Syndication.Download;
 using FluentFeeds.Feeds.Syndication.Tests.Mock;

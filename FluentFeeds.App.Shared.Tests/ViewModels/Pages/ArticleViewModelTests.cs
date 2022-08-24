@@ -11,7 +11,6 @@ using FluentFeeds.Documents.Blocks;
 using FluentFeeds.Documents.Inlines;
 using FluentFeeds.Feeds.Base.Items;
 using FluentFeeds.Feeds.Base.Items.Content;
-using FluentFeeds.Feeds.Base.Items.ContentLoaders;
 using Xunit;
 
 namespace FluentFeeds.App.Shared.Tests.ViewModels.Pages;

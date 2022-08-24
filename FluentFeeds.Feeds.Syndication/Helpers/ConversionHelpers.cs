@@ -6,11 +6,9 @@ using System.Threading.Tasks;
 using FluentFeeds.Common;
 using FluentFeeds.Documents;
 using FluentFeeds.Documents.Html;
-using FluentFeeds.Feeds.Base;
+using FluentFeeds.Feeds.Base.Feeds.Content;
 using FluentFeeds.Feeds.Base.Items;
 using FluentFeeds.Feeds.Base.Items.Content;
-using FluentFeeds.Feeds.Base.Items.ContentLoaders;
-using SysSyndicationFeed = System.ServiceModel.Syndication.SyndicationFeed;
 
 namespace FluentFeeds.Feeds.Syndication.Helpers;
 
@@ -87,9 +85,9 @@ public static class ConversionHelpers
 	}
 
 	/// <summary>
-	/// Convert a syndication item into a generic <see cref="Item"/> object.
+	/// Convert a syndication item into a generic <see cref="ItemDescriptor"/> object.
 	/// </summary>
-	public static async Task<IReadOnlyItem> ConvertItemAsync(SyndicationItem item, Uri feedUrl)
+	public static async Task<ItemDescriptor> ConvertItemAsync(SyndicationItem item, Uri feedUrl)
 	{
 		var htmlOptions = new HtmlParsingOptions { BaseUri = item.BaseUri ?? feedUrl };
 		var title = item.Title != null ? await TextContent.LoadAsync(item.Title, htmlOptions) : null;
@@ -97,16 +95,22 @@ public static class ConversionHelpers
 		var summary = item.Summary != null ? await TextContent.LoadAsync(item.Summary, htmlOptions) : null;
 		var content = await ConvertItemContentAsync(item, summary, htmlOptions);
 		var url = ConvertItemUrl(item);
-		return new Item(
-			url, contentUrl: null, publishedTimestamp: item.PublishDate, modifiedTimestamp: item.LastUpdatedTime,
-			title?.ToPlainText() ?? String.Empty, author, summary?.ToPlainText() ?? content.ToPlainText(),
-			new StaticItemContentLoader(new ArticleItemContent(content)));
+		return new ItemDescriptor(
+			identifier: item.Id,
+			title: title?.ToPlainText() ?? String.Empty,
+			author: author,
+			summary: summary?.ToPlainText() ?? content.ToPlainText(),
+			publishedTimestamp: item.PublishDate,
+			modifiedTimestamp: item.LastUpdatedTime,
+			url: url,
+			contentUrl: null,
+			contentLoader: new StaticItemContentLoader(new ArticleItemContent(content)));
 	}
 
 	/// <summary>
 	/// Convert the metadata of a syndication feed into a generic <see cref="FeedMetadata"/> object.
 	/// </summary>
-	public static async Task<FeedMetadata> ConvertFeedMetadataAsync(SysSyndicationFeed feed, Uri feedUrl)
+	public static async Task<FeedMetadata> ConvertFeedMetadataAsync(SyndicationFeed feed, Uri feedUrl)
 	{
 		var htmlOptions = new HtmlParsingOptions { BaseUri = feed.BaseUri ?? feedUrl };
 		var title = feed.Title != null ? await TextContent.LoadAsync(feed.Title, htmlOptions) : null;

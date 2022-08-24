@@ -1,5 +1,6 @@
 using System;
 using FluentFeeds.Feeds.Base.EventArgs;
+using FluentFeeds.Feeds.Base.Feeds.Content;
 using FluentFeeds.Feeds.Base.Tests.Mock;
 using Xunit;
 

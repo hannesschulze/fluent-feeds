@@ -2,7 +2,6 @@ using System;
 using FluentFeeds.Documents;
 using FluentFeeds.Feeds.Base.Items;
 using FluentFeeds.Feeds.Base.Items.Content;
-using FluentFeeds.Feeds.Base.Items.ContentLoaders;
 using FluentFeeds.Feeds.Base.Storage;
 
 namespace FluentFeeds.Feeds.Base.Tests;

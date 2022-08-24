@@ -7,16 +7,16 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using FluentFeeds.App.Shared.EventArgs;
 using FluentFeeds.App.Shared.Models;
 using FluentFeeds.App.Shared.Models.Navigation;
+using FluentFeeds.App.Shared.Models.Storage;
 using FluentFeeds.App.Shared.Services;
 using FluentFeeds.App.Shared.ViewModels.Modals;
 using FluentFeeds.Common;
 using FluentFeeds.Feeds.Base;
-using FluentFeeds.Feeds.Base.EventArgs;
 using FluentFeeds.Feeds.Base.Items;
 using FluentFeeds.Feeds.Base.Items.Content;
-using FluentFeeds.Feeds.Base.Storage;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
 
