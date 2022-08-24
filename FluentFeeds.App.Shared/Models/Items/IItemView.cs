@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using FluentFeeds.App.Shared.Models.Storage;
 using FluentFeeds.Feeds.Base.Items.Content;
@@ -8,7 +9,7 @@ namespace FluentFeeds.App.Shared.Models.Items;
 /// <summary>
 /// Read-only view into a stored item.
 /// </summary>
-public interface IItemView
+public interface IItemView : INotifyPropertyChanged
 {
 	/// <summary>
 	/// Unique identifier for this item.

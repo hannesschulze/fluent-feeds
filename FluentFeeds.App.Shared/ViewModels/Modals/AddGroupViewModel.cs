@@ -1,32 +1,36 @@
 ﻿using System;
 using System.Threading.Tasks;
+using FluentFeeds.App.Shared.Models.Feeds;
+using FluentFeeds.App.Shared.Models.Storage;
 using FluentFeeds.Common;
-using FluentFeeds.Feeds.Base.Nodes;
+using FluentFeeds.Feeds.Base.Feeds;
 
 namespace FluentFeeds.App.Shared.ViewModels.Modals;
 
 /// <summary>
 /// View model for a modal allowing the user to add a child group to the selected group.
 /// </summary>
-public sealed class AddGroupViewModel : NodeDataViewModel
+public sealed class AddGroupViewModel : FeedDataViewModel
 {
-	public AddGroupViewModel(IReadOnlyStoredFeedNode rootNode, IReadOnlyFeedNode? parentGroup)
+	public AddGroupViewModel(IFeedView rootFeed, IFeedView? parentGroup, IFeedStorage storage)
 		: base(
 			title: "Add a group", errorTitle: "Unable to create the group",
 			errorMessage: "An error occurred while trying to create the group.", inputLabel: "Name",
-			showProgressSpinner: false, rootNode, parentGroup, null)
+			showProgressSpinner: false, rootFeed, parentGroup, null)
 	{
+		_storage = storage;
 	}
 
-	protected override async Task SaveAsync(IReadOnlyStoredFeedNode selectedGroup)
+	protected override async Task SaveAsync(IFeedView selectedGroup)
 	{
-		var storage = selectedGroup.Storage;
-		var node = FeedNode.Group(Input.Trim(), Symbol.Directory, isUserCustomizable: true);
-		await storage.AddNodeAsync(node, selectedGroup.Identifier);
+		var descriptor = new GroupFeedDescriptor(Input.Trim(), Symbol.Directory);
+		await _storage.AddFeedAsync(descriptor, selectedGroup.Identifier);
 	}
 
 	protected override void HandleInputChanged()
 	{
 		IsInputValid = !String.IsNullOrWhiteSpace(Input);
 	}
+
+	private readonly IFeedStorage _storage;
 }

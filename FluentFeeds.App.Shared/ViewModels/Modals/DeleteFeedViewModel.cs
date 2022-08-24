@@ -1,24 +1,26 @@
 ﻿using System;
 using System.Windows.Input;
+using FluentFeeds.App.Shared.Models.Feeds;
+using FluentFeeds.App.Shared.Models.Storage;
 using FluentFeeds.App.Shared.Services;
-using FluentFeeds.Feeds.Base.Nodes;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
 
 namespace FluentFeeds.App.Shared.ViewModels.Modals;
 
 /// <summary>
-/// View model for a modal allowing the user to confirm that they want to delete a node.
+/// View model for a modal allowing the user to confirm that they want to delete a feed.
 /// </summary>
-public sealed class DeleteNodeViewModel : ObservableObject
+public sealed class DeleteFeedViewModel : ObservableObject
 {
-	public DeleteNodeViewModel(IModalService modalService, IReadOnlyStoredFeedNode node)
+	public DeleteFeedViewModel(IModalService modalService, IFeedView feed, IFeedStorage storage)
 	{
 		_modalService = modalService;
-		_node = node;
+		_feed = feed;
+		_storage = storage;
 		_confirmCommand = new RelayCommand(HandleConfirmCommand);
 		InfoText =
-			$"This action will permanently delete \"{node.DisplayTitle}\" and all of its children. Are you sure you" + 
+			$"This action will permanently delete \"{feed.DisplayName}\" and all of its children. Are you sure you" + 
 			" want to continue?";
 	}
 
@@ -28,7 +30,7 @@ public sealed class DeleteNodeViewModel : ObservableObject
 	public ICommand ConfirmCommand => _confirmCommand;
 
 	/// <summary>
-	/// Text informing the user about the consequences of deleting the node.
+	/// Text informing the user about the consequences of deleting the feed.
 	/// </summary>
 	public string InfoText { get; }
 
@@ -36,8 +38,7 @@ public sealed class DeleteNodeViewModel : ObservableObject
 	{
 		try
 		{
-			var storage = _node.Storage;
-			await storage.DeleteNodeAsync(_node.Identifier);
+			await _storage.DeleteFeedAsync(_feed.Identifier);
 		}
 		catch (Exception)
 		{
@@ -49,6 +50,7 @@ public sealed class DeleteNodeViewModel : ObservableObject
 	}
 
 	private readonly IModalService _modalService;
-	private readonly IReadOnlyStoredFeedNode _node;
+	private readonly IFeedView _feed;
+	private readonly IFeedStorage _storage;
 	private readonly RelayCommand _confirmCommand;
 }

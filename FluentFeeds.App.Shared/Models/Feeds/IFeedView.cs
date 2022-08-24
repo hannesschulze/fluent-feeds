@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using FluentFeeds.App.Shared.Models.Feeds.Loaders;
 using FluentFeeds.App.Shared.Models.Storage;
 using FluentFeeds.Common;
@@ -10,7 +11,7 @@ namespace FluentFeeds.App.Shared.Models.Feeds;
 /// <summary>
 /// Read-only view into a feed.
 /// </summary>
-public interface IFeedView
+public interface IFeedView : INotifyPropertyChanged
 {
 	/// <summary>
 	/// Unique identifier for this feed.

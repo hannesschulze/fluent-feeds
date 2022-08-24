@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
 using FluentFeeds.App.Shared.EventArgs;
@@ -9,13 +10,19 @@ namespace FluentFeeds.App.Shared.Models.Feeds.Loaders;
 /// <summary>
 /// A feed loader subclass which loads and saves items into an <see cref="IItemStorage"/>.
 /// </summary>
-public abstract class CachedFeedLoader : FeedLoader
+public sealed class CachedFeedLoader : FeedLoader
 {
-	protected CachedFeedLoader(IFeedView feed, IItemStorage storage, IFeedContentLoader contentLoader) : base(feed)
+	public CachedFeedLoader(Guid feedIdentifier, IItemStorage storage, IFeedContentLoader contentLoader)
 	{
+		FeedIdentifier = feedIdentifier;
 		Storage = storage;
 		ContentLoader = contentLoader;
 	}
+	
+	/// <summary>
+	/// Identifier of the feed.
+	/// </summary>
+	public Guid FeedIdentifier { get; }
 	
 	/// <summary>
 	/// Object which stores items.
@@ -36,12 +43,9 @@ public abstract class CachedFeedLoader : FeedLoader
 	protected sealed override async Task DoSynchronizeAsync()
 	{
 		var content = await Task.Run(ContentLoader.LoadAsync);
-		var newItems = await Storage.AddItemsAsync(content.Items, Feed.Identifier);
+		var newItems = await Storage.AddItemsAsync(content.Items, FeedIdentifier);
 		Items = Items.Union(newItems);
-		if (content.Metadata != Feed.Metadata && Feed.Storage != null)
-		{
-			await Feed.Storage.UpdateFeedMetadataAsync(Feed.Identifier, content.Metadata);
-		}
+		Metadata = content.Metadata;
 	}
 
 	private async void HandleItemsDeleted(object? sender, ItemsDeletedEventArgs e)
@@ -51,7 +55,7 @@ public abstract class CachedFeedLoader : FeedLoader
 
 	private async ValueTask ReloadItemsAsync()
 	{
-		var items = await Storage.GetItemsAsync(Feed.Identifier);
+		var items = await Storage.GetItemsAsync(FeedIdentifier);
 		Items = items.ToImmutableHashSet();
 	}
 }

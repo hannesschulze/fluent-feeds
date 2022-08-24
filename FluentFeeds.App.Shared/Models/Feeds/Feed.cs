@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using FluentFeeds.App.Shared.EventArgs;
 using FluentFeeds.App.Shared.Models.Feeds.Loaders;
 using FluentFeeds.App.Shared.Models.Storage;
 using FluentFeeds.Common;
@@ -12,19 +13,25 @@ namespace FluentFeeds.App.Shared.Models.Feeds;
 /// <summary>
 /// Stored representation of a feed.
 /// </summary>
-public sealed class Feed : ObservableObject, IFeedView
+public class Feed : ObservableObject, IFeedView
 {
 	public Feed(
-		Guid identifier, IFeedStorage? storage, Func<IFeedView, FeedLoader> loader, IEnumerable<IFeedView>? children,
+		Guid identifier, IFeedStorage? storage, Func<IFeedView, FeedLoader> loaderFactory, bool hasChildren,
 		IFeedView? parent, string? name, Symbol? symbol, FeedMetadata metadata, bool isUserCustomizable,
 		bool isExcludedFromGroup)
 	{
 		Identifier = identifier;
 		Storage = storage;
-		_loader = new Lazy<FeedLoader>(() => loader.Invoke(this));
-		if (children != null)
+		_loader = new Lazy<FeedLoader>(
+			() =>
+			{
+				var loader = loaderFactory.Invoke(this);
+				loader.MetadataUpdated += HandleMetadataUpdated;
+				return loader;
+			});
+		if (hasChildren)
 		{
-			Children = new ObservableCollection<IFeedView>(children);
+			Children = new ObservableCollection<IFeedView>();
 			_readOnlyChildren = new ReadOnlyObservableCollection<IFeedView>(Children);
 		}
 		_parent = parent;
@@ -36,7 +43,7 @@ public sealed class Feed : ObservableObject, IFeedView
 		_isUserCustomizable = isUserCustomizable;
 		_isExcludedFromGroup = isExcludedFromGroup;
 	}
-	
+
 	public Guid Identifier { get; }
 	
 	public IFeedStorage? Storage { get; }
@@ -117,6 +124,21 @@ public sealed class Feed : ObservableObject, IFeedView
 	private string GetDisplayName() => Name ?? Metadata.Name ?? "Unnamed feed";
 
 	private Symbol GetDisplaySymbol() => Symbol ?? Metadata.Symbol ?? Common.Symbol.Feed;
+
+	private async void HandleMetadataUpdated(object? sender, FeedMetadataUpdatedEventArgs e)
+	{
+		if (e.UpdatedMetadata != Metadata && Storage != null)
+		{
+			try
+			{
+				await Storage.UpdateFeedMetadataAsync(Identifier, e.UpdatedMetadata);
+			}
+			catch (Exception)
+			{
+				// Ignored
+			}
+		}
+	}
 
 	private readonly Lazy<FeedLoader> _loader;
 	private readonly ReadOnlyObservableCollection<IFeedView>? _readOnlyChildren;

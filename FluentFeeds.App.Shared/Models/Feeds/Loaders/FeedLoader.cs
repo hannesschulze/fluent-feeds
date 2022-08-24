@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using System.Threading.Tasks;
 using FluentFeeds.App.Shared.EventArgs;
 using FluentFeeds.App.Shared.Models.Items;
+using FluentFeeds.Feeds.Base.Feeds.Content;
 
 namespace FluentFeeds.App.Shared.Models.Feeds.Loaders;
 
@@ -11,10 +12,9 @@ namespace FluentFeeds.App.Shared.Models.Feeds.Loaders;
 /// </summary>
 public abstract class FeedLoader
 {
-	protected FeedLoader(IFeedView feed)
+	protected FeedLoader()
 	{
-		Feed = feed;
-		_initialize = new Lazy<Task>(DoInitializeAsync);
+		_initialize = new Lazy<Task>(InitializeAsyncCore);
 	}
 	
 	/// <summary>
@@ -24,10 +24,10 @@ public abstract class FeedLoader
 	public event EventHandler<FeedItemsUpdatedEventArgs>? ItemsUpdated;
 	
 	/// <summary>
-	/// The feed which created this loader.
+	/// Event called when <see cref="Metadata"/> has been updated.
 	/// </summary>
-	public IFeedView Feed { get; }
-	
+	public event EventHandler<FeedMetadataUpdatedEventArgs>? MetadataUpdated;
+
 	/// <summary>
 	/// The timestamp at which this feed was last synchronized in the current object's lifetime.
 	/// </summary>
@@ -43,6 +43,19 @@ public abstract class FeedLoader
 		{
 			_items = value;
 			ItemsUpdated?.Invoke(this, new FeedItemsUpdatedEventArgs(value));
+		}
+	}
+
+	/// <summary>
+	/// Loaded metadata.
+	/// </summary>
+	public FeedMetadata Metadata
+	{
+		get => _metadata;
+		protected set
+		{
+			_metadata = value;
+			MetadataUpdated?.Invoke(this, new FeedMetadataUpdatedEventArgs(value));
 		}
 	}
 
@@ -85,6 +98,11 @@ public abstract class FeedLoader
 	/// </summary>
 	protected abstract Task DoSynchronizeAsync();
 
+	private Task InitializeAsyncCore()
+	{
+		return DoInitializeAsync();
+	}
+
 	private async Task SynchronizeAsyncCore()
 	{
 		await InitializeAsync();
@@ -95,6 +113,7 @@ public abstract class FeedLoader
 	}
 	
 	private ImmutableHashSet<IItemView> _items = ImmutableHashSet<IItemView>.Empty;
+	private FeedMetadata _metadata = new();
 	private Lazy<Task> _initialize;
 	private bool _isSynchronizing;
 	private Task? _synchronizeTask;

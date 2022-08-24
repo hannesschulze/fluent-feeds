@@ -1,10 +1,10 @@
 ﻿using System;
 using System.ComponentModel;
 using FluentFeeds.App.Shared.Models;
+using FluentFeeds.App.Shared.Models.Items;
 using FluentFeeds.App.Shared.Models.Navigation;
 using FluentFeeds.App.Shared.Services;
 using FluentFeeds.Documents;
-using FluentFeeds.Feeds.Base.Items;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 
 namespace FluentFeeds.App.Shared.ViewModels.Pages;
@@ -112,11 +112,11 @@ public sealed class ArticleViewModel : ObservableObject
 	{
 		switch (e.PropertyName)
 		{
-			case nameof(IReadOnlyItem.Title):
+			case nameof(IItemView.Title):
 				UpdateTitle();
 				break;
-			case nameof(IReadOnlyItem.Author):
-			case nameof(IReadOnlyItem.PublishedTimestamp):
+			case nameof(IItemView.Author):
+			case nameof(IItemView.PublishedTimestamp):
 				UpdateItemInfo();
 				break;
 		}
@@ -138,7 +138,7 @@ public sealed class ArticleViewModel : ObservableObject
 	private readonly ISettingsService _settingsService;
 	private FontFamily _fontFamily;
 	private FontSize _fontSize;
-	private IReadOnlyStoredItem? _item;
+	private IItemView? _item;
 	private string _title = String.Empty;
 	private string _itemInfo = String.Empty;
 	private RichText _content = new();

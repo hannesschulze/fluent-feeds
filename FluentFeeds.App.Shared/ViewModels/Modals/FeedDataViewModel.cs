@@ -1,19 +1,19 @@
 ﻿using FluentFeeds.App.Shared.ViewModels.Items.GroupSelection;
-using FluentFeeds.Feeds.Base.Nodes;
 using System;
 using System.Collections.ObjectModel;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using System.Threading.Tasks;
+using FluentFeeds.App.Shared.Models.Feeds;
 
 namespace FluentFeeds.App.Shared.ViewModels.Modals;
 
 /// <summary>
-/// Base view model for updating node data. The view model contains a text input and a group selection menu.
+/// Base view model for updating feed data. The view model contains a text input and a group selection menu.
 /// </summary>
-public abstract class NodeDataViewModel : ObservableObject
+public abstract class FeedDataViewModel : ObservableObject
 {
 	/// <summary>
-	/// Create a node-data based view model.
+	/// Create a feed-data based view model.
 	/// </summary>
 	/// <param name="title">Title for the dialog.</param>
 	/// <param name="errorTitle">Error title shown if an exception is thrown.</param>
@@ -22,22 +22,22 @@ public abstract class NodeDataViewModel : ObservableObject
 	/// <param name="showProgressSpinner">
 	/// Flag indicating if a progress spinner should be shown during the save action.
 	/// </param>
-	/// <param name="rootNode">The root node displayed in the group selection.</param>
-	/// <param name="selectedGroup">Initially selected group (<c>rootNode</c> is used as a fallback).</param>
+	/// <param name="rootFeed">The root feed displayed in the group selection.</param>
+	/// <param name="selectedGroup">Initially selected group (<c>rootFeed</c> is used as a fallback).</param>
 	/// <param name="forbiddenGroup">A group in the menu which cannot be selected (including its children).</param>
-	protected NodeDataViewModel(
+	protected FeedDataViewModel(
 		string title, string errorTitle, string errorMessage, string inputLabel, bool showProgressSpinner,
-		IReadOnlyStoredFeedNode rootNode, IReadOnlyFeedNode? selectedGroup, IReadOnlyFeedNode? forbiddenGroup)
+		IFeedView rootFeed, IFeedView? selectedGroup, IFeedView? forbiddenGroup)
 	{
 		_isSaveEnabled = CheckCanSave();
 		_showProgressSpinner = showProgressSpinner;
 		_showProgressSpinner = showProgressSpinner;
-		if (selectedGroup == null && rootNode.IsUserCustomizable && rootNode.Type == FeedNodeType.Group &&
-		    forbiddenGroup != rootNode)
+		if (selectedGroup == null && rootFeed.IsUserCustomizable && rootFeed.Children != null &&
+			forbiddenGroup != rootFeed)
 		{
-			selectedGroup = rootNode;
+			selectedGroup = rootFeed;
 		}
-		AddGroupItem(rootNode, selectedGroup, forbiddenGroup);
+		AddGroupItem(rootFeed, selectedGroup, forbiddenGroup);
 
 		Title = title;
 		ErrorTitle = errorTitle;
@@ -47,26 +47,23 @@ public abstract class NodeDataViewModel : ObservableObject
 	}
 	
 	private void AddGroupItem(
-		IReadOnlyStoredFeedNode node, IReadOnlyFeedNode? selectedGroup, IReadOnlyFeedNode? forbiddenGroup,
-		bool isInForbiddenGroup = false, int indentationLevel = 0)
+		IFeedView feed, IFeedView? selectedGroup, IFeedView? forbiddenGroup, bool isInForbiddenGroup = false,
+		int indentationLevel = 0)
 	{
-		isInForbiddenGroup = isInForbiddenGroup || node == forbiddenGroup;
+		isInForbiddenGroup = isInForbiddenGroup || feed == forbiddenGroup;
 		var item = new GroupSelectionItemViewModel(
-			node, indentationLevel,
-			isSelectable: !isInForbiddenGroup && node.IsUserCustomizable && node.Type == FeedNodeType.Group);
-		if (node == selectedGroup)
+			feed, indentationLevel,
+			isSelectable: !isInForbiddenGroup && feed.IsUserCustomizable && feed.Children != null);
+		if (feed == selectedGroup)
 			_selectedGroup = item;
 		_groupItems.Add(item);
 
 		// Add children right after this item.
-		if (node.Children != null)
+		if (feed.Children != null)
 		{
-			foreach (var child in node.Children)
+			foreach (var child in feed.Children)
 			{
-				if (child is IReadOnlyStoredFeedNode storedChild)
-				{
-					AddGroupItem(storedChild, selectedGroup, forbiddenGroup, isInForbiddenGroup, indentationLevel + 1);
-				}
+				AddGroupItem(child, selectedGroup, forbiddenGroup, isInForbiddenGroup, indentationLevel + 1);
 			}
 		}
 	}
@@ -80,7 +77,7 @@ public abstract class NodeDataViewModel : ObservableObject
 	{
 	}
 
-	protected abstract Task SaveAsync(IReadOnlyStoredFeedNode selectedGroup);
+	protected abstract Task SaveAsync(IFeedView selectedGroup);
 
 	protected bool IsInputValid
 	{
@@ -197,7 +194,7 @@ public abstract class NodeDataViewModel : ObservableObject
 
 		try
 		{
-			await SaveAsync(SelectedGroup!.FeedNode);
+			await SaveAsync(SelectedGroup!.Feed);
 		}
 		catch (Exception)
 		{

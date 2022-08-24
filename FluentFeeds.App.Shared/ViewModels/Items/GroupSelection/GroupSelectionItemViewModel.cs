@@ -1,30 +1,30 @@
-﻿using FluentFeeds.Feeds.Base.Nodes;
+﻿using FluentFeeds.App.Shared.Models.Feeds;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 
 namespace FluentFeeds.App.Shared.ViewModels.Items.GroupSelection;
 
 /// <summary>
-/// <para>View model for an item in a group node selection menu.</para>
+/// <para>View model for an item in a group selection menu.</para>
 /// 
-/// <para>This is used for selecting the parent group node when adding feeds, groups or moving nodes.</para>
+/// <para>This is used for selecting the parent group when adding feeds, groups or moving feeds.</para>
 /// </summary>
 public sealed class GroupSelectionItemViewModel : ObservableObject
 {
-	public GroupSelectionItemViewModel(IReadOnlyStoredFeedNode feedNode, int indentationLevel, bool isSelectable)
+	public GroupSelectionItemViewModel(IFeedView feed, int indentationLevel, bool isSelectable)
 	{
-		FeedNode = feedNode;
-		Title = FeedNode.DisplayTitle;
+		Feed = feed;
+		Title = Feed.DisplayName;
 		IndentationLevel = indentationLevel;
 		IsSelectable = isSelectable;
 	}
 
 	/// <summary>
-	/// The node wrapped by this view model.
+	/// The feed wrapped by this view model.
 	/// </summary>
-	public IReadOnlyStoredFeedNode FeedNode { get; }
+	public IFeedView Feed { get; }
 
 	/// <summary>
-	/// Title of the feed node.
+	/// Title of the feed.
 	/// </summary>
 	public string Title { get; }
 

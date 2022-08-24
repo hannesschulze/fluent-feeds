@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using FluentFeeds.App.Shared.EventArgs;
 using FluentFeeds.App.Shared.Models.Feeds;
+using FluentFeeds.App.Shared.Models.Feeds.Loaders;
 using FluentFeeds.Feeds.Base;
 using FluentFeeds.Feeds.Base.Feeds;
 using FluentFeeds.Feeds.Base.Feeds.Content;
@@ -34,14 +35,17 @@ public interface IFeedStorage
 	IFeedView? GetFeed(Guid identifier);
 
 	/// <summary>
-	/// Add a new child feed to the group with <c>parentIdentifier</c>. 
+	/// Add a new feed to the group with <c>parentIdentifier</c>.
 	/// </summary>
-	Task<IFeedView> AddFeedAsync(FeedDescriptor descriptor, Guid parentIdentifier);
+	/// <param name="syncFirst">
+	/// Flag indicating that the feed should be synchronized before being added to the group.
+	/// </param>
+	Task<IFeedView> AddFeedAsync(FeedDescriptor descriptor, Guid parentIdentifier, bool syncFirst = false);
 
 	/// <summary>
 	/// Rename the feed with the specified identifier.
 	/// </summary>
-	Task<IFeedView> RenameFeedAsync(Guid identifier, string newTitle);
+	Task<IFeedView> RenameFeedAsync(Guid identifier, string newName);
 
 	/// <summary>
 	/// Move the feed with the specified identifier into the feed with <c>newParentIdentifier</c>.

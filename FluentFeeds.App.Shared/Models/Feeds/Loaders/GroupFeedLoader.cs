@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentFeeds.App.Shared.EventArgs;
@@ -13,53 +12,43 @@ namespace FluentFeeds.App.Shared.Models.Feeds.Loaders;
 /// </summary>
 public sealed class GroupFeedLoader : FeedLoader
 {
-	public GroupFeedLoader(IFeedView feed) : base(feed)
+	public GroupFeedLoader(ImmutableHashSet<FeedLoader> loaders)
 	{
-		_loaders = GetLoaders();
-		foreach (var loader in _loaders)
+		_loaders = loaders;
+		foreach (var loader in loaders)
 		{
 			loader.ItemsUpdated += HandleItemsUpdated;
 		}
-
-		if (feed.Children != null)
-		{
-			(feed.Children as INotifyCollectionChanged).CollectionChanged += (s, e) => UpdateLoaders();
-		}
 	}
 
-	private ImmutableHashSet<FeedLoader> GetLoaders()
+	public ImmutableHashSet<FeedLoader> Loaders
 	{
-		return Feed.Children?
-			.Where(feed => !feed.IsExcludedFromGroup)
-			.Select(feed => feed.Loader)
-			.ToImmutableHashSet() ?? ImmutableHashSet<FeedLoader>.Empty;
-	}
-
-	private void UpdateLoaders()
-	{
-		var oldLoaders = _loaders;
-		var newLoaders = GetLoaders();
-		_loaders = newLoaders;
+		get => _loaders;
+		set
+		{
+			var oldLoaders = _loaders;
+			_loaders = value;
 		
-		var added = newLoaders.Except(oldLoaders);
-		var removed = oldLoaders.Except(newLoaders);
+			var added = _loaders.Except(oldLoaders);
+			var removed = oldLoaders.Except(_loaders);
 		
-		foreach (var feed in removed)
-		{
-			feed.ItemsUpdated -= HandleItemsUpdated;
-		}
-			
-		foreach (var feed in added)
-		{
-			feed.ItemsUpdated += HandleItemsUpdated;
-		}
-
-		if (_hasStartedLoading)
-		{
-			UpdateItems();
-			foreach (var loader in added)
+			foreach (var feed in removed)
 			{
-				InitializeAddedFeed(loader);
+				feed.ItemsUpdated -= HandleItemsUpdated;
+			}
+			
+			foreach (var feed in added)
+			{
+				feed.ItemsUpdated += HandleItemsUpdated;
+			}
+
+			if (_hasStartedLoading)
+			{
+				UpdateItems();
+				foreach (var loader in added)
+				{
+					InitializeAddedFeed(loader);
+				}
 			}
 		}
 	}

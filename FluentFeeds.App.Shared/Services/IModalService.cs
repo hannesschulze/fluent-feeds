@@ -8,7 +8,7 @@ namespace FluentFeeds.App.Shared.Services;
 /// </summary>
 public interface IModalService
 {
-	void Show(NodeDataViewModel viewModel, NavigationItemViewModel relatedItem);
-	void Show(DeleteNodeViewModel viewModel, NavigationItemViewModel relatedItem);
+	void Show(FeedDataViewModel viewModel, NavigationItemViewModel relatedItem);
+	void Show(DeleteFeedViewModel viewModel, NavigationItemViewModel relatedItem);
 	void Show(ErrorViewModel viewModel);
 }
