@@ -170,7 +170,7 @@ public class ConversionHelperTests
 	[Fact]
 	public void ConvertItemAuthor_Missing()
 	{
-		var source = new SyndicationItem { Authors = { } };
+		var source = new SyndicationItem();
 		var author = ConversionHelpers.ConvertItemAuthor(source);
 		Assert.Null(author);
 	}
@@ -246,7 +246,7 @@ public class ConversionHelperTests
 		var item = await ConversionHelpers.ConvertItemAsync(source, new Uri("about:///"));
 		var expected = new ArticleItemContent(new RichText(
 			new GenericBlock(new TextInline("Test "), new BoldInline(new TextInline("content")))));
-		Assert.Equal(expected, await item.LoadContentAsync());
+		Assert.Equal(expected, await item.ContentLoader.LoadAsync());
 	}
 
 	[Fact]
@@ -261,7 +261,7 @@ public class ConversionHelperTests
 		var item = await ConversionHelpers.ConvertItemAsync(source, new Uri("about:///"));
 		var expected = new ArticleItemContent(new RichText(new GenericBlock(
 			new HyperlinkInline(new TextInline("link")) { Target = new Uri("https://www.example.com/foo") })));
-		Assert.Equal(expected, await item.LoadContentAsync());
+		Assert.Equal(expected, await item.ContentLoader.LoadAsync());
 	}
 
 	[Fact]
@@ -275,7 +275,7 @@ public class ConversionHelperTests
 		var item = await ConversionHelpers.ConvertItemAsync(source, new Uri("https://www.example.com/"));
 		var expected = new ArticleItemContent(new RichText(new GenericBlock(
 			new HyperlinkInline(new TextInline("link")) { Target = new Uri("https://www.example.com/foo") })));
-		Assert.Equal(expected, await item.LoadContentAsync());
+		Assert.Equal(expected, await item.ContentLoader.LoadAsync());
 	}
 
 	[Fact]
