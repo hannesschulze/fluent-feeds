@@ -254,6 +254,7 @@
 						<MenuFlyout Placement="BottomEdgeAlignedRight">
 							<RadioMenuFlyoutItem
 								Text="Newest"
+								GroupName="SortModes"
 								IsChecked="{x:Bind IsSortModeSelected(ViewModel.SelectedSortMode, models:ItemSortMode.Newest), Mode=OneWay}"
 								Command="{x:Bind SelectSortModeCommand}">
 								
@@ -265,6 +266,7 @@
 
 							<RadioMenuFlyoutItem
 								Text="Oldest"
+								GroupName="SortModes"
 								IsChecked="{x:Bind IsSortModeSelected(ViewModel.SelectedSortMode, models:ItemSortMode.Oldest), Mode=OneWay}"
 								Command="{x:Bind SelectSortModeCommand}">
 								
@@ -319,13 +321,65 @@
 					Width="{StaticResource ToolbarItemProgressRingSize}"
 					Height="{StaticResource ToolbarItemProgressRingSize}" />
 
-				<Button
-					Grid.Column="3"
-					Style="{StaticResource ToolbarButtonStyle}"
-					Command="{x:Bind ViewModel.OpenDisplayOptionsCommand}">
-					
+				<Button Grid.Column="3" Style="{StaticResource ToolbarButtonStyle}">
 					<Viewbox Height="{StaticResource ToolbarItemIconSize}" Child="{x:Bind FontSymbol}" />
-					
+
+					<Button.Flyout>
+						<MenuFlyout Placement="Bottom">
+							<MenuFlyoutSubItem Text="Font family" Icon="{x:Bind FontFamilySymbol}">
+								<RadioMenuFlyoutItem
+									Text="Sans Serif"
+									GroupName="FontFamilies"
+									IsChecked="{x:Bind IsFontFamilySelected(ViewModel.DisplayOptions.SelectedFontFamily, models:FontFamily.SansSerif), Mode=OneWay}"
+									Command="{x:Bind SelectFontFamilyCommand}">
+
+									<RadioMenuFlyoutItem.CommandParameter>
+										<models:FontFamily>SansSerif</models:FontFamily>
+									</RadioMenuFlyoutItem.CommandParameter>
+
+								</RadioMenuFlyoutItem>
+								
+								<RadioMenuFlyoutItem
+									Text="Serif"
+									GroupName="FontFamilies"
+									IsChecked="{x:Bind IsFontFamilySelected(ViewModel.DisplayOptions.SelectedFontFamily, models:FontFamily.Serif), Mode=OneWay}"
+									Command="{x:Bind SelectFontFamilyCommand}">
+
+									<RadioMenuFlyoutItem.CommandParameter>
+										<models:FontFamily>Serif</models:FontFamily>
+									</RadioMenuFlyoutItem.CommandParameter>
+
+								</RadioMenuFlyoutItem>
+
+								<RadioMenuFlyoutItem
+									Text="Monospace"
+									GroupName="FontFamilies"
+									IsChecked="{x:Bind IsFontFamilySelected(ViewModel.DisplayOptions.SelectedFontFamily, models:FontFamily.Monospace), Mode=OneWay}"
+									Command="{x:Bind SelectFontFamilyCommand}">
+
+									<RadioMenuFlyoutItem.CommandParameter>
+										<models:FontFamily>Monospace</models:FontFamily>
+									</RadioMenuFlyoutItem.CommandParameter>
+
+								</RadioMenuFlyoutItem>
+							</MenuFlyoutSubItem>
+
+							<MenuFlyoutItem
+								Text="Increase font size"
+								Icon="{x:Bind FontSizeIncreaseSymbol}"
+								Command="{x:Bind ViewModel.DisplayOptions.IncreaseFontSizeCommand}" />
+
+							<MenuFlyoutItem
+								Text="Decrease font size"
+								Icon="{x:Bind FontSizeDecreaseSymbol}"
+								Command="{x:Bind ViewModel.DisplayOptions.DecreaseFontSizeCommand}" />
+
+							<MenuFlyoutItem
+								Text="Reset font size"
+								Icon="{x:Bind FontSizeResetSymbol}"
+								Command="{x:Bind ViewModel.DisplayOptions.ResetFontSizeCommand}" />
+						</MenuFlyout>
+					</Button.Flyout>
 				</Button>
 
 				<Button

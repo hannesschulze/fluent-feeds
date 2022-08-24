@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using FluentFeeds.App.Shared.Helpers;
 using FluentFeeds.App.Shared.Models.Database;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -9,8 +10,6 @@ namespace FluentFeeds.App.Shared.Services.Default;
 
 public class DatabaseService : IDatabaseService
 {
-	private const string AppDataFolderName = "FluentFeeds";
-
 	public DatabaseService()
 	{
 		_initialize = new Lazy<Task>(InitializeAsync, isThreadSafe: true);
@@ -72,11 +71,8 @@ public class DatabaseService : IDatabaseService
 	/// </summary>
 	protected virtual SqliteConnection CreateConnection()
 	{
-		var allAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-		var appDataPath = Path.Combine(allAppDataPath, AppDataFolderName);
-		Directory.CreateDirectory(appDataPath);
-		var dbPath = Path.Combine(appDataPath, "db.sqlite3");
-		return new SqliteConnection($"Filename={dbPath}");
+		var path = AppData.GetPath("db.sqlite3");
+		return new SqliteConnection($"Filename={path}");
 	}
 
 	/// <summary>

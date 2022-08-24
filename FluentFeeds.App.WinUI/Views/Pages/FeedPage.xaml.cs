@@ -28,7 +28,13 @@ public sealed partial class FeedPage : Page
 		SortOrderSymbol = Common.Symbol.SortOrder.ToIconElement();
 		OpenExternalSymbol = Common.Symbol.OpenExternal.ToIconElement();
 		FontSymbol = Common.Symbol.Font.ToIconElement();
+		FontFamilySymbol = Common.Symbol.FontFamily.ToIconElement();
+		FontSizeIncreaseSymbol = Common.Symbol.FontSizeIncrease.ToIconElement();
+		FontSizeDecreaseSymbol = Common.Symbol.FontSizeDecrease.ToIconElement();
+		FontSizeResetSymbol = Common.Symbol.FontSizeReset.ToIconElement();
 		SelectSortModeCommand = new RelayCommand<ItemSortMode>(sortMode => ViewModel.SelectedSortMode = sortMode);
+		SelectFontFamilyCommand = new RelayCommand<FontFamily>(
+			fontFamily => ViewModel.DisplayOptions.SelectedFontFamily = fontFamily);
 
 		UpdateSelectedItems();
 		UpdateCurrentRoute();
@@ -43,8 +49,13 @@ public sealed partial class FeedPage : Page
 	private IconElement SortOrderSymbol { get; }
 	private IconElement OpenExternalSymbol { get; }
 	private IconElement FontSymbol { get; }
+	private IconElement FontFamilySymbol { get; }
+	private IconElement FontSizeIncreaseSymbol { get; }
+	private IconElement FontSizeDecreaseSymbol { get; }
+	private IconElement FontSizeResetSymbol { get; }
 
 	private RelayCommand<ItemSortMode> SelectSortModeCommand { get; }
+	private RelayCommand<FontFamily> SelectFontFamilyCommand { get; }
 
 	protected override void OnNavigatedTo(NavigationEventArgs e)
 	{
@@ -100,6 +111,9 @@ public sealed partial class FeedPage : Page
 
 	private bool IsSortModeSelected(ItemSortMode sortMode, ItemSortMode itemMode) =>
 		sortMode == itemMode;
+
+	private bool IsFontFamilySelected(Shared.Models.FontFamily fontFamily, Shared.Models.FontFamily itemFontFamily) =>
+		fontFamily == itemFontFamily;
 
 	private bool _isChangingSelection;
 }

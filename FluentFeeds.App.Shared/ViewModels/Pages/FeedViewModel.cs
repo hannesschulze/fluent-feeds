@@ -16,7 +16,6 @@ using FluentFeeds.Feeds.Base;
 using FluentFeeds.Feeds.Base.EventArgs;
 using FluentFeeds.Feeds.Base.Items;
 using FluentFeeds.Feeds.Base.Items.Content;
-using FluentFeeds.Feeds.Base.Nodes;
 using FluentFeeds.Feeds.Base.Storage;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
@@ -36,20 +35,20 @@ public sealed class FeedViewModel : ObservableObject
 	}
 
 	public event EventHandler? ItemsUpdated;
-	
-	public FeedViewModel(IModalService modalService, IFeedService feedService)
+
+	public FeedViewModel(IModalService modalService, IFeedService feedService, ISettingsService settingsService)
 	{
 		_modalService = modalService;
 		_feedService = feedService;
-		
+
 		_syncCommand = new RelayCommand(HandleSyncCommand, () => !IsSyncInProgress);
 		_toggleReadCommand = new RelayCommand(HandleToggleReadCommand, () => IsItemSelected);
 		_deleteCommand = new RelayCommand(HandleDeleteCommand, () => IsItemSelected);
-		_openDisplayOptionsCommand = new RelayCommand(() => { });
 		_reloadContentCommand = new RelayCommand(HandleReloadContentCommand, () => IsReloadContentAvailable);
 		_openBrowserCommand = new RelayCommand(HandleOpenBrowserCommand, () => SelectedItems.Length == 1);
 
 		Items = new ReadOnlyObservableCollection<IReadOnlyStoredItem>(_items);
+		DisplayOptions = new DisplayOptionsViewModel(settingsService);
 	}
 
 	/// <summary>
@@ -96,11 +95,6 @@ public sealed class FeedViewModel : ObservableObject
 	public ICommand DeleteCommand => _deleteCommand;
 
 	/// <summary>
-	/// Open display options for the reader.
-	/// </summary>
-	public ICommand OpenDisplayOptionsCommand => _openDisplayOptionsCommand;
-
-	/// <summary>
 	/// Reload the content of the currently selected item.
 	/// </summary>
 	public ICommand ReloadContentCommand => _reloadContentCommand;
@@ -109,7 +103,7 @@ public sealed class FeedViewModel : ObservableObject
 	/// Open the content of the currently selected item in a web browser.
 	/// </summary>
 	public ICommand OpenBrowserCommand => _openBrowserCommand;
-	
+
 	/// <summary>
 	/// Items provided by the feed, sorted using the current sort mode.
 	/// </summary>
@@ -130,7 +124,7 @@ public sealed class FeedViewModel : ObservableObject
 				{
 					oldItems[0].PropertyChanged -= HandleItemPropertyChanged;
 				}
-				
+
 				_loadItemContentToken = null;
 				_openBrowserCommand.NotifyCanExecuteChanged();
 				IsReloadContentAvailable = false;
@@ -158,6 +152,11 @@ public sealed class FeedViewModel : ObservableObject
 			}
 		}
 	}
+
+	/// <summary>
+	/// View model used to present display options as a toolbar menu.
+	/// </summary>
+	public DisplayOptionsViewModel DisplayOptions { get; }
 
 	/// <summary>
 	/// Mode used for sorting the items.
@@ -535,7 +534,6 @@ public sealed class FeedViewModel : ObservableObject
 	private readonly RelayCommand _syncCommand;
 	private readonly RelayCommand _toggleReadCommand;
 	private readonly RelayCommand _deleteCommand;
-	private readonly RelayCommand _openDisplayOptionsCommand;
 	private readonly RelayCommand _reloadContentCommand;
 	private readonly RelayCommand _openBrowserCommand;
 	private readonly ObservableCollection<IReadOnlyStoredItem> _items = new();

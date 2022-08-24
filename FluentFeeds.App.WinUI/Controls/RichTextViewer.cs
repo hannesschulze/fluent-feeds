@@ -884,7 +884,25 @@ public sealed partial class RichTextViewer : Control
 		set => SetValue(TableMarginProperty, value);
 	}
 
+	/// <summary>
+	/// Schedule an update to the drag regions. Updates are coalesced.
+	/// </summary>
 	private void RenderText()
+	{
+		if (_renderTextScheduled)
+			// Update is already scheduled.
+			return;
+
+		_renderTextScheduled = true;
+		DispatcherQueue
+			.TryEnqueue(() =>
+			{
+				_renderTextScheduled = false;
+				RenderTextCore();
+			});
+	}
+
+	private void RenderTextCore()
 	{
 		if (_container == null)
 			return;
@@ -908,4 +926,5 @@ public sealed partial class RichTextViewer : Control
 		((RichTextViewer) sender).RenderText();
 
 	private StackPanel? _container;
+	private bool _renderTextScheduled;
 }

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Reflection.Metadata;
+using FluentFeeds.App.Shared.Models;
 using FluentFeeds.App.Shared.Models.Navigation;
+using FluentFeeds.App.Shared.Services;
 using FluentFeeds.Documents;
 using FluentFeeds.Feeds.Base.Items;
-using FluentFeeds.Feeds.Base.Items.Content;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 
 namespace FluentFeeds.App.Shared.ViewModels.Pages;
@@ -14,6 +14,15 @@ namespace FluentFeeds.App.Shared.ViewModels.Pages;
 /// </summary>
 public sealed class ArticleViewModel : ObservableObject
 {
+	public ArticleViewModel(ISettingsService settingsService)
+	{
+		_settingsService = settingsService;
+
+		_fontFamily = _settingsService.ContentFontFamily;
+		_fontSize = _settingsService.ContentFontSize;
+		_settingsService.PropertyChanged += HandleSettingsChanged;
+	}
+
 	/// <summary>
 	/// Called after navigating to the article page.
 	/// </summary>
@@ -33,6 +42,24 @@ public sealed class ArticleViewModel : ObservableObject
 		Content = route.ArticleContent!.Body;
 		UpdateTitle();
 		UpdateItemInfo();
+	}
+
+	/// <summary>
+	/// Font family used to display the content.
+	/// </summary>
+	public FontFamily FontFamily
+	{
+		get => _fontFamily;
+		private set => SetProperty(ref _fontFamily, value);
+	}
+
+	/// <summary>
+	/// Font size used to display the content.
+	/// </summary>
+	public FontSize FontSize
+	{
+		get => _fontSize;
+		private set => SetProperty(ref _fontSize, value);
 	}
 
 	/// <summary>
@@ -95,6 +122,22 @@ public sealed class ArticleViewModel : ObservableObject
 		}
 	}
 
+	private void HandleSettingsChanged(object? sender, PropertyChangedEventArgs e)
+	{
+		switch (e.PropertyName)
+		{
+			case nameof(ISettingsService.ContentFontFamily):
+				FontFamily = _settingsService.ContentFontFamily;
+				break;
+			case nameof(ISettingsService.ContentFontSize):
+				FontSize = _settingsService.ContentFontSize;
+				break;
+		}
+	}
+
+	private readonly ISettingsService _settingsService;
+	private FontFamily _fontFamily;
+	private FontSize _fontSize;
 	private IReadOnlyStoredItem? _item;
 	private string _title = String.Empty;
 	private string _itemInfo = String.Empty;
