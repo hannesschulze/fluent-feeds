@@ -204,6 +204,17 @@ public class HtmlProcessorTests
 	}
 
 	[Fact]
+	public void Blocks_Known_List_EmptyMissingItemElement()
+	{
+		var actual = RichText.ParseHtml("<ul><li>foo</li>   <li>bar</li></ul>");
+		var expected = new RichText(
+			new ListBlock(
+				new ListItem(new TextInline("foo")),
+				new ListItem(new TextInline("bar"))));
+		Assert.Equal(expected, actual);
+	}
+
+	[Fact]
 	public void Blocks_Known_Table()
 	{
 		var actual = RichText.ParseHtml("<table><tr><th>foo</th><td>bar</td></tr><tr><td>baz</td></tr></table>");
