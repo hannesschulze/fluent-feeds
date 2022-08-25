@@ -29,9 +29,14 @@ public abstract class FeedLoader
 	public event EventHandler<FeedItemsUpdatedEventArgs>? ItemsUpdated;
 
 	/// <summary>
+	/// Called when the loader's custom loader state has changed.
+	/// </summary>
+	public event EventHandler? LoadingStateChanged; 
+
+	/// <summary>
 	/// The timestamp at which this feed was last synchronized in the current object's lifetime.
 	/// </summary>
-	public DateTimeOffset? LastSynchronized { get; private set; }
+	public virtual DateTimeOffset? LastSynchronized => _lastSynchronized;
 
 	/// <summary>
 	/// Current snapshot of items provided by the feed.
@@ -43,6 +48,22 @@ public abstract class FeedLoader
 		{
 			_items = value;
 			ItemsUpdated?.Invoke(this, new FeedItemsUpdatedEventArgs(value));
+		}
+	}
+
+	/// <summary>
+	/// Flag indicating a custom loading-progress for the feed loader.
+	/// </summary>
+	public bool IsLoadingCustom
+	{
+		get => _isLoadingCustom;
+		protected set
+		{
+			if (_isLoadingCustom != value)
+			{
+				_isLoadingCustom = value;
+				LoadingStateChanged?.Invoke(this, System.EventArgs.Empty);
+			}
 		}
 	}
 
@@ -96,11 +117,13 @@ public abstract class FeedLoader
 		await DoSynchronizeAsync();
 
 		_isSynchronizing = false;
-		LastSynchronized = DateTimeOffset.UtcNow;
+		_lastSynchronized = DateTimeOffset.UtcNow;
 	}
 	
 	private ImmutableHashSet<IItemView> _items = ImmutableHashSet<IItemView>.Empty;
+	private DateTimeOffset? _lastSynchronized;
 	private Lazy<Task> _initialize;
 	private bool _isSynchronizing;
+	private bool _isLoadingCustom;
 	private Task? _synchronizeTask;
 }

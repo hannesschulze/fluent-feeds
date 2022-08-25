@@ -130,15 +130,17 @@
 
 			</StackPanel>
 
-			<AutoSuggestBox 
-				Grid.Column="1" 
+			<AutoSuggestBox
+				Grid.Column="1"
 				QueryIcon="Find"
+				QuerySubmitted="HandleSearchQuerySubmitted"
 				PlaceholderText="Search"
 				Height="{StaticResource TitleBarSearchHeight}"
 				Margin="{StaticResource TitleBarSearchMargin}"
-				VerticalAlignment="Center" 
+				VerticalAlignment="Center"
 				BorderThickness="1"
-				SizeChanged="HandleDragRegionSizeChanged">
+				SizeChanged="HandleDragRegionSizeChanged"
+				Text="{x:Bind ViewModel.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
 				
 				<!-- Remove underline. -->
 				<AutoSuggestBox.Resources>

@@ -23,5 +23,6 @@ public enum Symbol
 	FontSizeDecrease,
 	FontSizeReset,
 	ColorPalette,
+	Search,
 	Settings
 }

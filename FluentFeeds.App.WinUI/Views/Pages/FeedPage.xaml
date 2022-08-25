@@ -224,7 +224,7 @@
 
 				<ProgressRing
 					Grid.Column="1"
-					IsActive="{x:Bind ViewModel.IsSyncInProgress, Mode=OneWay}"
+					IsActive="{x:Bind ViewModel.IsLoadingItems, Mode=OneWay}"
 					Margin="{StaticResource ToolbarItemPadding}"
 					Width="{StaticResource ToolbarItemProgressRingSize}"
 					Height="{StaticResource ToolbarItemProgressRingSize}" />
@@ -333,7 +333,7 @@
 
 				<ProgressRing
 					Grid.Column="1"
-					IsActive="{x:Bind ViewModel.IsLoadContentInProgress, Mode=OneWay}"
+					IsActive="{x:Bind ViewModel.IsLoadingContent, Mode=OneWay}"
 					Margin="{StaticResource ToolbarItemPadding}"
 					Width="{StaticResource ToolbarItemProgressRingSize}"
 					Height="{StaticResource ToolbarItemProgressRingSize}" />

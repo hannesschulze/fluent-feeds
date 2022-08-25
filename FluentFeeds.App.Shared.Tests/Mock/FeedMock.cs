@@ -20,6 +20,8 @@ public sealed class FeedLoaderMock : FeedLoader
 
 	public void UpdateItems(params IItemView[] items) => Items = items.ToImmutableHashSet();
 
+	public void UpdateIsLoadingCustom(bool isLoadingCustom) => IsLoadingCustom = isLoadingCustom;
+
 	protected override async Task DoInitializeAsync()
 	{
 		var items = await _initializeCompletionSource.Task;
