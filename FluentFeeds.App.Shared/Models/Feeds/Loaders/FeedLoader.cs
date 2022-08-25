@@ -31,7 +31,7 @@ public abstract class FeedLoader
 	/// <summary>
 	/// The timestamp at which this feed was last synchronized in the current object's lifetime.
 	/// </summary>
-	public DateTimeOffset? LastSynchronized { get; private set; }
+	public virtual DateTimeOffset? LastSynchronized => _lastSynchronized;
 
 	/// <summary>
 	/// Current snapshot of items provided by the feed.
@@ -96,10 +96,11 @@ public abstract class FeedLoader
 		await DoSynchronizeAsync();
 
 		_isSynchronizing = false;
-		LastSynchronized = DateTimeOffset.UtcNow;
+		_lastSynchronized = DateTimeOffset.UtcNow;
 	}
 	
 	private ImmutableHashSet<IItemView> _items = ImmutableHashSet<IItemView>.Empty;
+	private DateTimeOffset? _lastSynchronized;
 	private Lazy<Task> _initialize;
 	private bool _isSynchronizing;
 	private Task? _synchronizeTask;
