@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using FluentFeeds.App.Shared.Models.Feeds;
+using FluentFeeds.App.Shared.Models.Feeds.Loaders;
 using FluentFeeds.App.Shared.Models.Navigation;
 using FluentFeeds.App.Shared.Tests.Mock;
 using FluentFeeds.App.Shared.ViewModels.Items.Navigation;
 using FluentFeeds.Common;
-using FluentFeeds.Feeds.Base;
+using FluentFeeds.Feeds.Base.Feeds;
 using FluentFeeds.Feeds.Base.Feeds.Content;
-using FluentFeeds.Feeds.Base.Nodes;
 using Xunit;
 
 namespace FluentFeeds.App.Shared.Tests.ViewModels.Items;
@@ -15,36 +16,64 @@ namespace FluentFeeds.App.Shared.Tests.ViewModels.Items;
 public class FeedNavigationItemViewModelTests
 {
 	private ModalServiceMock ModalService { get; } = new();
-	
+
 	[Fact]
-	public void Metadata_GroupNode()
+	public void FeedWithChildren()
 	{
-		var node = FeedNode.Group("Title", Symbol.Directory, isUserCustomizable: true);
+		var feed = new Feed(
+			identifier: Guid.Empty,
+			storage: null,
+			loaderFactory: _ => new EmptyFeedLoader(),
+			hasChildren: true,
+			parent: null,
+			name: "Title",
+			symbol: Symbol.Directory,
+			metadata: new FeedMetadata(),
+			isUserCustomizable: true,
+			isExcludedFromGroup: false);
 		var item = new FeedNavigationItemViewModel(
-			ModalService, node, null, new Dictionary<IReadOnlyFeedNode, NavigationItemViewModel>());
+			ModalService, feed, null, new Dictionary<IFeedView, NavigationItemViewModel>());
 		Assert.Equal("Title",item.Title);
 		Assert.Equal(Symbol.Directory, item.Symbol);
-		Assert.Equal(MainNavigationRoute.Feed(node), item.Destination);
+		Assert.Equal(MainNavigationRoute.Feed(feed), item.Destination);
 		Assert.True(item.IsExpandable);
 		Assert.Empty(item.Children);
 
-		var childNode = FeedNode.Group(null, null, false);
-		node.Children!.Add(childNode);
+		var childFeed = new Feed(
+			identifier: Guid.Empty,
+			storage: null,
+			loaderFactory: _ => new EmptyFeedLoader(),
+			hasChildren: true,
+			parent: feed,
+			name: "Title",
+			symbol: Symbol.Directory,
+			metadata: new FeedMetadata(),
+			isUserCustomizable: true,
+			isExcludedFromGroup: false);
+		feed.Children!.Add(childFeed);
 		var childItem = Assert.IsType<FeedNavigationItemViewModel>(Assert.Single(item.Children));
-		Assert.Equal(childNode, childItem.FeedNode);
+		Assert.Equal(childFeed, childItem.Feed);
 	}
 	
 	[Fact]
-	public void Metadata_LeafNode()
+	public void FeedWithoutChildren()
 	{
-		var feed = new FeedMock(Guid.Empty);
-		feed.UpdateMetadata(new FeedMetadata { Name = "Feed", Symbol = Symbol.Web });
-		var node = FeedNode.Custom(feed, null, null, isUserCustomizable: true);
+		var feed = new Feed(
+			identifier: Guid.Empty,
+			storage: null,
+			loaderFactory: _ => new EmptyFeedLoader(),
+			hasChildren: false,
+			parent: null,
+			name: null,
+			symbol: null,
+			metadata: new FeedMetadata { Name = "Feed", Symbol = Symbol.Web },
+			isUserCustomizable: true,
+			isExcludedFromGroup: false);
 		var item = new FeedNavigationItemViewModel(
-			ModalService, node, null, new Dictionary<IReadOnlyFeedNode, NavigationItemViewModel>());
+			ModalService, feed, null, new Dictionary<IFeedView, NavigationItemViewModel>());
 		Assert.Equal("Feed",item.Title);
 		Assert.Equal(Symbol.Web, item.Symbol);
-		Assert.Equal(MainNavigationRoute.Feed(node), item.Destination);
+		Assert.Equal(MainNavigationRoute.Feed(feed), item.Destination);
 		Assert.False(item.IsExpandable);
 		Assert.Empty(item.Children);
 	}
@@ -52,9 +81,19 @@ public class FeedNavigationItemViewModelTests
 	[Fact]
 	public void AvailableActions_NodeIsNotStored()
 	{
-		var node = FeedNode.Group(null, null, true);
+		var feed = new Feed(
+			identifier: Guid.Empty,
+			storage: null,
+			loaderFactory: _ => new EmptyFeedLoader(),
+			hasChildren: false,
+			parent: null,
+			name: null,
+			symbol: null,
+			metadata: new FeedMetadata(),
+			isUserCustomizable: true,
+			isExcludedFromGroup: false);
 		var item = new FeedNavigationItemViewModel(
-			ModalService, node, null, new Dictionary<IReadOnlyFeedNode, NavigationItemViewModel>());
+			ModalService, feed, null, new Dictionary<IFeedView, NavigationItemViewModel>());
 		Assert.Empty(item.Actions);
 	}
 
@@ -62,9 +101,9 @@ public class FeedNavigationItemViewModelTests
 	public void AvailableActions_RootNode_UserCustomizable_WithUrlFactory()
 	{
 		var feedStorage = new FeedStorageMock(new FeedProviderMock(Guid.Empty));
-		var node = feedStorage.AddRootNode(FeedNode.Group(null, null, isUserCustomizable: true));
+		var node = feedStorage.AddRootNode(new GroupFeedDescriptor());
 		var item = new FeedNavigationItemViewModel(
-			ModalService, node, node, new Dictionary<IReadOnlyFeedNode, NavigationItemViewModel>());
+			ModalService, node, node, new Dictionary<IFeedView, NavigationItemViewModel>());
 		Assert.Collection(
 			item.Actions,
 			action => Assert.Equal("Add feed…", action.Title),
@@ -75,9 +114,9 @@ public class FeedNavigationItemViewModelTests
 	public void AvailableActions_RootNode_UserCustomizable_WithoutUrlFactory()
 	{
 		var feedStorage = new FeedStorageMock(new FeedProviderMock(Guid.Empty, hasUrlFactory: false));
-		var node = feedStorage.AddRootNode(FeedNode.Group(null, null, isUserCustomizable: true));
+		var node = feedStorage.AddRootNode(new GroupFeedDescriptor());
 		var item = new FeedNavigationItemViewModel(
-			ModalService, node, node, new Dictionary<IReadOnlyFeedNode, NavigationItemViewModel>());
+			ModalService, node, node, new Dictionary<IFeedView, NavigationItemViewModel>());
 		Assert.Collection(
 			item.Actions,
 			action => Assert.Equal("Add group…", action.Title));
@@ -87,9 +126,9 @@ public class FeedNavigationItemViewModelTests
 	public void AvailableActions_RootNode_NotUserCustomizable()
 	{
 		var feedStorage = new FeedStorageMock(new FeedProviderMock(Guid.Empty));
-		var node = feedStorage.AddRootNode(FeedNode.Group(null, null, isUserCustomizable: false));
+		var node = feedStorage.AddRootNode(new GroupFeedDescriptor { IsUserCustomizable = false });
 		var item = new FeedNavigationItemViewModel(
-			ModalService, node, node, new Dictionary<IReadOnlyFeedNode, NavigationItemViewModel>());
+			ModalService, node, node, new Dictionary<IFeedView, NavigationItemViewModel>());
 		Assert.Empty(item.Actions);
 	}
 
@@ -97,11 +136,10 @@ public class FeedNavigationItemViewModelTests
 	public void AvailableActions_GroupNode_UserCustomizable_WithUrlFactory()
 	{
 		var feedStorage = new FeedStorageMock(new FeedProviderMock(Guid.Empty));
-		var root = feedStorage.AddRootNode(FeedNode.Group(null, null, true));
-		var node = feedStorage.AddNodeAsync(
-			FeedNode.Group(null, null, isUserCustomizable: true), root.Identifier).Result;
+		var root = feedStorage.AddRootNode(new GroupFeedDescriptor());
+		var node = feedStorage.AddFeedAsync(new GroupFeedDescriptor(), root.Identifier).Result;
 		var item = new FeedNavigationItemViewModel(
-			ModalService, node, root, new Dictionary<IReadOnlyFeedNode, NavigationItemViewModel>());
+			ModalService, node, root, new Dictionary<IFeedView, NavigationItemViewModel>());
 		Assert.Collection(
 			item.Actions,
 			action => Assert.Equal("Add feed…", action.Title),
@@ -114,11 +152,10 @@ public class FeedNavigationItemViewModelTests
 	public void AvailableActions_GroupNode_UserCustomizable_WithoutUrlFactory()
 	{
 		var feedStorage = new FeedStorageMock(new FeedProviderMock(Guid.Empty, hasUrlFactory: false));
-		var root = feedStorage.AddRootNode(FeedNode.Group(null, null, true));
-		var node = feedStorage.AddNodeAsync(
-			FeedNode.Group(null, null, isUserCustomizable: true), root.Identifier).Result;
+		var root = feedStorage.AddRootNode(new GroupFeedDescriptor());
+		var node = feedStorage.AddFeedAsync(new GroupFeedDescriptor(), root.Identifier).Result;
 		var item = new FeedNavigationItemViewModel(
-			ModalService, node, root, new Dictionary<IReadOnlyFeedNode, NavigationItemViewModel>());
+			ModalService, node, root, new Dictionary<IFeedView, NavigationItemViewModel>());
 		Assert.Collection(
 			item.Actions,
 			action => Assert.Equal("Add group…", action.Title),
@@ -130,11 +167,11 @@ public class FeedNavigationItemViewModelTests
 	public void AvailableActions_GroupNode_NotUserCustomizable()
 	{
 		var feedStorage = new FeedStorageMock(new FeedProviderMock(Guid.Empty));
-		var root = feedStorage.AddRootNode(FeedNode.Group(null, null, true));
-		var node = feedStorage.AddNodeAsync(
-			FeedNode.Group(null, null, isUserCustomizable: false), root.Identifier).Result;
+		var root = feedStorage.AddRootNode(new GroupFeedDescriptor());
+		var node = feedStorage.AddFeedAsync(
+			new GroupFeedDescriptor { IsUserCustomizable = false }, root.Identifier).Result;
 		var item = new FeedNavigationItemViewModel(
-			ModalService, node, root, new Dictionary<IReadOnlyFeedNode, NavigationItemViewModel>());
+			ModalService, node, root, new Dictionary<IFeedView, NavigationItemViewModel>());
 		Assert.Empty(item.Actions);
 	}
 
@@ -142,11 +179,11 @@ public class FeedNavigationItemViewModelTests
 	public void AvailableActions_LeafNode_UserCustomizable()
 	{
 		var feedStorage = new FeedStorageMock(new FeedProviderMock(Guid.Empty));
-		var root = feedStorage.AddRootNode(FeedNode.Group(null, null, true));
-		var node = feedStorage.AddNodeAsync(
-			FeedNode.Custom(new FeedMock(Guid.Empty), null, null, isUserCustomizable: true), root.Identifier).Result;
+		var root = feedStorage.AddRootNode(new GroupFeedDescriptor());
+		var node = feedStorage.AddFeedAsync(
+			new CachedFeedDescriptor(new FeedContentLoaderMock("")), root.Identifier).Result;
 		var item = new FeedNavigationItemViewModel(
-			ModalService, node, root, new Dictionary<IReadOnlyFeedNode, NavigationItemViewModel>());
+			ModalService, node, root, new Dictionary<IFeedView, NavigationItemViewModel>());
 		Assert.Collection(
 			item.Actions,
 			action => Assert.Equal("Edit…", action.Title),
@@ -157,11 +194,12 @@ public class FeedNavigationItemViewModelTests
 	public void AvailableActions_LeafNode_NotUserCustomizable()
 	{
 		var feedStorage = new FeedStorageMock(new FeedProviderMock(Guid.Empty));
-		var root = feedStorage.AddRootNode(FeedNode.Group(null, null, true));
-		var node = feedStorage.AddNodeAsync(
-			FeedNode.Custom(new FeedMock(Guid.Empty), null, null, isUserCustomizable: false), root.Identifier).Result;
+		var root = feedStorage.AddRootNode(new GroupFeedDescriptor());
+		var node = feedStorage.AddFeedAsync(
+			new CachedFeedDescriptor(new FeedContentLoaderMock("")) { IsUserCustomizable = false },
+			root.Identifier).Result;
 		var item = new FeedNavigationItemViewModel(
-			ModalService, node, root, new Dictionary<IReadOnlyFeedNode, NavigationItemViewModel>());
+			ModalService, node, root, new Dictionary<IFeedView, NavigationItemViewModel>());
 		Assert.Empty(item.Actions);
 	}
 
@@ -169,17 +207,16 @@ public class FeedNavigationItemViewModelTests
 	public void UpdateProperties()
 	{
 		var feedStorage = new FeedStorageMock(new FeedProviderMock(Guid.Empty));
-		var root = feedStorage.AddRootNode(FeedNode.Group(null, null, true));
-		var feed = new FeedMock(Guid.Empty);
-		feed.UpdateMetadata(new FeedMetadata { Name = "Feed", Symbol = Symbol.Web });
-		var node = feedStorage.AddNodeAsync(
-			FeedNode.Custom(feed, null, null, isUserCustomizable: true), root.Identifier).Result;
+		var root = feedStorage.AddRootNode(new GroupFeedDescriptor());
+		var feed = feedStorage.AddFeedAsync(
+			new CachedFeedDescriptor(new FeedContentLoaderMock("")), root.Identifier).Result;
 		var item = new FeedNavigationItemViewModel(
-			ModalService, node, root, new Dictionary<IReadOnlyFeedNode, NavigationItemViewModel>());
-		feed.UpdateMetadata(new FeedMetadata { Name = "Updated", Symbol = Symbol.Feed });
-		((StoredFeedNode)node).IsUserCustomizable = false;
+			ModalService, feed, root, new Dictionary<IFeedView, NavigationItemViewModel>());
+		feedStorage.UpdateFeedMetadataAsync(
+			feed.Identifier, new FeedMetadata { Name = "Updated", Symbol = Symbol.Web });
+		((Feed)feed).IsUserCustomizable = false;
 		Assert.Equal("Updated", item.Title);
-		Assert.Equal(Symbol.Feed, item.Symbol);
+		Assert.Equal(Symbol.Web, item.Symbol);
 		Assert.Empty(item.Actions);
 	}
 
@@ -187,13 +224,12 @@ public class FeedNavigationItemViewModelTests
 	public async Task Actions_AddFeed()
 	{
 		var feedStorage = new FeedStorageMock(new FeedProviderMock(Guid.Empty, hasUrlFactory: true));
-		var root = feedStorage.AddRootNode(FeedNode.Group("root", null, isUserCustomizable: true));
-		var group = await feedStorage.AddNodeAsync(
-			FeedNode.Group("group", null, isUserCustomizable: true), root.Identifier);
+		var root = feedStorage.AddRootNode(new GroupFeedDescriptor("root", null));
+		var group = await feedStorage.AddFeedAsync(new GroupFeedDescriptor("group", null), root.Identifier);
 		var item = new FeedNavigationItemViewModel(
-			ModalService, group, root, new Dictionary<IReadOnlyFeedNode, NavigationItemViewModel>());
-		var modalArgs = Assert.Raises<ModalServiceMock.ShowNodeDataModalEventArgs>(
-			h => ModalService.ShowNodeDataModal += h, h => ModalService.ShowNodeDataModal -= h,
+			ModalService, group, root, new Dictionary<IFeedView, NavigationItemViewModel>());
+		var modalArgs = Assert.Raises<ModalServiceMock.ShowFeedDataModalEventArgs>(
+			h => ModalService.ShowFeedDataModal += h, h => ModalService.ShowFeedDataModal -= h,
 			() => item.Actions[0].Command.Execute(null)).Arguments;
 		Assert.Equal(item, modalArgs.RelatedItem);
 		
@@ -221,21 +257,21 @@ public class FeedNavigationItemViewModelTests
 		// Save
 		Assert.True(await modalArgs.ViewModel.HandleSaveAsync());
 		var node = Assert.Single(group.Children!);
-		var feed = Assert.IsType<FeedMock>(node.Feed);
-		Assert.Equal(new Uri("https://www.example.com"), feed.Url);
+		var loader = Assert.IsType<CachedFeedLoader>(node.Loader);
+		var contentLoader = Assert.IsType<FeedContentLoaderMock>(loader.ContentLoader);
+		Assert.Equal("https://www.example.com/", contentLoader.Identifier);
 	}
 
 	[Fact]
 	public async Task Actions_AddGroup()
 	{
 		var feedStorage = new FeedStorageMock(new FeedProviderMock(Guid.Empty, hasUrlFactory: false));
-		var root = feedStorage.AddRootNode(FeedNode.Group("root", null, isUserCustomizable: true));
-		var group = await feedStorage.AddNodeAsync(
-			FeedNode.Group("group", null, isUserCustomizable: true), root.Identifier);
+		var root = feedStorage.AddRootNode(new GroupFeedDescriptor("root", null));
+		var group = await feedStorage.AddFeedAsync(new GroupFeedDescriptor("group", null), root.Identifier);
 		var item = new FeedNavigationItemViewModel(
-			ModalService, group, root, new Dictionary<IReadOnlyFeedNode, NavigationItemViewModel>());
-		var modalArgs = Assert.Raises<ModalServiceMock.ShowNodeDataModalEventArgs>(
-			h => ModalService.ShowNodeDataModal += h, h => ModalService.ShowNodeDataModal -= h,
+			ModalService, group, root, new Dictionary<IFeedView, NavigationItemViewModel>());
+		var modalArgs = Assert.Raises<ModalServiceMock.ShowFeedDataModalEventArgs>(
+			h => ModalService.ShowFeedDataModal += h, h => ModalService.ShowFeedDataModal -= h,
 			() => item.Actions[0].Command.Execute(null)).Arguments;
 		Assert.Equal(item, modalArgs.RelatedItem);
 		
@@ -263,23 +299,21 @@ public class FeedNavigationItemViewModelTests
 		// Save
 		Assert.True(await modalArgs.ViewModel.HandleSaveAsync());
 		var node = Assert.Single(group.Children!);
-		Assert.Equal(FeedNodeType.Group, node.Type);
-		Assert.Equal("test", node.Title);
+		Assert.NotNull(node.Children);
+		Assert.Equal("test", node.Name);
 	}
 
 	[Fact]
 	public async Task Actions_EditNode()
 	{
 		var feedStorage = new FeedStorageMock(new FeedProviderMock(Guid.Empty, hasUrlFactory: false));
-		var root = feedStorage.AddRootNode(FeedNode.Group("root", null, isUserCustomizable: true));
-		var group = await feedStorage.AddNodeAsync(
-			FeedNode.Group("group", null, isUserCustomizable: true), root.Identifier);
-		var node = await feedStorage.AddNodeAsync(
-			FeedNode.Group("node", null, isUserCustomizable: true), group.Identifier);
+		var root = feedStorage.AddRootNode(new GroupFeedDescriptor("root", null));
+		var group = await feedStorage.AddFeedAsync(new GroupFeedDescriptor("group", null), root.Identifier);
+		var node = await feedStorage.AddFeedAsync(new GroupFeedDescriptor("feed", null), group.Identifier);
 		var item = new FeedNavigationItemViewModel(
-			ModalService, node, root, new Dictionary<IReadOnlyFeedNode, NavigationItemViewModel>());
-		var modalArgs = Assert.Raises<ModalServiceMock.ShowNodeDataModalEventArgs>(
-			h => ModalService.ShowNodeDataModal += h, h => ModalService.ShowNodeDataModal -= h,
+			ModalService, node, root, new Dictionary<IFeedView, NavigationItemViewModel>());
+		var modalArgs = Assert.Raises<ModalServiceMock.ShowFeedDataModalEventArgs>(
+			h => ModalService.ShowFeedDataModal += h, h => ModalService.ShowFeedDataModal -= h,
 			() => item.Actions[1].Command.Execute(null)).Arguments;
 		Assert.Equal(item, modalArgs.RelatedItem);
 		
@@ -298,7 +332,7 @@ public class FeedNavigationItemViewModelTests
 			},
 			groupItem =>
 			{
-				Assert.Equal("node", groupItem.Title);
+				Assert.Equal("feed", groupItem.Title);
 				Assert.False(groupItem.IsSelectable);
 			});
 		Assert.Equal(modalArgs.ViewModel.GroupItems[1], modalArgs.ViewModel.SelectedGroup);
@@ -316,20 +350,19 @@ public class FeedNavigationItemViewModelTests
 			root.Children!,
 			child => Assert.Equal(group, child),
 			child => Assert.Equal(node, child));
-		Assert.Equal("test", node.Title);
+		Assert.Equal("test", node.Name);
 	}
 
 	[Fact]
 	public async Task Actions_DeleteNode_Success()
 	{
 		var feedStorage = new FeedStorageMock(new FeedProviderMock(Guid.Empty, hasUrlFactory: false));
-		var root = feedStorage.AddRootNode(FeedNode.Group("root", null, isUserCustomizable: true));
-		var node = await feedStorage.AddNodeAsync(
-			FeedNode.Group("node", null, isUserCustomizable: true), root.Identifier);
+		var root = feedStorage.AddRootNode(new GroupFeedDescriptor("root", null));
+		var node = await feedStorage.AddFeedAsync(new GroupFeedDescriptor("feed", null), root.Identifier);
 		var item = new FeedNavigationItemViewModel(
-			ModalService, node, root, new Dictionary<IReadOnlyFeedNode, NavigationItemViewModel>());
-		var modalArgs = Assert.Raises<ModalServiceMock.ShowDeleteNodeModalEventArgs>(
-			h => ModalService.ShowDeleteNodeModal += h, h => ModalService.ShowDeleteNodeModal -= h,
+			ModalService, node, root, new Dictionary<IFeedView, NavigationItemViewModel>());
+		var modalArgs = Assert.Raises<ModalServiceMock.ShowDeleteFeedModalEventArgs>(
+			h => ModalService.ShowDeleteFeedModal += h, h => ModalService.ShowDeleteFeedModal -= h,
 			() => item.Actions[2].Command.Execute(null)).Arguments;
 		Assert.Equal(item, modalArgs.RelatedItem);
 		
@@ -341,17 +374,16 @@ public class FeedNavigationItemViewModelTests
 	public async Task Actions_DeleteNode_Error()
 	{
 		var feedStorage = new FeedStorageMock(new FeedProviderMock(Guid.Empty, hasUrlFactory: false));
-		var root = feedStorage.AddRootNode(FeedNode.Group("root", null, isUserCustomizable: true));
-		var node = await feedStorage.AddNodeAsync(
-			FeedNode.Group("node", null, isUserCustomizable: true), root.Identifier);
+		var root = feedStorage.AddRootNode(new GroupFeedDescriptor("root", null));
+		var node = await feedStorage.AddFeedAsync(new GroupFeedDescriptor("feed", null), root.Identifier);
 		var item = new FeedNavigationItemViewModel(
-			ModalService, node, root, new Dictionary<IReadOnlyFeedNode, NavigationItemViewModel>());
-		var modalArgs = Assert.Raises<ModalServiceMock.ShowDeleteNodeModalEventArgs>(
-			h => ModalService.ShowDeleteNodeModal += h, h => ModalService.ShowDeleteNodeModal -= h,
+			ModalService, node, root, new Dictionary<IFeedView, NavigationItemViewModel>());
+		var modalArgs = Assert.Raises<ModalServiceMock.ShowDeleteFeedModalEventArgs>(
+			h => ModalService.ShowDeleteFeedModal += h, h => ModalService.ShowDeleteFeedModal -= h,
 			() => item.Actions[2].Command.Execute(null)).Arguments;
 		Assert.Equal(item, modalArgs.RelatedItem);
 
-		feedStorage.DeleteNodeFails = true;
+		feedStorage.DeleteFeedFails = true;
 		var errorArgs = Assert.Raises<ModalServiceMock.ShowErrorModalEventArgs>(
 			h => ModalService.ShowErrorModal += h, h => ModalService.ShowErrorModal -= h,
 			() => modalArgs.ViewModel.ConfirmCommand.Execute(null)).Arguments;

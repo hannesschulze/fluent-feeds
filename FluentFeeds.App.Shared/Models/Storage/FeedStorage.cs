@@ -2,7 +2,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentFeeds.App.Shared.EventArgs;
@@ -63,7 +62,7 @@ public sealed class FeedStorage : IFeedStorage
 		switch (dbFeed.Type)
 		{
 			case FeedDescriptorType.Group:
-				loaderFactory = CreateGroupFeedLoader;
+				loaderFactory = GroupFeedLoader.FromFeed;
 				break;
 			case FeedDescriptorType.Cached:
 				var contentLoader = await Provider.LoadFeedAsync(dbFeed.ContentLoader ?? String.Empty);
@@ -128,7 +127,7 @@ public sealed class FeedStorage : IFeedStorage
 		switch (descriptor)
 		{
 			case GroupFeedDescriptor groupDescriptor:
-				loaderFactory = CreateGroupFeedLoader;
+				loaderFactory = GroupFeedLoader.FromFeed;
 				childDescriptors = groupDescriptor.Children;
 				break;
 			case CachedFeedDescriptor cachedDescriptor:
@@ -142,8 +141,14 @@ public sealed class FeedStorage : IFeedStorage
 					identifier, GetItemStorage(itemStorageIdentifier), cachedDescriptor.ContentLoader);
 				if (syncFirst)
 				{
+					loader.MetadataUpdater =
+						metadata =>
+						{
+							initialMetadata = metadata;
+							return Task.CompletedTask;
+						};
 					await loader.SynchronizeAsync();
-					initialMetadata = loader.Metadata;
+					loader.MetadataUpdater = null;
 				}
 				loaderFactory = _ => loader;
 				break;
@@ -204,10 +209,9 @@ public sealed class FeedStorage : IFeedStorage
 	/// <summary>
 	/// Store a new feed and all its children, returning its stored representation.
 	/// </summary>
-	private async Task<StoredFeed> StoreFeedAsync(
+	private static async Task StoreFeedAsync(
 		AppDbContext database, StoredFeed feed, ICollection<StoredFeed>? allFeeds = null)
 	{
-		// Determine deleted items.
 		var stack = new Stack<StoredFeed>();
 		stack.Push(feed);
 		while (stack.TryPop(out var currentFeed))
@@ -223,8 +227,6 @@ public sealed class FeedStorage : IFeedStorage
 				}
 			}
 		}
-
-		return feed;
 	}
 
 	/// <summary>
@@ -281,13 +283,13 @@ public sealed class FeedStorage : IFeedStorage
 		if (parentFeed.Children == null)
 			throw new Exception("Invalid parent feed type.");
 
-		var feed = await Task.Run(() => CreateFeedAsync(descriptor, parentFeed, syncFirst));
+		var feed = await CreateFeedAsync(descriptor, parentFeed, syncFirst);
 
 		// Update database
 		await _databaseService.ExecuteAsync(
 			async database =>
 			{
-				database.Attach(parentFeed.Db);
+				database.Feeds.Attach(parentFeed.Db);
 				await StoreFeedAsync(database, feed);
 				await database.SaveChangesAsync();
 			});
@@ -404,25 +406,6 @@ public sealed class FeedStorage : IFeedStorage
 		{
 			_feeds.Remove(deletedNode.Identifier);
 		}
-	}
-	
-	private static FeedLoader CreateGroupFeedLoader(IFeedView feed)
-	{
-		ImmutableHashSet<FeedLoader> GetLoaders()
-		{
-			return feed.Children?
-				.Where(f => !f.IsExcludedFromGroup)
-				.Select(f => f.Loader)
-				.ToImmutableHashSet() ?? ImmutableHashSet<FeedLoader>.Empty;
-		}
-
-		var loader = new GroupFeedLoader(GetLoaders());
-		if (feed.Children != null)
-		{
-			(feed.Children as INotifyCollectionChanged).CollectionChanged += (s, e) => loader.Loaders = GetLoaders();
-		}
-
-		return loader;
 	}
 	
 	/// <summary>

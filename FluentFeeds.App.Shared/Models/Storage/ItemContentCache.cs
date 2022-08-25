@@ -14,14 +14,12 @@ namespace FluentFeeds.App.Shared.Models.Storage;
 /// </summary>
 public sealed class ItemContentCache
 {
-	private const int MaxCacheSize = 10;
-	
-	public ItemContentCache(IDatabaseService databaseService)
+	public ItemContentCache(int maxCacheSize)
 	{
-		_databaseService = databaseService;
+		_maxCacheSize = maxCacheSize;
 	}
 	
-	public async Task<IItemContentLoader> GetLoaderAsync(Guid itemIdentifier, FeedProvider provider)
+	public async Task<IItemContentLoader> GetLoaderAsync(Guid itemIdentifier, Func<Task<IItemContentLoader>> loadFunc)
 	{
 		if (_cached.TryGetValue(itemIdentifier, out var cached))
 		{
@@ -34,12 +32,21 @@ public sealed class ItemContentCache
 		{
 			return await task;
 		}
-
-		var newTask = LoadFromDatabaseAsync(itemIdentifier, provider);
-		_loading.Add(itemIdentifier, newTask);
-		var result = await newTask;
+		
+		IItemContentLoader result;
+		try
+		{
+			var newTask = loadFunc.Invoke();
+			_loading.Add(itemIdentifier, newTask);
+			result = await newTask;
+		}
+		catch (Exception)
+		{
+			_loading.Remove(itemIdentifier);
+			throw;
+		}
 		_loading.Remove(itemIdentifier);
-		if (_cacheOrder.Count >= MaxCacheSize)
+		if (_cacheOrder.Count >= _maxCacheSize)
 		{
 			_cached.Remove(_cacheOrder[0]);
 			_cacheOrder.RemoveAt(0);
@@ -49,20 +56,7 @@ public sealed class ItemContentCache
 		return result;
 	}
 
-	private Task<IItemContentLoader> LoadFromDatabaseAsync(Guid itemIdentifier, FeedProvider provider)
-	{
-		return _databaseService.ExecuteAsync(
-			async database =>
-			{
-				var serialized = await database.Items
-					.Where(i => i.Identifier == itemIdentifier)
-					.Select(i => i.Content)
-					.FirstAsync();
-				return await provider.LoadItemContentAsync(serialized);
-			});
-	}
-
-	private readonly IDatabaseService _databaseService;
+	private readonly int _maxCacheSize;
 	private readonly List<Guid> _cacheOrder = new();
 	private readonly Dictionary<Guid, IItemContentLoader> _cached = new();
 	private readonly Dictionary<Guid, Task<IItemContentLoader>> _loading = new();

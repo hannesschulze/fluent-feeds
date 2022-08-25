@@ -16,11 +16,13 @@ namespace FluentFeeds.App.Shared.Services.Default;
 
 public sealed class FeedService : IFeedService
 {
+	private const int MaxItemContentCacheSize = 8;
+	
 	public FeedService(IDatabaseService databaseService, IPluginService pluginService)
 	{
 		_databaseService = databaseService;
 		_pluginService = pluginService;
-		_itemContentCache = new ItemContentCache(_databaseService);
+		_itemContentCache = new ItemContentCache(MaxItemContentCacheSize);
 		_initialize = new Lazy<Task>(InitializeAsyncCore);
 
 		ProviderFeeds = new ReadOnlyObservableCollection<IFeedView>(_providerFeeds);

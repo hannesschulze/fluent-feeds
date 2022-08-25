@@ -22,8 +22,10 @@ public class DatabaseServiceTests
 			async database =>
 			{
 				Assert.Empty(await database.FeedProviders.ToListAsync());
-				Assert.Empty(await database.FeedNodes.ToListAsync());
+				Assert.Empty(await database.Feeds.ToListAsync());
 				Assert.Empty(await database.Items.ToListAsync());
+				Assert.Empty(await database.FeedItems.ToListAsync());
+				Assert.Empty(await database.DeletedItems.ToListAsync());
 			});
 	}
 

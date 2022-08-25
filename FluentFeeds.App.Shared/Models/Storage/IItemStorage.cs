@@ -13,10 +13,15 @@ namespace FluentFeeds.App.Shared.Models.Storage;
 public interface IItemStorage
 {
 	/// <summary>
+	/// The storage's identifier.
+	/// </summary>
+	Guid Identifier { get; }
+	
+	/// <summary>
 	/// Event raised when items were permanently deleted from the storage.
 	/// </summary>
 	event EventHandler<ItemsDeletedEventArgs>? ItemsDeleted;
-	
+
 	/// <summary>
 	/// Return all saved items in this storage associated with a given feed.
 	/// </summary>

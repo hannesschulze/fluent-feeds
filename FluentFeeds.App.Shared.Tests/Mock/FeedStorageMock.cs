@@ -2,24 +2,17 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentFeeds.App.Shared.EventArgs;
+using FluentFeeds.App.Shared.Models.Feeds;
+using FluentFeeds.App.Shared.Models.Feeds.Loaders;
 using FluentFeeds.App.Shared.Models.Storage;
 using FluentFeeds.Feeds.Base;
-using FluentFeeds.Feeds.Base.Nodes;
+using FluentFeeds.Feeds.Base.Feeds;
+using FluentFeeds.Feeds.Base.Feeds.Content;
 
 namespace FluentFeeds.App.Shared.Tests.Mock;
 
 public sealed class FeedStorageMock : IFeedStorage
 {
-	private sealed class Node : StoredFeedNode
-	{
-		public Node(IReadOnlyFeedNode node, IFeedStorage storage, Node? parent) : base(node, Guid.NewGuid(), storage)
-		{
-			Parent = parent;
-		}
-		
-		public Node? Parent { get; set; }
-	}
-	
 	public FeedStorageMock(FeedProvider provider)
 	{
 		Provider = provider;
@@ -27,69 +20,103 @@ public sealed class FeedStorageMock : IFeedStorage
 	
 	public FeedProvider Provider { get; }
 	
-	public bool DeleteNodeFails { get; set; }
+	public bool DeleteFeedFails { get; set; }
 	
-	public event EventHandler<FeedNodesDeletedEventArgs>? NodesDeleted;
+	public event EventHandler<FeedsDeletedEventArgs>? FeedsDeleted;
 
 	public IItemStorage GetItemStorage(Guid identifier)
 	{
-		return new ItemStorageMock();
+		return new ItemStorageMock(identifier);
 	}
 
-	public IReadOnlyStoredFeedNode? GetNode(Guid identifier)
+	public IFeedView? GetFeed(Guid identifier)
 	{
-		return _nodes.GetValueOrDefault(identifier);
+		return _feeds.GetValueOrDefault(identifier);
 	}
 
-	public IReadOnlyStoredFeedNode? GetNodeParent(Guid identifier)
+	private Feed CreateFeed(FeedDescriptor descriptor, IFeedView? parent)
 	{
-		return _nodes.GetValueOrDefault(identifier)?.Parent;
+		var identifier = Guid.NewGuid();
+		var feed = new Feed(
+			identifier: identifier,
+			storage: this,
+			loaderFactory: descriptor switch
+			{
+				GroupFeedDescriptor => GroupFeedLoader.FromFeed,
+				CachedFeedDescriptor cachedDescriptor =>
+					_ => new CachedFeedLoader(
+						identifier, GetItemStorage(cachedDescriptor.ItemCacheIdentifier ?? identifier),
+						cachedDescriptor.ContentLoader),
+				_ => throw new IndexOutOfRangeException()
+			},
+			hasChildren: descriptor.Type == FeedDescriptorType.Group,
+			parent: parent,
+			name: descriptor.Name,
+			symbol: descriptor.Symbol,
+			metadata: new FeedMetadata(),
+			isUserCustomizable: descriptor.IsUserCustomizable,
+			isExcludedFromGroup: descriptor.IsExcludedFromGroup);
+		if (feed.Children != null && descriptor is GroupFeedDescriptor groupFeedDescriptor)
+		{
+			foreach (var child in groupFeedDescriptor.Children)
+			{
+				feed.Children.Add(CreateFeed(child, feed));
+			}
+		}
+		
+		_feeds.Add(identifier, feed);
+
+		return feed;
 	}
 
-	public IReadOnlyStoredFeedNode AddRootNode(IReadOnlyFeedNode node)
+	public IFeedView AddRootNode(FeedDescriptor descriptor)
 	{
-		var stored = new Node(node, this, null);
-		_nodes.Add(stored.Identifier, stored);
-		return stored;
+		return CreateFeed(descriptor, null);
 	}
 
-	public Task<IReadOnlyStoredFeedNode> AddNodeAsync(IReadOnlyFeedNode node, Guid parentIdentifier)
+	public Task<IFeedView> AddFeedAsync(FeedDescriptor descriptor, Guid parentIdentifier, bool syncFirst = false)
 	{
-		var parent = _nodes[parentIdentifier];
-		var stored = new Node(node, this, parent);
-		_nodes.Add(stored.Identifier, stored);
-		parent.Children!.Add(stored);
-		return Task.FromResult<IReadOnlyStoredFeedNode>(stored);
+		var parent = _feeds[parentIdentifier];
+		var feed = CreateFeed(descriptor, parent);
+		parent.Children!.Add(feed);
+		return Task.FromResult<IFeedView>(feed);
 	}
 
-	public Task<IReadOnlyStoredFeedNode> RenameNodeAsync(Guid identifier, string newTitle)
+	public Task<IFeedView> RenameFeedAsync(Guid identifier, string newName)
 	{
-		var node = _nodes[identifier];
-		node.Title = newTitle;
-		return Task.FromResult<IReadOnlyStoredFeedNode>(node);
+		var feed = _feeds[identifier];
+		feed.Name = newName;
+		return Task.FromResult<IFeedView>(feed);
 	}
 
-	public Task<IReadOnlyStoredFeedNode> MoveNodeAsync(Guid identifier, Guid newParentIdentifier)
+	public Task<IFeedView> UpdateFeedMetadataAsync(Guid identifier, FeedMetadata newMetadata)
 	{
-		var node = _nodes[identifier];
-		var newParent = _nodes[newParentIdentifier];
-		node.Parent?.Children!.Remove(node);
-		node.Parent = newParent;
-		newParent.Children!.Add(node);
-		return Task.FromResult<IReadOnlyStoredFeedNode>(node);
+		var feed = _feeds[identifier];
+		feed.Metadata = newMetadata;
+		return Task.FromResult<IFeedView>(feed);
 	}
 
-	public Task DeleteNodeAsync(Guid identifier)
+	public Task<IFeedView> MoveFeedAsync(Guid identifier, Guid newParentIdentifier)
 	{
-		if (DeleteNodeFails)
+		var feed = _feeds[identifier];
+		var newParent = _feeds[newParentIdentifier];
+		(feed.Parent as Feed)?.Children!.Remove(feed);
+		feed.Parent = newParent;
+		newParent.Children!.Add(feed);
+		return Task.FromResult<IFeedView>(feed);
+	}
+
+	public Task DeleteFeedAsync(Guid identifier)
+	{
+		if (DeleteFeedFails)
 			throw new Exception("error");
 		
-		var node = _nodes[identifier];
-		node.Parent?.Children!.Remove(node);
-		NodesDeleted?.Invoke(this, new FeedNodesDeletedEventArgs(new[] { node }));
-		_nodes.Remove(identifier);
+		var node = _feeds[identifier];
+		(node.Parent as Feed)?.Children!.Remove(node);
+		FeedsDeleted?.Invoke(this, new FeedsDeletedEventArgs(new[] { node }));
+		_feeds.Remove(identifier);
 		return Task.CompletedTask;
 	}
 
-	private readonly Dictionary<Guid, Node> _nodes = new();
+	private readonly Dictionary<Guid, Feed> _feeds = new();
 }

@@ -24,8 +24,10 @@ public sealed class ItemStorage : IItemStorage
 	/// </summary>
 	private sealed class ItemContentLoader : IItemContentLoader
 	{
-		public ItemContentLoader(ItemContentCache cache, FeedProvider provider, Guid identifier)
+		public ItemContentLoader(
+			IDatabaseService databaseService, ItemContentCache cache, FeedProvider provider, Guid identifier)
 		{
+			_databaseService = databaseService;
 			_cache = cache;
 			_provider = provider;
 			_identifier = identifier;
@@ -33,10 +35,24 @@ public sealed class ItemStorage : IItemStorage
 
 		public async Task<ItemContent> LoadAsync(bool reload = false)
 		{
-			var loader = await _cache.GetLoaderAsync(_identifier, _provider);
+			var loader = await _cache.GetLoaderAsync(_identifier, LoadFromDatabaseAsync);
 			return await loader.LoadAsync(reload);
 		}
 
+		private Task<IItemContentLoader> LoadFromDatabaseAsync()
+		{
+			return _databaseService.ExecuteAsync(
+				async database =>
+				{
+					var serialized = await database.Items
+						.Where(i => i.Identifier == _identifier)
+						.Select(i => i.Content)
+						.FirstAsync();
+					return await _provider.LoadItemContentAsync(serialized);
+				});
+		}
+
+		private readonly IDatabaseService _databaseService;
 		private readonly ItemContentCache _cache;
 		private readonly FeedProvider _provider;
 		private readonly Guid _identifier;
@@ -45,13 +61,15 @@ public sealed class ItemStorage : IItemStorage
 	public ItemStorage(
 		IDatabaseService databaseService, ItemContentCache itemContentCache, FeedProvider provider, Guid identifier)
 	{
+		Identifier = identifier;
 		_databaseService = databaseService;
 		_itemContentCache = itemContentCache;
 		_provider = provider;
-		_identifier = identifier;
 
 		_initialize = new Lazy<Task>(InitializeAsync);
 	}
+	
+	public Guid Identifier { get; }
 	
 	public event EventHandler<ItemsDeletedEventArgs>? ItemsDeleted;
 	
@@ -59,21 +77,16 @@ public sealed class ItemStorage : IItemStorage
 	{
 		await _initialize.Value;
 		
-		return _feedItems.TryGetValue(feedIdentifier, out var items) ? items.Values : Enumerable.Empty<IItemView>();
+		return _feedItems.TryGetValue(feedIdentifier, out var items) ? items : Enumerable.Empty<IItemView>();
 	}
 
 	public async Task<IEnumerable<IItemView>> AddItemsAsync(IEnumerable<ItemDescriptor> items, Guid feedIdentifier)
 	{
 		await _initialize.Value;
 
-		Dictionary<Guid, Item> feedItems;
-		if (_feedItems.TryGetValue(feedIdentifier, out var existingFeedItems))
+		if (!_feedItems.TryGetValue(feedIdentifier, out var feedItems))
 		{
-			feedItems = existingFeedItems;
-		}
-		else
-		{
-			feedItems = new Dictionary<Guid, Item>();
+			feedItems = new HashSet<Item>();
 			_feedItems.Add(feedIdentifier, feedItems);
 		}
 
@@ -94,7 +107,7 @@ public sealed class ItemStorage : IItemStorage
 				}
 				result.Add(existing);
 				
-				if (!feedItems.ContainsKey(existing.Identifier))
+				if (!feedItems.Contains(existing))
 				{
 					addedToFeed.Add(existing);
 				}
@@ -137,6 +150,7 @@ public sealed class ItemStorage : IItemStorage
 		// Update local copy
 		foreach (var (item, updatedItem) in updated)
 		{
+			item.Url = updatedItem.Url;
 			item.ContentUrl = updatedItem.ContentUrl;
 			item.ModifiedTimestamp = updatedItem.ModifiedTimestamp;
 			item.Title = updatedItem.Title;
@@ -148,12 +162,12 @@ public sealed class ItemStorage : IItemStorage
 		foreach (var item in added)
 		{
 			RegisterItem(item);
-			feedItems.Add(item.Identifier, item);
+			feedItems.Add(item);
 		}
 
 		foreach (var item in addedToFeed)
 		{
-			feedItems.Add(item.Identifier, item);
+			feedItems.Add(item);
 		}
 
 		return result;
@@ -213,7 +227,7 @@ public sealed class ItemStorage : IItemStorage
 						{
 							Identifier = Guid.NewGuid(),
 							ProviderIdentifier = _provider.Metadata.Identifier,
-							StorageIdentifier = _identifier,
+							StorageIdentifier = Identifier,
 							UserIdentifier = identifier
 						});
 				await database.DeletedItems.AddRangeAsync(dbDeletedItems);
@@ -229,9 +243,9 @@ public sealed class ItemStorage : IItemStorage
 
 		foreach (var feedItems in _feedItems.Values)
 		{
-			foreach (var identifier in identifiers)
+			foreach (var item in items)
 			{
-				feedItems.Remove(identifier);
+				feedItems.Remove(item);
 			}
 		}
 
@@ -269,7 +283,7 @@ public sealed class ItemStorage : IItemStorage
 				{ 
 					Identifier = item.Identifier, 
 					ProviderIdentifier = _provider.Metadata.Identifier,
-					StorageIdentifier = _identifier,
+					StorageIdentifier = Identifier,
 					UserIdentifier = item.UserIdentifier,
 					Title = item.Title,
 					Author = item.Author,
@@ -286,8 +300,7 @@ public sealed class ItemStorage : IItemStorage
 		await database.Items.AddRangeAsync(dbItems);
 	}
 
-	private async Task MapItemsToFeedAsync(
-		AppDbContext database, IReadOnlyCollection<Item> items, Guid feedIdentifier)
+	private static async Task MapItemsToFeedAsync(AppDbContext database, IEnumerable<Item> items, Guid feedIdentifier)
 	{
 		var dbItems = items
 			.Select(item =>
@@ -306,6 +319,7 @@ public sealed class ItemStorage : IItemStorage
 	private async Task UpdateItemAsync(AppDbContext database, Guid identifier, ItemDescriptor descriptor)
 	{
 		var dbItem = await database.Items.Where(i => i.Identifier == identifier).FirstAsync();
+		dbItem.Url = descriptor.Url;
 		dbItem.ContentUrl = descriptor.ContentUrl;
 		dbItem.ModifiedTimestamp = descriptor.ModifiedTimestamp;
 		dbItem.Title = descriptor.Title;
@@ -321,7 +335,7 @@ public sealed class ItemStorage : IItemStorage
 	{
 		var providerIdentifier = _provider.Metadata.Identifier;
 		var dbItems = await database.Items
-			.Where(i => i.ProviderIdentifier == providerIdentifier && i.StorageIdentifier == _identifier)
+			.Where(i => i.ProviderIdentifier == providerIdentifier && i.StorageIdentifier == Identifier)
 			.Select(i =>
 				new
 				{
@@ -349,7 +363,7 @@ public sealed class ItemStorage : IItemStorage
 				modifiedTimestamp: item.ModifiedTimestamp,
 				url: item.Url,
 				contentUrl: item.ContentUrl,
-				contentLoader: new ItemContentLoader(_itemContentCache, _provider, item.Identifier),
+				contentLoader: new ItemContentLoader(_databaseService, _itemContentCache, _provider, item.Identifier),
 				isRead: item.IsRead));
 		foreach (var item in items)
 		{
@@ -361,7 +375,7 @@ public sealed class ItemStorage : IItemStorage
 	{
 		var providerIdentifier = _provider.Metadata.Identifier;
 		var identifiers = await database.DeletedItems
-			.Where(item => item.ProviderIdentifier == providerIdentifier && item.StorageIdentifier == _identifier)
+			.Where(item => item.ProviderIdentifier == providerIdentifier && item.StorageIdentifier == Identifier)
 			.Select(item => item.UserIdentifier)
 			.ToListAsync();
 		_deletedIdentifiers = identifiers.ToHashSet();
@@ -371,12 +385,12 @@ public sealed class ItemStorage : IItemStorage
 	{
 		var providerIdentifier = _provider.Metadata.Identifier;
 		var feeds = await database.Feeds
-			.Where(feed => feed.ProviderIdentifier == providerIdentifier && feed.ItemStorageIdentifier == _identifier)
+			.Where(feed => feed.ProviderIdentifier == providerIdentifier && feed.ItemStorageIdentifier == Identifier)
 			.Select(feed => feed.Identifier)
 			.ToListAsync();
 		foreach (var feed in feeds)
 		{
-			var items = new Dictionary<Guid, Item>();
+			var items = new HashSet<Item>();
 			var identifiers = await database.FeedItems
 				.Where(item => item.FeedIdentifier == feed)
 				.Select(item => item.ItemIdentifier)
@@ -385,7 +399,7 @@ public sealed class ItemStorage : IItemStorage
 			{
 				if (_items.TryGetValue(identifier, out var item))
 				{
-					items.Add(identifier, item);
+					items.Add(item);
 				}
 			}
 			_feedItems.Add(feed, items);
@@ -406,8 +420,7 @@ public sealed class ItemStorage : IItemStorage
 	private readonly IDatabaseService _databaseService;
 	private readonly ItemContentCache _itemContentCache;
 	private readonly FeedProvider _provider;
-	private readonly Guid _identifier;
-	private readonly Dictionary<Guid, Dictionary<Guid, Item>> _feedItems = new();
+	private readonly Dictionary<Guid, HashSet<Item>> _feedItems = new();
 	private readonly Dictionary<Guid, Item> _items = new();
 	private readonly Dictionary<string, Item> _identifierItems = new();
 	private readonly Lazy<Task> _initialize;

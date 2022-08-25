@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentFeeds.App.Shared.EventArgs;
@@ -19,6 +20,25 @@ public sealed class GroupFeedLoader : FeedLoader
 		{
 			loader.ItemsUpdated += HandleItemsUpdated;
 		}
+	}
+
+	public static GroupFeedLoader FromFeed(IFeedView feed)
+	{
+		ImmutableHashSet<FeedLoader> GetLoaders()
+		{
+			return feed.Children?
+				.Where(f => !f.IsExcludedFromGroup)
+				.Select(f => f.Loader)
+				.ToImmutableHashSet() ?? ImmutableHashSet<FeedLoader>.Empty;
+		}
+
+		var loader = new GroupFeedLoader(GetLoaders());
+		if (feed.Children != null)
+		{
+			(feed.Children as INotifyCollectionChanged).CollectionChanged += (s, e) => loader.Loaders = GetLoaders();
+		}
+
+		return loader;
 	}
 
 	public ImmutableHashSet<FeedLoader> Loaders

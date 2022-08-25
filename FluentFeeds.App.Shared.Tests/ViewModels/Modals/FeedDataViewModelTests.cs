@@ -1,18 +1,18 @@
 using System;
 using System.Threading.Tasks;
+using FluentFeeds.App.Shared.Models.Feeds;
 using FluentFeeds.App.Shared.Tests.Mock;
 using FluentFeeds.App.Shared.ViewModels.Modals;
-using FluentFeeds.Feeds.Base.Nodes;
+using FluentFeeds.Feeds.Base.Feeds;
 using Xunit;
 
 namespace FluentFeeds.App.Shared.Tests.ViewModels.Modals;
 
 public class NodeDataViewModelTests
 {
-	private sealed class TestViewModel : NodeDataViewModel
+	private sealed class TestViewModel : FeedDataViewModel
 	{
-		public TestViewModel(
-			IReadOnlyStoredFeedNode rootNode, IReadOnlyFeedNode? selectedNode, IReadOnlyFeedNode? forbiddenNode)
+		public TestViewModel(IFeedView rootNode, IFeedView? selectedNode, IFeedView? forbiddenNode)
 			: base("title", "error", "error message", "input", true, rootNode, selectedNode, forbiddenNode)
 		{
 		}
@@ -23,7 +23,7 @@ public class NodeDataViewModelTests
 
 		public void CompleteSave(Exception exception) => _saveCompletionSource?.TrySetException(exception);
 
-		protected override Task SaveAsync(IReadOnlyStoredFeedNode selectedGroup)
+		protected override Task SaveAsync(IFeedView selectedGroup)
 		{
 			var completionSource = _saveCompletionSource = new TaskCompletionSource();
 			return completionSource.Task;
@@ -36,16 +36,17 @@ public class NodeDataViewModelTests
 	{
 		ModalService = new ModalServiceMock();
 		FeedStorage = new FeedStorageMock(new FeedProviderMock(Guid.Empty));
-		RootNode = FeedStorage.AddRootNode(FeedNode.Group("root", null, true));
-		GroupNode = FeedStorage.AddNodeAsync(FeedNode.Group("group", null, true), RootNode.Identifier).Result;
-		ChildNode = FeedStorage.AddNodeAsync(FeedNode.Group("child", null, false), GroupNode.Identifier).Result;
+		RootNode = FeedStorage.AddRootNode(new GroupFeedDescriptor("root", null));
+		GroupNode = FeedStorage.AddFeedAsync(new GroupFeedDescriptor("group", null), RootNode.Identifier).Result;
+		ChildNode = FeedStorage.AddFeedAsync(
+			new GroupFeedDescriptor("child", null) { IsUserCustomizable = false }, GroupNode.Identifier).Result;
 	}
 	
 	private ModalServiceMock ModalService { get; }
 	private FeedStorageMock FeedStorage { get; }
-	private IReadOnlyStoredFeedNode RootNode { get; }
-	private IReadOnlyStoredFeedNode GroupNode { get; }
-	private IReadOnlyStoredFeedNode ChildNode { get; }
+	private IFeedView RootNode { get; }
+	private IFeedView GroupNode { get; }
+	private IFeedView ChildNode { get; }
 
 	[Fact]
 	public void GroupSelection_Items_NoForbiddenNode()

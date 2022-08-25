@@ -1,7 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using FluentFeeds.App.Shared.EventArgs;
+using System.Threading.Tasks;
 using FluentFeeds.App.Shared.Models.Feeds.Loaders;
 using FluentFeeds.App.Shared.Models.Storage;
 using FluentFeeds.Common;
@@ -26,7 +25,7 @@ public class Feed : ObservableObject, IFeedView
 			() =>
 			{
 				var loader = loaderFactory.Invoke(this);
-				loader.MetadataUpdated += HandleMetadataUpdated;
+				loader.MetadataUpdater = UpdateMetadataAsync;
 				return loader;
 			});
 		if (hasChildren)
@@ -125,19 +124,14 @@ public class Feed : ObservableObject, IFeedView
 
 	private Symbol GetDisplaySymbol() => Symbol ?? Metadata.Symbol ?? Common.Symbol.Feed;
 
-	private async void HandleMetadataUpdated(object? sender, FeedMetadataUpdatedEventArgs e)
+	private Task UpdateMetadataAsync(FeedMetadata metadata)
 	{
-		if (e.UpdatedMetadata != Metadata && Storage != null)
+		if (metadata != Metadata && Storage != null)
 		{
-			try
-			{
-				await Storage.UpdateFeedMetadataAsync(Identifier, e.UpdatedMetadata);
-			}
-			catch (Exception)
-			{
-				// Ignored
-			}
+			return Storage.UpdateFeedMetadataAsync(Identifier, metadata);
 		}
+		
+		return Task.CompletedTask;
 	}
 
 	private readonly Lazy<FeedLoader> _loader;

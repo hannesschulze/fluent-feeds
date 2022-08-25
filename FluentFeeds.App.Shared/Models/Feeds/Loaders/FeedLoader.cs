@@ -18,15 +18,15 @@ public abstract class FeedLoader
 	}
 	
 	/// <summary>
+	/// Callback used when the metadata of the feed has changed.
+	/// </summary>
+	public Func<FeedMetadata, Task>? MetadataUpdater { get; set; }
+
+	/// <summary>
 	/// Event called when <see cref="Items"/> has been updated. This event is usually raised after calling either
 	/// <see cref="InitializeAsync"/> or <see cref="SynchronizeAsync"/>.
 	/// </summary>
 	public event EventHandler<FeedItemsUpdatedEventArgs>? ItemsUpdated;
-	
-	/// <summary>
-	/// Event called when <see cref="Metadata"/> has been updated.
-	/// </summary>
-	public event EventHandler<FeedMetadataUpdatedEventArgs>? MetadataUpdated;
 
 	/// <summary>
 	/// The timestamp at which this feed was last synchronized in the current object's lifetime.
@@ -43,19 +43,6 @@ public abstract class FeedLoader
 		{
 			_items = value;
 			ItemsUpdated?.Invoke(this, new FeedItemsUpdatedEventArgs(value));
-		}
-	}
-
-	/// <summary>
-	/// Loaded metadata.
-	/// </summary>
-	public FeedMetadata Metadata
-	{
-		get => _metadata;
-		protected set
-		{
-			_metadata = value;
-			MetadataUpdated?.Invoke(this, new FeedMetadataUpdatedEventArgs(value));
 		}
 	}
 
@@ -113,7 +100,6 @@ public abstract class FeedLoader
 	}
 	
 	private ImmutableHashSet<IItemView> _items = ImmutableHashSet<IItemView>.Empty;
-	private FeedMetadata _metadata = new();
 	private Lazy<Task> _initialize;
 	private bool _isSynchronizing;
 	private Task? _synchronizeTask;

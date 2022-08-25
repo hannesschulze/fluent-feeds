@@ -34,18 +34,21 @@ public sealed class CachedFeedLoader : FeedLoader
 	/// </summary>
 	public IFeedContentLoader ContentLoader { get; }
 
-	protected sealed override async Task DoInitializeAsync()
+	protected override async Task DoInitializeAsync()
 	{
 		await ReloadItemsAsync();
 		Storage.ItemsDeleted += HandleItemsDeleted;
 	}
 
-	protected sealed override async Task DoSynchronizeAsync()
+	protected override async Task DoSynchronizeAsync()
 	{
 		var content = await Task.Run(ContentLoader.LoadAsync);
 		var newItems = await Storage.AddItemsAsync(content.Items, FeedIdentifier);
 		Items = Items.Union(newItems);
-		Metadata = content.Metadata;
+		if (MetadataUpdater != null)
+		{
+			await MetadataUpdater.Invoke(content.Metadata);
+		}
 	}
 
 	private async void HandleItemsDeleted(object? sender, ItemsDeletedEventArgs e)

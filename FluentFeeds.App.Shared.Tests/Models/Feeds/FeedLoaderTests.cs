@@ -1,27 +1,44 @@
 using System;
-using FluentFeeds.Feeds.Base.EventArgs;
+using FluentFeeds.App.Shared.EventArgs;
+using FluentFeeds.App.Shared.Models.Items;
+using FluentFeeds.App.Shared.Tests.Mock;
+using FluentFeeds.Documents;
 using FluentFeeds.Feeds.Base.Feeds.Content;
-using FluentFeeds.Feeds.Base.Tests.Mock;
+using FluentFeeds.Feeds.Base.Items.Content;
 using Xunit;
 
-namespace FluentFeeds.Feeds.Base.Tests;
+namespace FluentFeeds.App.Shared.Tests.Models.Feeds;
 
-public class FeedTests
+public class FeedLoaderTests
 {
-	private ItemStorageMock ItemStorage { get; } = new();
+	public static Item CreateItem(Guid identifier)
+	{
+		return new Item(
+			identifier: identifier,
+			storage: new ItemStorageMock(),
+			userIdentifier: null,
+			title: "title",
+			author: "author",
+			summary: "summary",
+			publishedTimestamp: DateTimeOffset.Now,
+			modifiedTimestamp: DateTimeOffset.Now,
+			url: null,
+			contentUrl: null,
+			isRead: false,
+			contentLoader: new StaticItemContentLoader(new ArticleItemContent(new RichText())));
+	}
 	
 	[Fact]
-	public void LoadItems()
+	public void Initialize()
 	{
-		var feed = new FeedMock();
+		var feed = new FeedLoaderMock();
 		Assert.Empty(feed.Items);
-		var task = feed.LoadAsync();
+		var task = feed.InitializeAsync();
 		Assert.False(task.IsCompleted);
 		Assert.Raises<FeedItemsUpdatedEventArgs>(
 			h => feed.ItemsUpdated += h,
 			h => feed.ItemsUpdated -= h,
-			() => feed.CompleteLoad(
-				TestHelpers.CreateItem(Guid.Parse("df3ba29e-f58f-476c-aae2-f8c35d2e0cc4"), ItemStorage)));
+			() => feed.CompleteInitialize(CreateItem(Guid.Parse("df3ba29e-f58f-476c-aae2-f8c35d2e0cc4"))));
 		Assert.True(task.IsCompleted);
 		Assert.Collection(
 			feed.Items,
@@ -29,14 +46,14 @@ public class FeedTests
 	}
 
 	[Fact]
-	public void LoadItems_AlreadyInProgress()
+	public void Initialize_AlreadyInProgress()
 	{
-		var feed = new FeedMock();
-		var taskA = feed.LoadAsync();
-		var taskB = feed.LoadAsync();
+		var feed = new FeedLoaderMock();
+		var taskA = feed.InitializeAsync();
+		var taskB = feed.InitializeAsync();
 		Assert.False(taskA.IsCompleted);
 		Assert.False(taskB.IsCompleted);
-		feed.CompleteLoad(TestHelpers.CreateItem(Guid.Parse("df3ba29e-f58f-476c-aae2-f8c35d2e0cc4"), ItemStorage));
+		feed.CompleteInitialize(CreateItem(Guid.Parse("df3ba29e-f58f-476c-aae2-f8c35d2e0cc4")));
 		Assert.True(taskA.IsCompleted);
 		Assert.True(taskB.IsCompleted);
 		Assert.Collection(
@@ -45,32 +62,31 @@ public class FeedTests
 	}
 
 	[Fact]
-	public void LoadItems_AlreadyDone()
+	public void Initialize_AlreadyDone()
 	{
-		var feed = new FeedMock();
-		feed.LoadAsync();
-		feed.CompleteLoad(TestHelpers.CreateItem(Guid.Parse("df3ba29e-f58f-476c-aae2-f8c35d2e0cc4"), ItemStorage));
-		var task = feed.LoadAsync();
+		var feed = new FeedLoaderMock();
+		feed.InitializeAsync();
+		feed.CompleteInitialize(CreateItem(Guid.Parse("df3ba29e-f58f-476c-aae2-f8c35d2e0cc4")));
+		var task = feed.InitializeAsync();
 		Assert.True(task.IsCompleted);
-		feed.CompleteLoad(TestHelpers.CreateItem(Guid.Parse("bd977580-70eb-4359-b370-a41c15e1fbc8"), ItemStorage));
+		feed.CompleteInitialize(CreateItem(Guid.Parse("bd977580-70eb-4359-b370-a41c15e1fbc8")));
 		Assert.Collection(
 			feed.Items,
 			item => Assert.Equal(Guid.Parse("df3ba29e-f58f-476c-aae2-f8c35d2e0cc4"), item.Identifier));
 	}
 
 	[Fact]
-	public void SynchronizeItems()
+	public void Synchronize()
 	{
-		var feed = new FeedMock();
-		feed.LoadAsync();
-		feed.CompleteLoad();
+		var feed = new FeedLoaderMock();
+		feed.InitializeAsync();
+		feed.CompleteInitialize();
 		var task = feed.SynchronizeAsync();
 		Assert.False(task.IsCompleted);
 		Assert.Raises<FeedItemsUpdatedEventArgs>(
 			h => feed.ItemsUpdated += h,
 			h => feed.ItemsUpdated -= h,
-			() => feed.CompleteSynchronize(
-				TestHelpers.CreateItem(Guid.Parse("df3ba29e-f58f-476c-aae2-f8c35d2e0cc4"), ItemStorage)));
+			() => feed.CompleteSynchronize(CreateItem(Guid.Parse("df3ba29e-f58f-476c-aae2-f8c35d2e0cc4"))));
 		Assert.True(task.IsCompleted);
 		Assert.Collection(
 			feed.Items,
@@ -78,16 +94,15 @@ public class FeedTests
 	}
 
 	[Fact]
-	public void SynchronizeItems_WithoutLoading()
+	public void Synchronize_WithoutInitializing()
 	{
-		var feed = new FeedMock();
+		var feed = new FeedLoaderMock();
 		var task = feed.SynchronizeAsync();
 		Assert.False(task.IsCompleted);
 		Assert.Raises<FeedItemsUpdatedEventArgs>(
 			h => feed.ItemsUpdated += h,
 			h => feed.ItemsUpdated -= h,
-			() => feed.CompleteLoad(
-				TestHelpers.CreateItem(Guid.Parse("df3ba29e-f58f-476c-aae2-f8c35d2e0cc4"), ItemStorage)));
+			() => feed.CompleteInitialize(CreateItem(Guid.Parse("df3ba29e-f58f-476c-aae2-f8c35d2e0cc4"))));
 		Assert.False(task.IsCompleted);
 		Assert.Collection(
 			feed.Items,
@@ -95,8 +110,7 @@ public class FeedTests
 		Assert.Raises<FeedItemsUpdatedEventArgs>(
 			h => feed.ItemsUpdated += h,
 			h => feed.ItemsUpdated -= h,
-			() => feed.CompleteSynchronize(
-				TestHelpers.CreateItem(Guid.Parse("bd977580-70eb-4359-b370-a41c15e1fbc8"), ItemStorage)));
+			() => feed.CompleteSynchronize(CreateItem(Guid.Parse("bd977580-70eb-4359-b370-a41c15e1fbc8"))));
 		Assert.True(task.IsCompleted);
 		Assert.Collection(
 			feed.Items,
@@ -104,16 +118,15 @@ public class FeedTests
 	}
 
 	[Fact]
-	public void SynchronizeItems_AlreadyInProgress()
+	public void Synchronize_AlreadyInProgress()
 	{
-		var feed = new FeedMock();
+		var feed = new FeedLoaderMock();
 		var taskA = feed.SynchronizeAsync();
 		var taskB = feed.SynchronizeAsync();
 		Assert.False(taskA.IsCompleted);
 		Assert.False(taskB.IsCompleted);
-		feed.CompleteLoad();
-		feed.CompleteSynchronize(
-			TestHelpers.CreateItem(Guid.Parse("df3ba29e-f58f-476c-aae2-f8c35d2e0cc4"), ItemStorage));
+		feed.CompleteInitialize();
+		feed.CompleteSynchronize(CreateItem(Guid.Parse("df3ba29e-f58f-476c-aae2-f8c35d2e0cc4")));
 		Assert.True(taskA.IsCompleted);
 		Assert.True(taskB.IsCompleted);
 		Assert.Collection(
@@ -122,20 +135,18 @@ public class FeedTests
 	}
 
 	[Fact]
-	public void SynchronizeItems_AfterFirstCompletion()
+	public void Synchronize_AfterFirstCompletion()
 	{
-		var feed = new FeedMock();
+		var feed = new FeedLoaderMock();
 		feed.SynchronizeAsync();
-		feed.CompleteLoad();
-		feed.CompleteSynchronize(
-			TestHelpers.CreateItem(Guid.Parse("df3ba29e-f58f-476c-aae2-f8c35d2e0cc4"), ItemStorage));
+		feed.CompleteInitialize();
+		feed.CompleteSynchronize(CreateItem(Guid.Parse("df3ba29e-f58f-476c-aae2-f8c35d2e0cc4")));
 		var task = feed.SynchronizeAsync();
 		Assert.False(task.IsCompleted);
 		Assert.Raises<FeedItemsUpdatedEventArgs>(
 			h => feed.ItemsUpdated += h,
 			h => feed.ItemsUpdated -= h,
-			() => feed.CompleteSynchronize(
-				TestHelpers.CreateItem(Guid.Parse("bd977580-70eb-4359-b370-a41c15e1fbc8"), ItemStorage)));
+			() => feed.CompleteSynchronize(CreateItem(Guid.Parse("bd977580-70eb-4359-b370-a41c15e1fbc8"))));
 		Assert.True(task.IsCompleted);
 		Assert.Collection(
 			feed.Items,
@@ -145,29 +156,15 @@ public class FeedTests
 	[Fact]
 	public void UpdateItemsManually()
 	{
-		var feed = new FeedMock();
-		feed.LoadAsync();
-		feed.CompleteLoad();
+		var feed = new FeedLoaderMock();
+		feed.InitializeAsync();
+		feed.CompleteInitialize();
 		Assert.Raises<FeedItemsUpdatedEventArgs>(
 			h => feed.ItemsUpdated += h,
 			h => feed.ItemsUpdated -= h,
-			() => feed.UpdateItems(
-				TestHelpers.CreateItem(Guid.Parse("bd977580-70eb-4359-b370-a41c15e1fbc8"), ItemStorage)));
+			() => feed.UpdateItems(CreateItem(Guid.Parse("bd977580-70eb-4359-b370-a41c15e1fbc8"))));
 		Assert.Collection(
 			feed.Items,
 			item => Assert.Equal(Guid.Parse("bd977580-70eb-4359-b370-a41c15e1fbc8"), item.Identifier));
-	}
-
-	[Fact]
-	public void UpdateMetadata()
-	{
-		var feed = new FeedMock();
-		Assert.Equal(new FeedMetadata(), feed.Metadata);
-		var metadata = new FeedMetadata { Name = "feed", Author = "author", Description = "description" };
-		Assert.Raises<FeedMetadataUpdatedEventArgs>(
-			h => feed.MetadataUpdated += h,
-			h => feed.MetadataUpdated -= h,
-			() => feed.UpdateMetadata(metadata));
-		Assert.Equal(metadata, feed.Metadata);
 	}
 }
