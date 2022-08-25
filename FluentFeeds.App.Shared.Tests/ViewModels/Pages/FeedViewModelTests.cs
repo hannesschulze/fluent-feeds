@@ -3,15 +3,17 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentFeeds.App.Shared.Models;
+using FluentFeeds.App.Shared.Models.Feeds;
+using FluentFeeds.App.Shared.Models.Feeds.Loaders;
+using FluentFeeds.App.Shared.Models.Items;
 using FluentFeeds.App.Shared.Models.Navigation;
 using FluentFeeds.App.Shared.Tests.Mock;
 using FluentFeeds.App.Shared.ViewModels.Pages;
 using FluentFeeds.Common;
 using FluentFeeds.Documents;
+using FluentFeeds.Feeds.Base.Feeds.Content;
 using FluentFeeds.Feeds.Base.Items;
 using FluentFeeds.Feeds.Base.Items.Content;
-using FluentFeeds.Feeds.Base.Items.ContentLoaders;
-using FluentFeeds.Feeds.Base.Nodes;
 using Xunit;
 
 namespace FluentFeeds.App.Shared.Tests.ViewModels.Pages;
@@ -23,6 +25,21 @@ public class FeedViewModelTests
 	private ModalServiceMock ModalService { get; } = new();
 
 	private SettingsServiceMock SettingsService { get; } = new();
+
+	private static Feed CreateFeed(FeedLoader loader)
+	{
+		return new Feed(
+			identifier: Guid.NewGuid(),
+			storage: null,
+			loaderFactory: _ => loader,
+			hasChildren: false,
+			parent: null,
+			name: null,
+			symbol: null,
+			metadata: new FeedMetadata(),
+			isUserCustomizable: false,
+			isExcludedFromGroup: false);
+	}
 	
 	[Fact]
 	public void InitialStates()
@@ -45,8 +62,9 @@ public class FeedViewModelTests
 	public void Synchronization_NotSynced()
 	{
 		var viewModel = new FeedViewModel(ModalService, FeedService, SettingsService);
-		var feed = new FeedMock(Guid.Empty);
-		viewModel.Load(MainNavigationRoute.Feed(FeedNode.Custom(feed, null, null, false)));
+		var feed = new FeedLoaderMock();
+		feed.CompleteInitialize();
+		viewModel.Load(MainNavigationRoute.Feed(CreateFeed(feed)));
 		Assert.False(viewModel.SyncCommand.CanExecute(null));
 		Assert.True(viewModel.IsSyncInProgress);
 		FeedService.CompleteInitialization();
@@ -59,10 +77,11 @@ public class FeedViewModelTests
 	public void Synchronization_AlreadySynced()
 	{
 		var viewModel = new FeedViewModel(ModalService, FeedService, SettingsService);
-		var feed = new FeedMock(Guid.Empty);
+		var feed = new FeedLoaderMock();
+		feed.CompleteInitialize();
 		feed.SynchronizeAsync();
 		feed.CompleteSynchronize();
-		viewModel.Load(MainNavigationRoute.Feed(FeedNode.Custom(feed, null, null, false)));
+		viewModel.Load(MainNavigationRoute.Feed(CreateFeed(feed)));
 		Assert.True(viewModel.SyncCommand.CanExecute(null));
 		Assert.False(viewModel.IsSyncInProgress);
 	}
@@ -71,8 +90,9 @@ public class FeedViewModelTests
 	public void Synchronization_ErrorHandling_InitializationFails()
 	{
 		var viewModel = new FeedViewModel(ModalService, FeedService, SettingsService);
-		var feed = new FeedMock(Guid.Empty);
-		viewModel.Load(MainNavigationRoute.Feed(FeedNode.Custom(feed, null, null, false)));
+		var feed = new FeedLoaderMock();
+		feed.CompleteInitialize();
+		viewModel.Load(MainNavigationRoute.Feed(CreateFeed(feed)));
 		FeedService.CompleteInitialization(new Exception("error"));
 		Assert.True(viewModel.SyncCommand.CanExecute(null));
 		Assert.False(viewModel.IsSyncInProgress);
@@ -82,8 +102,9 @@ public class FeedViewModelTests
 	public void Synchronization_ErrorHandling_SyncFails()
 	{
 		var viewModel = new FeedViewModel(ModalService, FeedService, SettingsService);
-		var feed = new FeedMock(Guid.Empty);
-		viewModel.Load(MainNavigationRoute.Feed(FeedNode.Custom(feed, null, null, false)));
+		var feed = new FeedLoaderMock();
+		feed.CompleteInitialize();
+		viewModel.Load(MainNavigationRoute.Feed(CreateFeed(feed)));
 		FeedService.CompleteInitialization();
 		var errorArgs = Assert.Raises<ModalServiceMock.ShowErrorModalEventArgs>(
 			h => ModalService.ShowErrorModal += h, h => ModalService.ShowErrorModal -= h,
@@ -98,11 +119,13 @@ public class FeedViewModelTests
 	public void Synchronization_StartedTwice()
 	{
 		var viewModel = new FeedViewModel(ModalService, FeedService, SettingsService);
-		var feedA = new FeedMock(Guid.Empty);
-		var feedB = new FeedMock(Guid.Empty);
-		viewModel.Load(MainNavigationRoute.Feed(FeedNode.Custom(feedA, null, null, false)));
+		var feedA = new FeedLoaderMock();
+		var feedB = new FeedLoaderMock();
+		feedA.CompleteInitialize();
+		feedB.CompleteInitialize();
+		viewModel.Load(MainNavigationRoute.Feed(CreateFeed(feedA)));
 		FeedService.CompleteInitialization();
-		viewModel.Load(MainNavigationRoute.Feed(FeedNode.Custom(feedB, null, null, false)));
+		viewModel.Load(MainNavigationRoute.Feed(CreateFeed(feedB)));
 		FeedService.CompleteInitialization();
 		feedA.CompleteSynchronize();
 		Assert.False(viewModel.SyncCommand.CanExecute(null));
@@ -114,17 +137,19 @@ public class FeedViewModelTests
 	
 	private DateTimeOffset DummyItemBaseTimestamp { get; } = DateTimeOffset.Now;
 
-	private IReadOnlyStoredItem CreateDummyItem(
+	private IItemView CreateDummyItem(
 		TimeSpan timeOffset, ItemStorageMock? itemStorage = null, IItemContentLoader? contentLoader = null)
 	{
 		itemStorage ??= new ItemStorageMock();
 		return itemStorage.AddItems(
 			new[]
 			{
-				new Item(
-					null, null, DummyItemBaseTimestamp + timeOffset, DateTimeOffset.Now, "title", "author", "summary",
-					contentLoader ?? new StaticItemContentLoader(new ArticleItemContent(new RichText())))
-			}).First();
+				new ItemDescriptor(
+					identifier: null, title: "title", author: "author", summary: "summary",
+					publishedTimestamp: DummyItemBaseTimestamp + timeOffset, modifiedTimestamp: DateTimeOffset.Now,
+					url: null, contentUrl: null,
+					contentLoader: contentLoader ?? new StaticItemContentLoader(new ArticleItemContent(new RichText())))
+			}, Guid.Empty).First();
 	}
 
 	private static Task WaitForItemUpdateCompletion(FeedViewModel viewModel, Action startUpdate)
@@ -141,14 +166,15 @@ public class FeedViewModelTests
 	public async Task UpdateItems_Reload(ItemSortMode sortMode)
 	{
 		var viewModel = new FeedViewModel(ModalService, FeedService, SettingsService);
-		var feed = new FeedMock(Guid.Empty);
+		var feed = new FeedLoaderMock();
 		var itemA = CreateDummyItem(TimeSpan.FromMinutes(sortMode == ItemSortMode.Oldest ? 1 : 3));
 		var itemB = CreateDummyItem(TimeSpan.FromMinutes(2));
 		var itemC = CreateDummyItem(TimeSpan.FromMinutes(sortMode == ItemSortMode.Oldest ? 3 : 1));
 		await WaitForItemUpdateCompletion(viewModel, 
-			() => viewModel.Load(MainNavigationRoute.Feed(FeedNode.Custom(feed, null, null, false))));
+			() => viewModel.Load(MainNavigationRoute.Feed(CreateFeed(feed))));
 		viewModel.SelectedSortMode = sortMode;
 		FeedService.CompleteInitialization();
+		await WaitForItemUpdateCompletion(viewModel, () => feed.CompleteInitialize());
 		await WaitForItemUpdateCompletion(viewModel, () => feed.CompleteSynchronize(itemB, itemC, itemA));
 		Assert.Collection(
 			viewModel.Items,
@@ -164,14 +190,15 @@ public class FeedViewModelTests
 	public async Task UpdateItems_Add(ItemSortMode sortMode)
 	{
 		var viewModel = new FeedViewModel(ModalService, FeedService, SettingsService);
-		var feed = new FeedMock(Guid.Empty);
+		var feed = new FeedLoaderMock();
 		var itemA = CreateDummyItem(TimeSpan.FromMinutes(sortMode == ItemSortMode.Oldest ? 1 : 3));
 		var itemB = CreateDummyItem(TimeSpan.FromMinutes(2));
 		var itemC = CreateDummyItem(TimeSpan.FromMinutes(sortMode == ItemSortMode.Oldest ? 3 : 1));
 		await WaitForItemUpdateCompletion(viewModel,
-			() => viewModel.Load(MainNavigationRoute.Feed(FeedNode.Custom(feed, null, null, false))));
+			() => viewModel.Load(MainNavigationRoute.Feed(CreateFeed(feed))));
 		viewModel.SelectedSortMode = sortMode;
 		FeedService.CompleteInitialization();
+		await WaitForItemUpdateCompletion(viewModel, () => feed.CompleteInitialize());
 		await WaitForItemUpdateCompletion(viewModel, () => feed.CompleteSynchronize(itemB));
 		viewModel.SelectedItems = ImmutableArray.Create(itemB);
 		await WaitForItemUpdateCompletion(viewModel, () => feed.UpdateItems(itemB, itemC, itemA));
@@ -189,13 +216,14 @@ public class FeedViewModelTests
 	public async Task UpdateItems_Remove()
 	{
 		var viewModel = new FeedViewModel(ModalService, FeedService, SettingsService);
-		var feed = new FeedMock(Guid.Empty);
+		var feed = new FeedLoaderMock();
 		var itemA = CreateDummyItem(TimeSpan.FromMinutes(3));
 		var itemB = CreateDummyItem(TimeSpan.FromMinutes(2));
 		var itemC = CreateDummyItem(TimeSpan.FromMinutes(1));
 		await WaitForItemUpdateCompletion(viewModel,
-			() => viewModel.Load(MainNavigationRoute.Feed(FeedNode.Custom(feed, null, null, false))));
+			() => viewModel.Load(MainNavigationRoute.Feed(CreateFeed(feed))));
 		FeedService.CompleteInitialization();
+		await WaitForItemUpdateCompletion(viewModel, () => feed.CompleteInitialize());
 		await WaitForItemUpdateCompletion(viewModel, () => feed.CompleteSynchronize(itemA, itemB, itemC));
 		viewModel.SelectedItems = ImmutableArray.Create(itemA, itemB);
 		await WaitForItemUpdateCompletion(viewModel, () => feed.UpdateItems(itemA, itemC));
@@ -214,7 +242,7 @@ public class FeedViewModelTests
 		var viewModel = new FeedViewModel(ModalService, FeedService, SettingsService);
 		var item = CreateDummyItem(TimeSpan.FromMinutes(1));
 		viewModel.SelectedItems = ImmutableArray.Create(item);
-		viewModel.SelectedItems = ImmutableArray<IReadOnlyStoredItem>.Empty;
+		viewModel.SelectedItems = ImmutableArray<IItemView>.Empty;
 		Assert.False(viewModel.ToggleReadCommand.CanExecute(null));
 		Assert.False(viewModel.DeleteCommand.CanExecute(null));
 		Assert.False(viewModel.ReloadContentCommand.CanExecute(null));
@@ -244,7 +272,7 @@ public class FeedViewModelTests
 	public void ItemSelection_Single()
 	{
 		var viewModel = new FeedViewModel(ModalService, FeedService, SettingsService);
-		var contentA = new ArticleItemContent(new RichText(), isReloadable: true);
+		var contentA = new ArticleItemContent(new RichText()) { IsReloadable = true };
 		var contentB = new ArticleItemContent(new RichText());
 		var item = CreateDummyItem(
 			TimeSpan.FromMinutes(1), new ItemStorageMock(), new StaticItemContentLoader(contentA));
@@ -259,7 +287,7 @@ public class FeedViewModelTests
 		Assert.False(viewModel.IsLoadContentInProgress);
 		Assert.True(viewModel.IsReloadContentAvailable);
 		Assert.Equal(FeedNavigationRoute.Article(item, contentA), viewModel.CurrentRoute);
-		((StoredItem)item).ContentLoader = new StaticItemContentLoader(contentB);
+		((Item)item).ContentLoader = new StaticItemContentLoader(contentB);
 		Assert.True(viewModel.ToggleReadCommand.CanExecute(null));
 		Assert.True(viewModel.DeleteCommand.CanExecute(null));
 		Assert.False(viewModel.ReloadContentCommand.CanExecute(null));
@@ -274,13 +302,13 @@ public class FeedViewModelTests
 	public void ItemSelection_Single_ShowContentLoading()
 	{
 		var viewModel = new FeedViewModel(ModalService, FeedService, SettingsService);
-		var contentA = new ArticleItemContent(new RichText(), isReloadable: true);
-		var contentB = new ArticleItemContent(new RichText(), isReloadable: true);
+		var contentA = new ArticleItemContent(new RichText()) { IsReloadable = true };
+		var contentB = new ArticleItemContent(new RichText()) { IsReloadable = true };
 		var item = CreateDummyItem(
 			TimeSpan.FromMinutes(1), new ItemStorageMock(), new StaticItemContentLoader(contentA));
 		viewModel.SelectedItems = ImmutableArray.Create(item);
 		var contentLoader = new ItemContentLoaderMock();
-		((StoredItem)item).ContentLoader = contentLoader;
+		((Item)item).ContentLoader = contentLoader;
 		Assert.True(viewModel.ToggleReadCommand.CanExecute(null));
 		Assert.True(viewModel.DeleteCommand.CanExecute(null));
 		Assert.False(viewModel.ReloadContentCommand.CanExecute(null));
@@ -326,7 +354,7 @@ public class FeedViewModelTests
 	public void Actions_ReloadContentManually()
 	{
 		var viewModel = new FeedViewModel(ModalService, FeedService, SettingsService);
-		var contentA = new ArticleItemContent(new RichText(), isReloadable: true);
+		var contentA = new ArticleItemContent(new RichText()) { IsReloadable = true };
 		var contentB = new ArticleItemContent(new RichText());
 		var contentLoader = new ItemContentLoaderMock();
 		contentLoader.CompleteLoad(contentA);
@@ -343,7 +371,7 @@ public class FeedViewModelTests
 		var viewModel = new FeedViewModel(ModalService, FeedService, SettingsService);
 		var itemA = CreateDummyItem(TimeSpan.FromMinutes(1));
 		var itemB = CreateDummyItem(TimeSpan.FromMinutes(2));
-		((StoredItem)itemA).IsRead = true;
+		((Item)itemA).IsRead = true;
 		viewModel.SelectedItems = ImmutableArray.Create(itemA, itemB);
 		Assert.Equal(Symbol.MailRead, viewModel.ToggleReadSymbol);
 		viewModel.ToggleReadCommand.Execute(null);
@@ -358,8 +386,8 @@ public class FeedViewModelTests
 		var viewModel = new FeedViewModel(ModalService, FeedService, SettingsService);
 		var itemA = CreateDummyItem(TimeSpan.FromMinutes(1));
 		var itemB = CreateDummyItem(TimeSpan.FromMinutes(2));
-		((StoredItem)itemA).IsRead = true;
-		((StoredItem)itemB).IsRead = true;
+		((Item)itemA).IsRead = true;
+		((Item)itemB).IsRead = true;
 		viewModel.SelectedItems = ImmutableArray.Create(itemA, itemB);
 		Assert.Equal(Symbol.MailUnread, viewModel.ToggleReadSymbol);
 		viewModel.ToggleReadCommand.Execute(null);
@@ -379,7 +407,7 @@ public class FeedViewModelTests
 		var itemC = CreateDummyItem(TimeSpan.FromMinutes(3), itemStorageB);
 		viewModel.SelectedItems = ImmutableArray.Create(itemA, itemB, itemC);
 		viewModel.DeleteCommand.Execute(null);
-		Assert.Empty(itemStorageA.GetItems());
-		Assert.Empty(itemStorageB.GetItems());
+		Assert.Empty(itemStorageA.GetItems(Guid.Empty));
+		Assert.Empty(itemStorageB.GetItems(Guid.Empty));
 	}
 }

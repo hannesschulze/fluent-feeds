@@ -1,8 +1,8 @@
 using System;
 using System.Net.Http;
+using System.ServiceModel.Syndication;
 using System.Threading.Tasks;
 using System.Xml;
-using SysSyndicationFeed = System.ServiceModel.Syndication.SyndicationFeed;
 
 namespace FluentFeeds.Feeds.Syndication.Download;
 
@@ -21,11 +21,11 @@ public sealed class FeedDownloader : IFeedDownloader
 	/// </summary>
 	public Uri Url { get; }
 	
-	public async Task<SysSyndicationFeed> DownloadAsync()
+	public async Task<SyndicationFeed> DownloadAsync()
 	{
 		await using var stream = await _httpClient.GetStreamAsync(Url);
 		using var xmlReader = XmlReader.Create(stream);
-		return SysSyndicationFeed.Load(xmlReader);
+		return SyndicationFeed.Load(xmlReader);
 	}
 
 	private readonly HttpClient _httpClient = new();

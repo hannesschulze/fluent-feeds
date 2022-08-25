@@ -5,11 +5,11 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using AngleSharp;
 using AngleSharp.Html.Parser;
+using FluentFeeds.Common.Helpers;
 using FluentFeeds.Documents.Blocks;
 using FluentFeeds.Documents.Html;
 using FluentFeeds.Documents.Json;
 using FluentFeeds.Documents.PlainText;
-using FluentFeeds.Documents.Helpers;
 
 namespace FluentFeeds.Documents;
 

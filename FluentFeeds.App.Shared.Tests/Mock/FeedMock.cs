@@ -3,41 +3,37 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
-using FluentFeeds.Feeds.Base;
-using FluentFeeds.Feeds.Base.Items;
+using FluentFeeds.App.Shared.Models.Feeds.Loaders;
+using FluentFeeds.App.Shared.Models.Items;
 
 namespace FluentFeeds.App.Shared.Tests.Mock;
 
-public sealed class FeedMock : Feed
+public sealed class FeedLoaderMock : FeedLoader
 {
-	public void CompleteSynchronize(IEnumerable<IReadOnlyStoredItem> items) =>
-		_synchronizeCompletionSource.TrySetResult(items);
-	public void CompleteSynchronize(params IReadOnlyStoredItem[] items) =>
-		CompleteSynchronize(items.AsEnumerable());
+	public void CompleteInitialize(IEnumerable<IItemView> items) => _initializeCompletionSource.TrySetResult(items);
+	public void CompleteInitialize(params IItemView[] items) => CompleteInitialize(items.AsEnumerable());
+	public void CompleteInitialize(Exception exception) => _initializeCompletionSource.TrySetException(exception);
+
+	public void CompleteSynchronize(IEnumerable<IItemView> items) => _synchronizeCompletionSource.TrySetResult(items);
+	public void CompleteSynchronize(params IItemView[] items) => CompleteSynchronize(items.AsEnumerable());
 	public void CompleteSynchronize(Exception exception) => _synchronizeCompletionSource.TrySetException(exception);
 
-	public void UpdateItems(params IReadOnlyStoredItem[] items) => Items = items.ToImmutableHashSet();
-	
-	public FeedMock(Guid identifier, Uri? url = null)
+	public void UpdateItems(params IItemView[] items) => Items = items.ToImmutableHashSet();
+
+	protected override async Task DoInitializeAsync()
 	{
-		Identifier = identifier;
-		Url = url;
+		var items = await _initializeCompletionSource.Task;
+		_initializeCompletionSource = new TaskCompletionSource<IEnumerable<IItemView>>();
+		Items = items.ToImmutableHashSet();
 	}
-		
-	public Guid Identifier { get; }
-	
-	public Uri? Url { get; }
-
-	public void UpdateMetadata(FeedMetadata metadata) => Metadata = metadata;
-
-	protected override Task DoLoadAsync() => Task.CompletedTask;
 
 	protected override async Task DoSynchronizeAsync()
 	{
 		var items = await _synchronizeCompletionSource.Task;
-		_synchronizeCompletionSource = new TaskCompletionSource<IEnumerable<IReadOnlyStoredItem>>();
+		_synchronizeCompletionSource = new TaskCompletionSource<IEnumerable<IItemView>>();
 		Items = items.ToImmutableHashSet();
 	}
 
-	private TaskCompletionSource<IEnumerable<IReadOnlyStoredItem>> _synchronizeCompletionSource = new();
+	private TaskCompletionSource<IEnumerable<IItemView>> _initializeCompletionSource = new();
+	private TaskCompletionSource<IEnumerable<IItemView>> _synchronizeCompletionSource = new();
 }

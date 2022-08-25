@@ -3,15 +3,14 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using FluentFeeds.App.Shared.EventArgs;
 using FluentFeeds.App.Shared.Helpers;
+using FluentFeeds.App.Shared.Models.Feeds;
 using FluentFeeds.App.Shared.Models.Navigation;
 using FluentFeeds.App.Shared.Services;
 using FluentFeeds.App.Shared.ViewModels.Items.Navigation;
 using FluentFeeds.App.Shared.ViewModels.Modals;
 using FluentFeeds.Common;
-using FluentFeeds.Feeds.Base;
-using FluentFeeds.Feeds.Base.EventArgs;
-using FluentFeeds.Feeds.Base.Nodes;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
 
@@ -31,17 +30,13 @@ public sealed class MainViewModel : ObservableObject
 		_settingsItem =
 			new NavigationItemViewModel(MainNavigationRoute.Settings, isExpandable: false, "Settings", Symbol.Settings);
 		_footerItems.Add(_settingsItem);
-		var overviewFeedNode = feedService.OverviewNode;
-		var overviewItem = new FeedNavigationItemViewModel(modalService, overviewFeedNode, null, _feedItemRegistry);
-		var unreadFeedNode = FeedNode.Custom(new EmptyFeed(), "Unread", Symbol.Sparkle, false);
-		var unreadItem = new FeedNavigationItemViewModel(modalService, unreadFeedNode, null, _feedItemRegistry);
-		_feedItemRegistry.Add(overviewFeedNode, overviewItem);
-		_feedItemRegistry.Add(unreadFeedNode, unreadItem);
+		var overviewItem = new FeedNavigationItemViewModel(
+			modalService, feedService.OverviewFeed, null, _feedItemRegistry);
+		_feedItemRegistry.Add(feedService.OverviewFeed, overviewItem);
 		_feedItems.Add(overviewItem);
-		_feedItems.Add(unreadItem);
 		_feedItemTransformer = ObservableCollectionTransformer.CreateCached(
-			feedService.ProviderNodes, _feedItems, CreateRootNodeViewModel, rootNode => rootNode, _feedItemRegistry);
-		_currentRoute = MainNavigationRoute.Feed(overviewFeedNode);
+			feedService.ProviderFeeds, _feedItems, CreateRootFeedViewModel, _feedItemRegistry);
+		_currentRoute = MainNavigationRoute.Feed(feedService.OverviewFeed);
 		_backStack.Add(_currentRoute);
 		_selectedItem = overviewItem;
 
@@ -64,10 +59,13 @@ public sealed class MainViewModel : ObservableObject
 		}
 	}
 
-	private NavigationItemViewModel CreateRootNodeViewModel(IReadOnlyStoredFeedNode rootNode)
+	private NavigationItemViewModel CreateRootFeedViewModel(IFeedView rootFeed)
 	{
-		rootNode.Storage.NodesDeleted += HandleFeedNodesDeleted;
-		return new FeedNavigationItemViewModel(_modalService, rootNode, rootNode, _feedItemRegistry);
+		if (rootFeed.Storage != null)
+		{
+			rootFeed.Storage.FeedsDeleted += HandleFeedsDeleted;
+		}
+		return new FeedNavigationItemViewModel(_modalService, rootFeed, rootFeed, _feedItemRegistry);
 	}
 
 	/// <summary>
@@ -128,30 +126,30 @@ public sealed class MainViewModel : ObservableObject
 			newRoute.Type switch
 			{
 				MainNavigationRouteType.Settings => _settingsItem,
-				MainNavigationRouteType.Feed => _feedItemRegistry.GetValueOrDefault(newRoute.FeedNode!),
+				MainNavigationRouteType.Feed => _feedItemRegistry.GetValueOrDefault(newRoute.SelectedFeed!),
 				_ => null
 			};
 		_isChangingSelection = false;
 		CurrentRoute = newRoute;
 	}
 
-	private void HandleFeedNodesDeleted(object? sender, FeedNodesDeletedEventArgs e)
+	private void HandleFeedsDeleted(object? sender, FeedsDeletedEventArgs e)
 	{
-		var nodes = e.Nodes.ToImmutableHashSet<IReadOnlyFeedNode>();
+		var feeds = e.Feeds.ToImmutableHashSet();
 
 		// Clean up cache
-		foreach (var node in nodes)
+		foreach (var feed in feeds)
 		{
-			_feedItemRegistry.Remove(node);
+			_feedItemRegistry.Remove(feed);
 		}
 
-		// Remove nodes from the back stack
+		// Remove feeds from the back stack
 		bool changed = false;
 		MainNavigationRoute? previousRoute = null;
 		for (var i = _backStack.Count - 1; i >= 0; --i)
 		{
 			var route = _backStack[i];
-			if (route == previousRoute || (route.FeedNode != null && nodes.Contains(route.FeedNode)))
+			if (route == previousRoute || (route.SelectedFeed != null && feeds.Contains(route.SelectedFeed)))
 			{
 				_backStack.RemoveAt(i);
 				changed = true;
@@ -175,8 +173,8 @@ public sealed class MainViewModel : ObservableObject
 	private readonly NavigationItemViewModel _settingsItem;
 	private readonly ObservableCollection<NavigationItemViewModel> _feedItems = new();
 	private readonly ObservableCollection<NavigationItemViewModel> _footerItems = new();
-	private readonly ObservableCollectionTransformer<IReadOnlyStoredFeedNode, NavigationItemViewModel> _feedItemTransformer;
-	private readonly Dictionary<IReadOnlyFeedNode, NavigationItemViewModel> _feedItemRegistry = new();
+	private readonly ObservableCollectionTransformer<IFeedView, NavigationItemViewModel> _feedItemTransformer;
+	private readonly Dictionary<IFeedView, NavigationItemViewModel> _feedItemRegistry = new();
 	private MainNavigationRoute _currentRoute;
 	private NavigationItemViewModel? _selectedItem;
 	private bool _isChangingSelection;

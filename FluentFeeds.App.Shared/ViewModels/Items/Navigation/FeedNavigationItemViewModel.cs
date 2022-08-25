@@ -2,10 +2,10 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel;
 using FluentFeeds.App.Shared.Helpers;
+using FluentFeeds.App.Shared.Models.Feeds;
 using FluentFeeds.App.Shared.Models.Navigation;
 using FluentFeeds.App.Shared.Services;
 using FluentFeeds.App.Shared.ViewModels.Modals;
-using FluentFeeds.Feeds.Base.Nodes;
 using Microsoft.Toolkit.Mvvm.Input;
 
 namespace FluentFeeds.App.Shared.ViewModels.Items.Navigation;
@@ -17,33 +17,34 @@ public sealed class FeedNavigationItemViewModel : NavigationItemViewModel
 {
 	private ImmutableArray<NavigationItemActionViewModel> BuildActions()
 	{
-		if (FeedNode is not IReadOnlyStoredFeedNode storedNode || !FeedNode.IsUserCustomizable || RootNode == null)
+		var storage = Feed.Storage;
+		if (storage == null || !Feed.IsUserCustomizable || RootFeed == null)
 			return ImmutableArray<NavigationItemActionViewModel>.Empty;
 
 		var result = new List<NavigationItemActionViewModel>();
 		
-		if (storedNode.Type == FeedNodeType.Group)
+		if (Feed.Children != null)
 		{
-			var urlFactory = storedNode.Storage.Provider.UrlFeedFactory;
+			var urlFactory = storage.Provider.UrlFeedFactory;
 			if (urlFactory != null)
 			{
 				result.Add(new NavigationItemActionViewModel(
 					new RelayCommand(() => _modalService.Show(
-						new AddFeedViewModel(_modalService, urlFactory, RootNode, storedNode), this)),
+						new AddFeedViewModel(_modalService, urlFactory, RootFeed, Feed, storage), this)),
 					"Add feed…", null));
 			}
 			result.Add(new NavigationItemActionViewModel(
-				new RelayCommand(() => _modalService.Show(new AddGroupViewModel(RootNode, storedNode), this)),
+				new RelayCommand(() => _modalService.Show(new AddGroupViewModel(RootFeed, Feed, storage), this)),
 				"Add group…", null));
 		}
 		
-		if (storedNode != RootNode)
+		if (Feed != RootFeed)
 		{
 			result.Add(new NavigationItemActionViewModel(
-				new RelayCommand(() => _modalService.Show(new EditNodeViewModel(RootNode, storedNode), this)),
+				new RelayCommand(() => _modalService.Show(new EditFeedViewModel(RootFeed, Feed, storage), this)),
 				"Edit…", null));
 			result.Add(new NavigationItemActionViewModel(
-				new RelayCommand(() => _modalService.Show(new DeleteNodeViewModel(_modalService, storedNode), this)),
+				new RelayCommand(() => _modalService.Show(new DeleteFeedViewModel(_modalService, Feed, storage), this)),
 				"Delete", null));
 		}
 		
@@ -51,48 +52,47 @@ public sealed class FeedNavigationItemViewModel : NavigationItemViewModel
 	}
 
 	public FeedNavigationItemViewModel(
-		IModalService modalService, IReadOnlyFeedNode feedNode, IReadOnlyStoredFeedNode? rootNode,
-		Dictionary<IReadOnlyFeedNode, NavigationItemViewModel> feedItemRegistry) : base(
-			MainNavigationRoute.Feed(feedNode), isExpandable: feedNode.Children != null, feedNode.DisplayTitle,
-			feedNode.DisplaySymbol)
+		IModalService modalService, IFeedView feed, IFeedView? rootFeed,
+		Dictionary<IFeedView, NavigationItemViewModel> feedItemRegistry) : base(
+			MainNavigationRoute.Feed(feed), isExpandable: feed.Children != null, feed.DisplayName, feed.DisplaySymbol)
 	{
 		_modalService = modalService;
 
-		FeedNode = feedNode;
-		FeedNode.PropertyChanged += HandlePropertyChanged;
-		RootNode = rootNode;
+		Feed = feed;
+		Feed.PropertyChanged += HandlePropertyChanged;
+		RootFeed = rootFeed;
 		Actions = BuildActions();
 
-		if (feedNode.Children != null)
+		if (feed.Children != null)
 		{
 			ObservableCollectionTransformer.CreateCached(
-				feedNode.Children, MutableChildren,
-				node => new FeedNavigationItemViewModel(modalService, node, rootNode, feedItemRegistry),
+				feed.Children, MutableChildren,
+				child => new FeedNavigationItemViewModel(modalService, child, rootFeed, feedItemRegistry), 
 				feedItemRegistry);
 		}
 	}
 	
 	/// <summary>
-	/// The source feed node.
+	/// The source feed.
 	/// </summary>
-	public IReadOnlyFeedNode FeedNode { get; }
+	public IFeedView Feed { get; }
 	
 	/// <summary>
-	/// The root for the source node.
+	/// The root for the source feed.
 	/// </summary>
-	public IReadOnlyStoredFeedNode? RootNode { get; }
+	public IFeedView? RootFeed { get; }
 
 	private void HandlePropertyChanged(object? sender, PropertyChangedEventArgs e)
 	{
 		switch (e.PropertyName)
 		{
-			case nameof(IReadOnlyFeedNode.DisplayTitle):
-				Title = FeedNode.DisplayTitle;
+			case nameof(IFeedView.DisplayName):
+				Title = Feed.DisplayName;
 				break;
-			case nameof(IReadOnlyFeedNode.DisplaySymbol):
-				Symbol = FeedNode.DisplaySymbol;
+			case nameof(IFeedView.DisplaySymbol):
+				Symbol = Feed.DisplaySymbol;
 				break;
-			case nameof(IReadOnlyFeedNode.IsUserCustomizable):
+			case nameof(IFeedView.IsUserCustomizable):
 				Actions = BuildActions();
 				break;
 		}

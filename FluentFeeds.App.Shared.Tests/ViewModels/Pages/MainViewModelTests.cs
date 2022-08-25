@@ -5,7 +5,7 @@ using FluentFeeds.App.Shared.Tests.Mock;
 using FluentFeeds.App.Shared.ViewModels.Items.Navigation;
 using FluentFeeds.App.Shared.ViewModels.Pages;
 using FluentFeeds.Common;
-using FluentFeeds.Feeds.Base.Nodes;
+using FluentFeeds.Feeds.Base.Feeds;
 using Xunit;
 
 namespace FluentFeeds.App.Shared.Tests.ViewModels.Pages;
@@ -27,8 +27,8 @@ public class MainViewModelTests
 		var viewModel = new MainViewModel(FeedService, ModalService);
 		var provider = new FeedProviderMock(Guid.Empty);
 		var feedStorage = new FeedStorageMock(provider);
-		var node = feedStorage.AddRootNode(provider.CreateInitialTree(feedStorage));
-		FeedService.ProviderNodes.Add(node);
+		var node = feedStorage.AddRootNode(provider.CreateInitialTree());
+		FeedService.ProviderFeeds.Add(node);
 		FeedService.CompleteInitialization();
 
 		Assert.Collection(
@@ -36,20 +36,14 @@ public class MainViewModelTests
 			item =>
 			{
 				var feedItem = Assert.IsType<FeedNavigationItemViewModel>(item);
-				Assert.Equal(FeedService.OverviewNode, feedItem.FeedNode);
-				Assert.Null(feedItem.RootNode);
+				Assert.Equal(FeedService.OverviewFeed, feedItem.Feed);
+				Assert.Null(feedItem.RootFeed);
 			},
 			item =>
 			{
 				var feedItem = Assert.IsType<FeedNavigationItemViewModel>(item);
-				Assert.Equal("Unread", feedItem.Title);
-				Assert.Null(feedItem.RootNode);
-			},
-			item =>
-			{
-				var feedItem = Assert.IsType<FeedNavigationItemViewModel>(item);
-				Assert.Equal(node, feedItem.FeedNode);
-				Assert.Equal(node, feedItem.RootNode);
+				Assert.Equal(node, feedItem.Feed);
+				Assert.Equal(node, feedItem.RootFeed);
 			});
 
 		Assert.Collection(
@@ -82,7 +76,7 @@ public class MainViewModelTests
 		var viewModel = new MainViewModel(FeedService, ModalService);
 		FeedService.CompleteInitialization();
 		
-		Assert.Equal(MainNavigationRoute.Feed(FeedService.OverviewNode), viewModel.CurrentRoute);
+		Assert.Equal(MainNavigationRoute.Feed(FeedService.OverviewFeed), viewModel.CurrentRoute);
 		Assert.Equal(viewModel.FeedItems[0], viewModel.SelectedItem);
 		Assert.False(viewModel.GoBackCommand.CanExecute(null));
 		viewModel.SelectedItem = viewModel.FooterItems[0];
@@ -99,7 +93,7 @@ public class MainViewModelTests
 		
 		viewModel.SelectedItem = viewModel.FooterItems[0];
 		viewModel.GoBackCommand.Execute(null);
-		Assert.Equal(MainNavigationRoute.Feed(FeedService.OverviewNode), viewModel.CurrentRoute);
+		Assert.Equal(MainNavigationRoute.Feed(FeedService.OverviewFeed), viewModel.CurrentRoute);
 		Assert.Equal(viewModel.FeedItems[0], viewModel.SelectedItem);
 		Assert.False(viewModel.GoBackCommand.CanExecute(null));
 	}
@@ -110,28 +104,28 @@ public class MainViewModelTests
 		var viewModel = new MainViewModel(FeedService, ModalService);
 		var provider = new FeedProviderMock(Guid.Empty);
 		var feedStorage = new FeedStorageMock(provider);
-		var rootNode = feedStorage.AddRootNode(FeedNode.Group("root", Symbol.Directory, true));
-		var nodeA = await feedStorage.AddNodeAsync(FeedNode.Group("a", Symbol.Directory, true), rootNode.Identifier);
-		var nodeB = await feedStorage.AddNodeAsync(FeedNode.Group("b", Symbol.Directory, true), rootNode.Identifier);
-		FeedService.ProviderNodes.Add(rootNode);
+		var rootNode = feedStorage.AddRootNode(new GroupFeedDescriptor("root", Symbol.Directory));
+		var nodeA = await feedStorage.AddFeedAsync(new GroupFeedDescriptor("a", Symbol.Directory), rootNode.Identifier);
+		var nodeB = await feedStorage.AddFeedAsync(new GroupFeedDescriptor("b", Symbol.Directory), rootNode.Identifier);
+		FeedService.ProviderFeeds.Add(rootNode);
 		FeedService.CompleteInitialization();
 
 		viewModel.SelectedItem = viewModel.FooterItems[0];
-		viewModel.SelectedItem = viewModel.FeedItems[2].Children[0];
-		viewModel.SelectedItem = viewModel.FeedItems[2].Children[1];
-		viewModel.SelectedItem = viewModel.FeedItems[2].Children[0];
-		viewModel.SelectedItem = viewModel.FeedItems[2].Children[1];
+		viewModel.SelectedItem = viewModel.FeedItems[1].Children[0];
+		viewModel.SelectedItem = viewModel.FeedItems[1].Children[1];
+		viewModel.SelectedItem = viewModel.FeedItems[1].Children[0];
+		viewModel.SelectedItem = viewModel.FeedItems[1].Children[1];
 		
-		await feedStorage.DeleteNodeAsync(nodeB.Identifier);
+		await feedStorage.DeleteFeedAsync(nodeB.Identifier);
 		Assert.Equal(MainNavigationRoute.Feed(nodeA), viewModel.CurrentRoute);
-		Assert.Equal(viewModel.FeedItems[2].Children[0], viewModel.SelectedItem);
+		Assert.Equal(viewModel.FeedItems[1].Children[0], viewModel.SelectedItem);
 		Assert.True(viewModel.GoBackCommand.CanExecute(null));
 		viewModel.GoBackCommand.Execute(null);
 		Assert.Equal(MainNavigationRoute.Settings, viewModel.CurrentRoute);
 		Assert.Equal(viewModel.FooterItems[0], viewModel.SelectedItem);
 		Assert.True(viewModel.GoBackCommand.CanExecute(null));
 		viewModel.GoBackCommand.Execute(null);
-		Assert.Equal(MainNavigationRoute.Feed(FeedService.OverviewNode), viewModel.CurrentRoute);
+		Assert.Equal(MainNavigationRoute.Feed(FeedService.OverviewFeed), viewModel.CurrentRoute);
 		Assert.Equal(viewModel.FeedItems[0], viewModel.SelectedItem);
 		Assert.False(viewModel.GoBackCommand.CanExecute(null));
 	}

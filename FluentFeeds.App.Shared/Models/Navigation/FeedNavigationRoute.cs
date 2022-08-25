@@ -1,5 +1,5 @@
 using System;
-using FluentFeeds.Feeds.Base.Items;
+using FluentFeeds.App.Shared.Models.Items;
 using FluentFeeds.Feeds.Base.Items.Content;
 
 namespace FluentFeeds.App.Shared.Models.Navigation;
@@ -18,7 +18,7 @@ public readonly struct FeedNavigationRoute : IEquatable<FeedNavigationRoute>
 	/// <summary>
 	/// Page displaying article content for an item.
 	/// </summary>
-	public static FeedNavigationRoute Article(IReadOnlyStoredItem item, ArticleItemContent content) =>
+	public static FeedNavigationRoute Article(IItemView item, ArticleItemContent content) =>
 		new(FeedNavigationRouteType.Article, 1, item, content);
 
 	/// <summary>
@@ -34,7 +34,7 @@ public readonly struct FeedNavigationRoute : IEquatable<FeedNavigationRoute>
 	/// <summary>
 	/// The single item selected (not set for <see cref="FeedNavigationRouteType.Selection"/>.
 	/// </summary>
-	public IReadOnlyStoredItem? Item { get; }
+	public IItemView? Item { get; }
 	
 	/// <summary>
 	/// The loaded content for the article item (only set for <see cref="FeedNavigationRouteType.Article"/>).
@@ -42,8 +42,7 @@ public readonly struct FeedNavigationRoute : IEquatable<FeedNavigationRoute>
 	public ArticleItemContent? ArticleContent { get; }
 
 	private FeedNavigationRoute(
-		FeedNavigationRouteType type, int selectionCount, IReadOnlyStoredItem? item,
-		ArticleItemContent? articleContent)
+		FeedNavigationRouteType type, int selectionCount, IItemView? item, ArticleItemContent? articleContent)
 	{
 		Type = type;
 		SelectionCount = selectionCount;

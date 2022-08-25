@@ -10,5 +10,5 @@ public class FeedProviderDb
 {
 	[Key]
 	public Guid Identifier { get; set; }
-	public FeedNodeDb RootNode { get; set; } = null!;
+	public FeedDb RootNode { get; set; } = null!;
 }

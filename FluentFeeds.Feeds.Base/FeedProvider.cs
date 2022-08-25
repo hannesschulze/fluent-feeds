@@ -4,15 +4,15 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using FluentFeeds.Documents;
 using FluentFeeds.Feeds.Base.Factories;
+using FluentFeeds.Feeds.Base.Feeds;
+using FluentFeeds.Feeds.Base.Feeds.Content;
 using FluentFeeds.Feeds.Base.Items.Content;
-using FluentFeeds.Feeds.Base.Items.ContentLoaders;
-using FluentFeeds.Feeds.Base.Nodes;
-using FluentFeeds.Feeds.Base.Storage;
 
 namespace FluentFeeds.Feeds.Base;
 
 /// <summary>
-/// A pluggable class which can create feeds and has its own area in the sidebar.
+/// A pluggable class which is responsible for the serialization of feed content loaders and item content loaders, as
+/// well as creating new feeds.
 /// </summary>
 public abstract class FeedProvider
 {
@@ -34,27 +34,28 @@ public abstract class FeedProvider
 	public IUrlFeedFactory? UrlFeedFactory { get; protected set; }
 	
 	/// <summary>
-	/// Create the initial set of feed nodes presented when the user adds this provider and there is no saved tree.
+	/// Create a descriptor for the initial feed tree presented when the user adds this provider and there is no saved
+	/// tree.
 	/// </summary>
-	public abstract IReadOnlyFeedNode CreateInitialTree(IFeedStorage feedStorage);
+	public abstract GroupFeedDescriptor CreateInitialTree();
 	
 	/// <summary>
-	/// Load a serialized feed as returned by <see cref="StoreFeedAsync"/>.
+	/// Serialize a feed content loader so it can be loaded using <see cref="LoadFeedAsync"/>.
 	/// </summary>
-	public abstract Task<Feed> LoadFeedAsync(IFeedStorage feedStorage, string serialized);
+	public abstract Task<string> StoreFeedAsync(IFeedContentLoader contentLoader);
 	
 	/// <summary>
-	/// Serialize a feed so it can be loaded using <see cref="LoadFeedAsync"/>.
+	/// Load a serialized feed content loader as returned by <see cref="StoreFeedAsync"/>.
 	/// </summary>
-	public abstract Task<string> StoreFeedAsync(Feed feed);
+	public abstract Task<IFeedContentLoader> LoadFeedAsync(string serialized);
 
 	/// <summary>
-	/// Serialize a item content into a string.
+	/// Serialize an item content loader into a string.
 	/// </summary>
 	/// <remarks>
 	/// The default implementation loads the content and serializes it as JSON.
 	/// </remarks>
-	public virtual async Task<string> StoreContentAsync(IItemContentLoader contentLoader)
+	public virtual async Task<string> StoreItemContentAsync(IItemContentLoader contentLoader)
 	{
 		var loaded = await contentLoader.LoadAsync();
 		var content = new SerializedContent(loaded.Type, (loaded as ArticleItemContent)?.Body);
@@ -63,9 +64,9 @@ public abstract class FeedProvider
 	}
 
 	/// <summary>
-	/// Deserialize a content loader from a string.
+	/// Deserialize an item content loader from a string.
 	/// </summary>
-	public virtual Task<IItemContentLoader> LoadContentAsync(string serialized)
+	public virtual Task<IItemContentLoader> LoadItemContentAsync(string serialized)
 	{
 		var options = new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
 		var content = JsonSerializer.Deserialize<SerializedContent>(serialized, options) ?? throw new JsonException();

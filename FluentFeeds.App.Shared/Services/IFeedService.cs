@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
-using FluentFeeds.App.Shared.Models;
-using FluentFeeds.Feeds.Base.Nodes;
+using FluentFeeds.App.Shared.Models.Feeds;
 
 namespace FluentFeeds.App.Shared.Services;
 
@@ -16,12 +15,12 @@ public interface IFeedService
 	Task InitializeAsync();
 
 	/// <summary>
-	/// The root nodes for loaded feed providers.
+	/// The root feeds for loaded feed providers.
 	/// </summary>
-	ReadOnlyObservableCollection<IReadOnlyStoredFeedNode> ProviderNodes { get; }
+	ReadOnlyObservableCollection<IFeedView> ProviderFeeds { get; }
 	
 	/// <summary>
-	/// Feed node providing an overview of all available feeds.
+	/// Feed providing an overview of all available feeds.
 	/// </summary>
-	IReadOnlyFeedNode OverviewNode { get; }
+	IFeedView OverviewFeed { get; }
 }

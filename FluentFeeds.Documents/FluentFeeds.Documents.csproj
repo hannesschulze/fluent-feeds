@@ -12,4 +12,8 @@
 	<ItemGroup>
 		<PackageReference Include="AngleSharp" Version="0.17.1" />
 	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\FluentFeeds.Common\FluentFeeds.Common.csproj" />
+	</ItemGroup>
 </Project>

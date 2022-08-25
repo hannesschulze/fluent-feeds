@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
+using FluentFeeds.App.Shared.Models.Feeds;
+using FluentFeeds.App.Shared.Models.Feeds.Loaders;
 using FluentFeeds.App.Shared.Services;
 using FluentFeeds.Common;
-using FluentFeeds.Feeds.Base;
-using FluentFeeds.Feeds.Base.Nodes;
+using FluentFeeds.Feeds.Base.Feeds.Content;
 
 namespace FluentFeeds.App.Shared.Tests.Mock;
 
@@ -12,7 +13,7 @@ public sealed class FeedServiceMock : IFeedService
 {
 	public FeedServiceMock()
 	{
-		_readOnlyProviderNodes = new ReadOnlyObservableCollection<IReadOnlyStoredFeedNode>(ProviderNodes);
+		_readOnlyProviderFeeds = new ReadOnlyObservableCollection<IFeedView>(ProviderFeeds);
 	}
 	
 	public void CompleteInitialization() =>
@@ -27,13 +28,23 @@ public sealed class FeedServiceMock : IFeedService
 		return completionSource.Task;
 	}
 
-	public ObservableCollection<IReadOnlyStoredFeedNode> ProviderNodes { get; } = new();
+	public ObservableCollection<IFeedView> ProviderFeeds { get; } = new();
 
-	ReadOnlyObservableCollection<IReadOnlyStoredFeedNode> IFeedService.ProviderNodes => _readOnlyProviderNodes;
+	ReadOnlyObservableCollection<IFeedView> IFeedService.ProviderFeeds => _readOnlyProviderFeeds;
 
-	public IReadOnlyFeedNode OverviewNode { get; } =
-		FeedNode.Custom(new EmptyFeed(), "Overview", Symbol.Home, isUserCustomizable: false);
+	public IFeedView OverviewFeed { get; } =
+		new Feed(
+			identifier: Guid.Empty,
+			storage: null,
+			loaderFactory: _ => new EmptyFeedLoader(),
+			hasChildren: false,
+			parent: null,
+			name: "Overview",
+			symbol: Symbol.Home,
+			metadata: new FeedMetadata(),
+			isUserCustomizable: false,
+			isExcludedFromGroup: false);
 
-	private readonly ReadOnlyObservableCollection<IReadOnlyStoredFeedNode> _readOnlyProviderNodes;
+	private readonly ReadOnlyObservableCollection<IFeedView> _readOnlyProviderFeeds;
 	private TaskCompletionSource? _initializationCompletionSource;
 }

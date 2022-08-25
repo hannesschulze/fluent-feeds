@@ -1,15 +1,15 @@
 ﻿using System;
-using System.Threading.Tasks;
-using FluentFeeds.Feeds.Base;
 using FluentFeeds.Feeds.Base.Factories;
-using FluentFeeds.Feeds.Base.Storage;
+using FluentFeeds.Feeds.Base.Feeds.Content;
 
 namespace FluentFeeds.App.Shared.Tests.Mock;
 
 public sealed class UrlFeedFactoryMock : IUrlFeedFactory
 {
-	public Task<Feed> CreateAsync(IFeedStorage feedStorage, Uri url)
+	public IFeedContentLoader Create(Uri url)
 	{
-		return Task.FromResult<Feed>(new FeedMock(Guid.NewGuid(), url));
+		var result = new FeedContentLoaderMock(url.ToString());
+		result.CompleteLoad(new FeedContent());
+		return result;
 	}
 }

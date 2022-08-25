@@ -7,16 +7,16 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using FluentFeeds.App.Shared.EventArgs;
 using FluentFeeds.App.Shared.Models;
+using FluentFeeds.App.Shared.Models.Feeds;
+using FluentFeeds.App.Shared.Models.Items;
 using FluentFeeds.App.Shared.Models.Navigation;
+using FluentFeeds.App.Shared.Models.Storage;
 using FluentFeeds.App.Shared.Services;
 using FluentFeeds.App.Shared.ViewModels.Modals;
 using FluentFeeds.Common;
-using FluentFeeds.Feeds.Base;
-using FluentFeeds.Feeds.Base.EventArgs;
-using FluentFeeds.Feeds.Base.Items;
 using FluentFeeds.Feeds.Base.Items.Content;
-using FluentFeeds.Feeds.Base.Storage;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
 
@@ -47,7 +47,7 @@ public sealed class FeedViewModel : ObservableObject
 		_reloadContentCommand = new RelayCommand(HandleReloadContentCommand, () => IsReloadContentAvailable);
 		_openBrowserCommand = new RelayCommand(HandleOpenBrowserCommand, () => SelectedItems.Length == 1);
 
-		Items = new ReadOnlyObservableCollection<IReadOnlyStoredItem>(_items);
+		Items = new ReadOnlyObservableCollection<IItemView>(_items);
 		DisplayOptions = new DisplayOptionsViewModel(settingsService);
 	}
 
@@ -62,17 +62,17 @@ public sealed class FeedViewModel : ObservableObject
 
 		if (_feed != null)
 		{
-			_feed.ItemsUpdated -= HandleItemsUpdated;
+			_feed.Loader.ItemsUpdated -= HandleItemsUpdated;
 		}
 
-		_feed = route.FeedNode!.Feed;
+		_feed = route.SelectedFeed!;
 		_syncToken = _updateItemsToken = null;
 		IsSyncInProgress = false;
 
 		UpdateItems(reload: true);
-		_feed.ItemsUpdated += HandleItemsUpdated;
+		_feed.Loader.ItemsUpdated += HandleItemsUpdated;
 
-		if (_feed.LastSynchronized == null)
+		if (_feed.Loader.LastSynchronized == null)
 		{
 			// This is the first time the feed is shown, it still needs to be synchronized.
 			HandleSyncCommand();
@@ -107,12 +107,12 @@ public sealed class FeedViewModel : ObservableObject
 	/// <summary>
 	/// Items provided by the feed, sorted using the current sort mode.
 	/// </summary>
-	public ReadOnlyObservableCollection<IReadOnlyStoredItem> Items { get; }
+	public ReadOnlyObservableCollection<IItemView> Items { get; }
 
 	/// <summary>
 	/// List of currently selected items.
 	/// </summary>
-	public ImmutableArray<IReadOnlyStoredItem> SelectedItems
+	public ImmutableArray<IItemView> SelectedItems
 	{
 		get => _selectedItems;
 		set
@@ -273,8 +273,7 @@ public sealed class FeedViewModel : ObservableObject
 		}
 	}
 
-	private static IEnumerable<IReadOnlyStoredItem> SortItems(
-		IEnumerable<IReadOnlyStoredItem> items, ItemSortMode sortMode)
+	private static IEnumerable<IItemView> SortItems(IEnumerable<IItemView> items, ItemSortMode sortMode)
 	{
 		return
 			sortMode switch
@@ -285,7 +284,7 @@ public sealed class FeedViewModel : ObservableObject
 			};
 	}
 
-	private static bool ShouldInsertSortedItem(IReadOnlyItem existing, IReadOnlyItem added, ItemSortMode sortMode)
+	private static bool ShouldInsertSortedItem(IItemView existing, IItemView added, ItemSortMode sortMode)
 	{
 		return
 			sortMode switch
@@ -351,14 +350,14 @@ public sealed class FeedViewModel : ObservableObject
 
 		var token = new object();
 		_updateItemsToken = token;
-		var newItems = _feed.Items;
+		var newItems = _feed.Loader.Items;
 		var sortMode = SelectedSortMode;
 
 		if (reload || _items.Count == 0)
 		{
 			_items.Clear();
-			_itemSet = ImmutableHashSet<IReadOnlyStoredItem>.Empty;
-			SelectedItems = ImmutableArray<IReadOnlyStoredItem>.Empty;
+			_itemSet = ImmutableHashSet<IItemView>.Empty;
+			SelectedItems = ImmutableArray<IItemView>.Empty;
 
 			// Sort the items on a background thread. This is only possible because the PublishedTimestamp does not change.
 			// When other sort modes are added, this will need to be done differently.
@@ -371,14 +370,14 @@ public sealed class FeedViewModel : ObservableObject
 					_items.Add(item);
 				}
 				_itemSet = newItems;
-				ItemsUpdated?.Invoke(this, EventArgs.Empty);
+				ItemsUpdated?.Invoke(this, System.EventArgs.Empty);
 			}
 		}
 		else
 		{
 			// Calculate the differences and sort new items on a background thread (see remarks above).
-			var added = new List<IReadOnlyStoredItem>();
-			var removed = ImmutableHashSet<IReadOnlyStoredItem>.Empty;
+			var added = new List<IItemView>();
+			var removed = ImmutableHashSet<IItemView>.Empty;
 			var oldItems = _itemSet;
 			await Task.Run(
 				() =>
@@ -425,7 +424,7 @@ public sealed class FeedViewModel : ObservableObject
 
 				_itemSet = newItems;
 				SelectedItems = SelectedItems.Where(i => !removed.Contains(i)).ToImmutableArray();
-				ItemsUpdated?.Invoke(this, EventArgs.Empty);
+				ItemsUpdated?.Invoke(this, System.EventArgs.Empty);
 			}
 		}
 	}
@@ -439,7 +438,7 @@ public sealed class FeedViewModel : ObservableObject
 	{
 		switch (e.PropertyName)
 		{
-			case nameof(IReadOnlyItem.ContentLoader):
+			case nameof(IItemView.ContentLoader):
 				LoadItemContent();
 				break;
 		}
@@ -459,7 +458,7 @@ public sealed class FeedViewModel : ObservableObject
 			await _feedService.InitializeAsync();
 			try
 			{
-				await _feed.SynchronizeAsync();
+				await _feed.Loader.SynchronizeAsync();
 			}
 			catch (Exception)
 			{
@@ -536,13 +535,13 @@ public sealed class FeedViewModel : ObservableObject
 	private readonly RelayCommand _deleteCommand;
 	private readonly RelayCommand _reloadContentCommand;
 	private readonly RelayCommand _openBrowserCommand;
-	private readonly ObservableCollection<IReadOnlyStoredItem> _items = new();
-	private ImmutableHashSet<IReadOnlyStoredItem> _itemSet = ImmutableHashSet<IReadOnlyStoredItem>.Empty;
+	private readonly ObservableCollection<IItemView> _items = new();
+	private ImmutableHashSet<IItemView> _itemSet = ImmutableHashSet<IItemView>.Empty;
 	private object? _syncToken;
 	private object? _updateItemsToken;
 	private object? _loadItemContentToken;
-	private Feed? _feed;
-	private ImmutableArray<IReadOnlyStoredItem> _selectedItems = ImmutableArray<IReadOnlyStoredItem>.Empty;
+	private IFeedView? _feed;
+	private ImmutableArray<IItemView> _selectedItems = ImmutableArray<IItemView>.Empty;
 	private ItemSortMode _selectedSortMode = ItemSortMode.Newest;
 	private Symbol _toggleReadSymbol = Symbol.MailUnread;
 	private bool _isSyncInProgress;

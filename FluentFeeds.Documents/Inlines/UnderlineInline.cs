@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
+using FluentFeeds.Common.Helpers;
 using FluentFeeds.Documents.Json;
-using FluentFeeds.Documents.Helpers;
 
 namespace FluentFeeds.Documents.Inlines;
 
