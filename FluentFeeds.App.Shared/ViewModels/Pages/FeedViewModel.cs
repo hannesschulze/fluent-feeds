@@ -36,16 +36,21 @@ public sealed class FeedViewModel : ObservableObject
 
 	public event EventHandler? ItemsUpdated;
 
-	public FeedViewModel(IModalService modalService, IFeedService feedService, ISettingsService settingsService)
+	public FeedViewModel(
+		IModalService modalService, IFeedService feedService, IWebBrowserService webBrowserService,
+		ISettingsService settingsService)
 	{
 		_modalService = modalService;
 		_feedService = feedService;
+		_webBrowserService = webBrowserService;
 
 		_syncCommand = new RelayCommand(HandleSyncCommand, () => !IsSyncInProgress);
 		_toggleReadCommand = new RelayCommand(HandleToggleReadCommand, () => IsItemSelected);
 		_deleteCommand = new RelayCommand(HandleDeleteCommand, () => IsItemSelected);
 		_reloadContentCommand = new RelayCommand(HandleReloadContentCommand, () => IsReloadContentAvailable);
-		_openBrowserCommand = new RelayCommand(HandleOpenBrowserCommand, () => SelectedItems.Length == 1);
+		_openBrowserCommand = new RelayCommand(
+			HandleOpenBrowserCommand,
+			() => SelectedItems.Length == 1 && (SelectedItems[0].Url != null || SelectedItems[0].ContentUrl != null));
 
 		Items = new ReadOnlyObservableCollection<IItemView>(_items);
 		DisplayOptions = new DisplayOptionsViewModel(settingsService);
@@ -524,12 +529,13 @@ public sealed class FeedViewModel : ObservableObject
 		var url = SelectedItems[0].ContentUrl ?? SelectedItems[0].Url;
 		if (url != null)
 		{
-			Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = url.ToString() });
+			_webBrowserService.Open(url);
 		}
 	}
 
 	private readonly IModalService _modalService;
 	private readonly IFeedService _feedService;
+	private readonly IWebBrowserService _webBrowserService;
 	private readonly RelayCommand _syncCommand;
 	private readonly RelayCommand _toggleReadCommand;
 	private readonly RelayCommand _deleteCommand;

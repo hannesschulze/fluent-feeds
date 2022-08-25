@@ -113,7 +113,7 @@ public sealed partial class FeedPage : Page
 	private bool IsSortModeSelected(ItemSortMode sortMode, ItemSortMode itemMode) =>
 		sortMode == itemMode;
 
-	private bool IsFontFamilySelected(Shared.Models.FontFamily fontFamily, Shared.Models.FontFamily itemFontFamily) =>
+	private bool IsFontFamilySelected(FontFamily fontFamily, FontFamily itemFontFamily) =>
 		fontFamily == itemFontFamily;
 
 	private bool _isChangingSelection;

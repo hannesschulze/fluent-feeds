@@ -24,7 +24,7 @@
 			<TextBlock
 				Text="{x:Bind ViewModel.ItemInfo, Mode=OneWay}"
 				Style="{StaticResource CaptionTextBlockStyle}"
-				Foreground="{ThemeResource SystemControlForegroundBaseMediumLowBrush}"
+				Foreground="{ThemeResource TextFillColorTertiaryBrush}"
 				Margin="0,8,0,0"
 				IsTextSelectionEnabled="True" />
 			

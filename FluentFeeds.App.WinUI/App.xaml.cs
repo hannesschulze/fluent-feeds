@@ -23,11 +23,13 @@ public partial class App : Application
 				.AddSingleton<IDatabaseService, DatabaseService>()
 				.AddSingleton<IFeedService, FeedService>()
 				.AddSingleton<ISettingsService, SettingsService>()
+				.AddSingleton<IWebBrowserService, WebBrowserService>()
 				.AddSingleton<IModalService, ModalService>()
 				.AddTransient<MainViewModel>()
 				.AddTransient<FeedViewModel>()
 				.AddTransient<SelectionViewModel>()
 				.AddTransient<ArticleViewModel>()
+				.AddTransient<SettingsViewModel>()
 				.BuildServiceProvider());
 
 		_window = new MainWindow();

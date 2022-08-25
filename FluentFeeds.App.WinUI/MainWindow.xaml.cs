@@ -1,4 +1,6 @@
-﻿using FluentFeeds.App.Shared.Services;
+﻿using System;
+using FluentFeeds.App.Shared.Models;
+using FluentFeeds.App.Shared.Services;
 using FluentFeeds.App.WinUI.Helpers;
 using FluentFeeds.App.WinUI.Services;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
@@ -19,6 +21,10 @@ public sealed partial class MainWindow : Window
 			modalService.XamlRootLocator = () => Content.XamlRoot;
 		}
 
+		_settingsService = Ioc.Default.GetRequiredService<ISettingsService>();
+		_settingsService.PropertyChanged += HandleSettingsChanged;
+		UpdateTheme();
+
 		Title = MainPage.WindowTitle;
 		this.GetAppWindow().SetIcon(MainPage.WindowIcon);
 
@@ -36,6 +42,32 @@ public sealed partial class MainWindow : Window
 		}
 	}
 
+	private void HandleSettingsChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+	{
+		switch (e.PropertyName)
+		{
+			case nameof(ISettingsService.AppTheme):
+				UpdateTheme();
+				break;
+		}
+	}
+
+	private void UpdateTheme()
+	{
+		if (Content is FrameworkElement content)
+		{
+			content.RequestedTheme =
+				_settingsService.AppTheme switch
+				{
+					Theme.SystemDefault => ElementTheme.Default,
+					Theme.Light => ElementTheme.Light,
+					Theme.Dark => ElementTheme.Dark,
+					_ => throw new IndexOutOfRangeException()
+				};
+		}
+	}
+
+	private readonly ISettingsService _settingsService;
 	private MicaHelper? _micaHelper;
 	private TitleBarHelper? _titleBarHelper;
 }

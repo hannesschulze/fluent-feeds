@@ -10,7 +10,10 @@ namespace FluentFeeds.App.Shared.Services.Default;
 
 public class SettingsService : ObservableObject, ISettingsService
 {
-	protected record SerializedSettings(FontFamily ContentFontFamily, FontSize ContentFontSize);
+	protected record SerializedSettings(
+		FontFamily ContentFontFamily,
+		FontSize ContentFontSize,
+		Theme AppTheme);
 
 	/// <summary>
 	/// Load initial settings (if any).
@@ -19,7 +22,8 @@ public class SettingsService : ObservableObject, ISettingsService
 	{
 		_serialized = serializedSettings ?? new SerializedSettings(
 			ContentFontFamily: FontFamily.SansSerif,
-			ContentFontSize: FontSize.Normal);
+			ContentFontSize: FontSize.Normal,
+			AppTheme: Theme.SystemDefault);
 	}
 
 	public SettingsService() : this(Load())
@@ -36,6 +40,12 @@ public class SettingsService : ObservableObject, ISettingsService
 	{
 		get => _serialized.ContentFontSize;
 		set => Update(_serialized with { ContentFontSize = value });
+	}
+
+	public Theme AppTheme
+	{
+		get => _serialized.AppTheme;
+		set => Update(_serialized with { AppTheme = value });
 	}
 
 	private void Update(SerializedSettings updated, [CallerMemberName] string? updatedPropertyName = null)

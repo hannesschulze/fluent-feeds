@@ -24,6 +24,8 @@ public class FeedViewModelTests
 
 	private ModalServiceMock ModalService { get; } = new();
 
+	private WebBrowserServiceMock WebBrowserService { get; } = new();
+
 	private SettingsServiceMock SettingsService { get; } = new();
 
 	private static Feed CreateFeed(FeedLoader loader)
@@ -44,7 +46,7 @@ public class FeedViewModelTests
 	[Fact]
 	public void InitialStates()
 	{
-		var viewModel = new FeedViewModel(ModalService, FeedService, SettingsService);
+		var viewModel = new FeedViewModel(ModalService, FeedService, WebBrowserService, SettingsService);
 		Assert.True(viewModel.SyncCommand.CanExecute(null));
 		Assert.False(viewModel.ToggleReadCommand.CanExecute(null));
 		Assert.False(viewModel.DeleteCommand.CanExecute(null));
@@ -61,7 +63,7 @@ public class FeedViewModelTests
 	[Fact]
 	public void Synchronization_NotSynced()
 	{
-		var viewModel = new FeedViewModel(ModalService, FeedService, SettingsService);
+		var viewModel = new FeedViewModel(ModalService, FeedService, WebBrowserService, SettingsService);
 		var feed = new FeedLoaderMock();
 		feed.CompleteInitialize();
 		viewModel.Load(MainNavigationRoute.Feed(CreateFeed(feed)));
@@ -76,7 +78,7 @@ public class FeedViewModelTests
 	[Fact]
 	public void Synchronization_AlreadySynced()
 	{
-		var viewModel = new FeedViewModel(ModalService, FeedService, SettingsService);
+		var viewModel = new FeedViewModel(ModalService, FeedService, WebBrowserService, SettingsService);
 		var feed = new FeedLoaderMock();
 		feed.CompleteInitialize();
 		feed.SynchronizeAsync();
@@ -89,7 +91,7 @@ public class FeedViewModelTests
 	[Fact]
 	public void Synchronization_ErrorHandling_InitializationFails()
 	{
-		var viewModel = new FeedViewModel(ModalService, FeedService, SettingsService);
+		var viewModel = new FeedViewModel(ModalService, FeedService, WebBrowserService, SettingsService);
 		var feed = new FeedLoaderMock();
 		feed.CompleteInitialize();
 		viewModel.Load(MainNavigationRoute.Feed(CreateFeed(feed)));
@@ -101,7 +103,7 @@ public class FeedViewModelTests
 	[Fact]
 	public void Synchronization_ErrorHandling_SyncFails()
 	{
-		var viewModel = new FeedViewModel(ModalService, FeedService, SettingsService);
+		var viewModel = new FeedViewModel(ModalService, FeedService, WebBrowserService, SettingsService);
 		var feed = new FeedLoaderMock();
 		feed.CompleteInitialize();
 		viewModel.Load(MainNavigationRoute.Feed(CreateFeed(feed)));
@@ -118,7 +120,7 @@ public class FeedViewModelTests
 	[Fact]
 	public void Synchronization_StartedTwice()
 	{
-		var viewModel = new FeedViewModel(ModalService, FeedService, SettingsService);
+		var viewModel = new FeedViewModel(ModalService, FeedService, WebBrowserService, SettingsService);
 		var feedA = new FeedLoaderMock();
 		var feedB = new FeedLoaderMock();
 		feedA.CompleteInitialize();
@@ -138,7 +140,8 @@ public class FeedViewModelTests
 	private DateTimeOffset DummyItemBaseTimestamp { get; } = DateTimeOffset.Now;
 
 	private IItemView CreateDummyItem(
-		TimeSpan timeOffset, ItemStorageMock? itemStorage = null, IItemContentLoader? contentLoader = null)
+		TimeSpan timeOffset, ItemStorageMock? itemStorage = null, IItemContentLoader? contentLoader = null,
+		bool hasUrl = true, bool hasContentUrl = true)
 	{
 		itemStorage ??= new ItemStorageMock();
 		return itemStorage.AddItems(
@@ -147,7 +150,8 @@ public class FeedViewModelTests
 				new ItemDescriptor(
 					identifier: null, title: "title", author: "author", summary: "summary",
 					publishedTimestamp: DummyItemBaseTimestamp + timeOffset, modifiedTimestamp: DateTimeOffset.Now,
-					url: null, contentUrl: null,
+					url: hasUrl ? new Uri("https://item") : null,
+					contentUrl: hasContentUrl ? new Uri("https://content") : null,
 					contentLoader: contentLoader ?? new StaticItemContentLoader(new ArticleItemContent(new RichText())))
 			}, Guid.Empty).First();
 	}
@@ -165,7 +169,7 @@ public class FeedViewModelTests
 	[InlineData(ItemSortMode.Oldest)]
 	public async Task UpdateItems_Reload(ItemSortMode sortMode)
 	{
-		var viewModel = new FeedViewModel(ModalService, FeedService, SettingsService);
+		var viewModel = new FeedViewModel(ModalService, FeedService, WebBrowserService, SettingsService);
 		var feed = new FeedLoaderMock();
 		var itemA = CreateDummyItem(TimeSpan.FromMinutes(sortMode == ItemSortMode.Oldest ? 1 : 3));
 		var itemB = CreateDummyItem(TimeSpan.FromMinutes(2));
@@ -189,7 +193,7 @@ public class FeedViewModelTests
 	[InlineData(ItemSortMode.Oldest)]
 	public async Task UpdateItems_Add(ItemSortMode sortMode)
 	{
-		var viewModel = new FeedViewModel(ModalService, FeedService, SettingsService);
+		var viewModel = new FeedViewModel(ModalService, FeedService, WebBrowserService, SettingsService);
 		var feed = new FeedLoaderMock();
 		var itemA = CreateDummyItem(TimeSpan.FromMinutes(sortMode == ItemSortMode.Oldest ? 1 : 3));
 		var itemB = CreateDummyItem(TimeSpan.FromMinutes(2));
@@ -215,7 +219,7 @@ public class FeedViewModelTests
 	[Fact]
 	public async Task UpdateItems_Remove()
 	{
-		var viewModel = new FeedViewModel(ModalService, FeedService, SettingsService);
+		var viewModel = new FeedViewModel(ModalService, FeedService, WebBrowserService, SettingsService);
 		var feed = new FeedLoaderMock();
 		var itemA = CreateDummyItem(TimeSpan.FromMinutes(3));
 		var itemB = CreateDummyItem(TimeSpan.FromMinutes(2));
@@ -239,7 +243,7 @@ public class FeedViewModelTests
 	[Fact]
 	public void ItemSelection_Empty()
 	{
-		var viewModel = new FeedViewModel(ModalService, FeedService, SettingsService);
+		var viewModel = new FeedViewModel(ModalService, FeedService, WebBrowserService, SettingsService);
 		var item = CreateDummyItem(TimeSpan.FromMinutes(1));
 		viewModel.SelectedItems = ImmutableArray.Create(item);
 		viewModel.SelectedItems = ImmutableArray<IItemView>.Empty;
@@ -255,7 +259,7 @@ public class FeedViewModelTests
 	[Fact]
 	public void ItemSelection_Multiple()
 	{
-		var viewModel = new FeedViewModel(ModalService, FeedService, SettingsService);
+		var viewModel = new FeedViewModel(ModalService, FeedService, WebBrowserService, SettingsService);
 		var itemA = CreateDummyItem(TimeSpan.FromMinutes(1));
 		var itemB = CreateDummyItem(TimeSpan.FromMinutes(2));
 		viewModel.SelectedItems = ImmutableArray.Create(itemA, itemB);
@@ -271,7 +275,7 @@ public class FeedViewModelTests
 	[Fact]
 	public void ItemSelection_Single()
 	{
-		var viewModel = new FeedViewModel(ModalService, FeedService, SettingsService);
+		var viewModel = new FeedViewModel(ModalService, FeedService, WebBrowserService, SettingsService);
 		var contentA = new ArticleItemContent(new RichText()) { IsReloadable = true };
 		var contentB = new ArticleItemContent(new RichText());
 		var item = CreateDummyItem(
@@ -301,7 +305,7 @@ public class FeedViewModelTests
 	[Fact]
 	public void ItemSelection_Single_ShowContentLoading()
 	{
-		var viewModel = new FeedViewModel(ModalService, FeedService, SettingsService);
+		var viewModel = new FeedViewModel(ModalService, FeedService, WebBrowserService, SettingsService);
 		var contentA = new ArticleItemContent(new RichText()) { IsReloadable = true };
 		var contentB = new ArticleItemContent(new RichText()) { IsReloadable = true };
 		var item = CreateDummyItem(
@@ -331,7 +335,7 @@ public class FeedViewModelTests
 	[Fact]
 	public void ItemSelection_Single_LoadContentFails()
 	{
-		var viewModel = new FeedViewModel(ModalService, FeedService, SettingsService);
+		var viewModel = new FeedViewModel(ModalService, FeedService, WebBrowserService, SettingsService);
 		var contentLoader = new ItemContentLoaderMock();
 		contentLoader.CompleteLoad(new Exception("error"));
 		var item = CreateDummyItem(TimeSpan.FromMinutes(1), new ItemStorageMock(), contentLoader);
@@ -353,7 +357,7 @@ public class FeedViewModelTests
 	[Fact]
 	public void Actions_ReloadContentManually()
 	{
-		var viewModel = new FeedViewModel(ModalService, FeedService, SettingsService);
+		var viewModel = new FeedViewModel(ModalService, FeedService, WebBrowserService, SettingsService);
 		var contentA = new ArticleItemContent(new RichText()) { IsReloadable = true };
 		var contentB = new ArticleItemContent(new RichText());
 		var contentLoader = new ItemContentLoaderMock();
@@ -368,7 +372,7 @@ public class FeedViewModelTests
 	[Fact]
 	public void Actions_ToggleRead_CurrentlyUnread()
 	{
-		var viewModel = new FeedViewModel(ModalService, FeedService, SettingsService);
+		var viewModel = new FeedViewModel(ModalService, FeedService, WebBrowserService, SettingsService);
 		var itemA = CreateDummyItem(TimeSpan.FromMinutes(1));
 		var itemB = CreateDummyItem(TimeSpan.FromMinutes(2));
 		((Item)itemA).IsRead = true;
@@ -383,7 +387,7 @@ public class FeedViewModelTests
 	[Fact]
 	public void Actions_ToggleRead_CurrentlyRead()
 	{
-		var viewModel = new FeedViewModel(ModalService, FeedService, SettingsService);
+		var viewModel = new FeedViewModel(ModalService, FeedService, WebBrowserService, SettingsService);
 		var itemA = CreateDummyItem(TimeSpan.FromMinutes(1));
 		var itemB = CreateDummyItem(TimeSpan.FromMinutes(2));
 		((Item)itemA).IsRead = true;
@@ -399,7 +403,7 @@ public class FeedViewModelTests
 	[Fact]
 	public void Actions_DeleteItems()
 	{
-		var viewModel = new FeedViewModel(ModalService, FeedService, SettingsService);
+		var viewModel = new FeedViewModel(ModalService, FeedService, WebBrowserService, SettingsService);
 		var itemStorageA = new ItemStorageMock();
 		var itemStorageB = new ItemStorageMock();
 		var itemA = CreateDummyItem(TimeSpan.FromMinutes(1), itemStorageA);
@@ -409,5 +413,31 @@ public class FeedViewModelTests
 		viewModel.DeleteCommand.Execute(null);
 		Assert.Empty(itemStorageA.GetItems(Guid.Empty));
 		Assert.Empty(itemStorageB.GetItems(Guid.Empty));
+	}
+
+	[Fact]
+	public void Actions_OpenInBrowser_UrlUnavailable()
+	{
+		var viewModel = new FeedViewModel(ModalService, FeedService, WebBrowserService, SettingsService);
+		var item = CreateDummyItem(
+			TimeSpan.FromMinutes(1), new ItemStorageMock(), null, hasUrl: false, hasContentUrl: false);
+		viewModel.SelectedItems = ImmutableArray.Create(item);
+		Assert.False(viewModel.OpenBrowserCommand.CanExecute(null));
+	}
+
+	[Theory]
+	[InlineData(true, true, "https://content")]
+	[InlineData(false, true, "https://content")]
+	[InlineData(true, false, "https://item")]
+	public void Actions_OpenInBrowser_UrlAvailable(bool hasUrl, bool hasContentUrl, string expectedUrl)
+	{
+		var viewModel = new FeedViewModel(ModalService, FeedService, WebBrowserService, SettingsService);
+		var item = CreateDummyItem(TimeSpan.FromMinutes(1), new ItemStorageMock(), null, hasUrl, hasContentUrl);
+		viewModel.SelectedItems = ImmutableArray.Create(item);
+		Assert.True(viewModel.OpenBrowserCommand.CanExecute(null));
+		var openArgs = Assert.Raises<WebBrowserServiceMock.OpenEventArgs>(
+			h => WebBrowserService.OpenEvent += h, h => WebBrowserService.OpenEvent -= h,
+			() => viewModel.OpenBrowserCommand.Execute(null)).Arguments;
+		Assert.Equal(new Uri(expectedUrl), openArgs.Url);
 	}
 }

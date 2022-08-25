@@ -22,7 +22,6 @@ public sealed class DisplayOptionsViewModel : ObservableObject
 			HandleDecreaseFontSizeCommand, () => _settingsService.ContentFontSize != FontSize.Small);
 		_resetFontSizeCommand = new RelayCommand(
 			HandleResetFontSizeCommand, () => _settingsService.ContentFontSize != FontSize.Normal);
-		_selectedFontFamily = _settingsService.ContentFontFamily;
 		_settingsService.PropertyChanged += HandleSettingsChanged;
 	}
 
@@ -46,16 +45,8 @@ public sealed class DisplayOptionsViewModel : ObservableObject
 	/// </summary>
 	public FontFamily SelectedFontFamily
 	{
-		get => _selectedFontFamily;
-		set
-		{
-			if (SetProperty(ref _selectedFontFamily, value) && !_isChangingFontFamily)
-			{
-				_isChangingFontFamily = true;
-				_settingsService.ContentFontFamily = value;
-				_isChangingFontFamily = false;
-			}
-		}
+		get => _settingsService.ContentFontFamily;
+		set => _settingsService.ContentFontFamily = value;
 	}
 
 	private void HandleIncreaseFontSizeCommand()
@@ -92,12 +83,7 @@ public sealed class DisplayOptionsViewModel : ObservableObject
 		switch (e.PropertyName)
 		{
 			case nameof(ISettingsService.ContentFontFamily):
-				if (!_isChangingFontFamily)
-				{
-					_isChangingFontFamily = true;
-					SelectedFontFamily = _settingsService.ContentFontFamily;
-					_isChangingFontFamily = false;
-				}
+				OnPropertyChanged(nameof(SelectedFontFamily));
 				break;
 			case nameof(ISettingsService.ContentFontSize):
 				_increaseFontSizeCommand.NotifyCanExecuteChanged();
@@ -111,6 +97,4 @@ public sealed class DisplayOptionsViewModel : ObservableObject
 	private readonly RelayCommand _increaseFontSizeCommand;
 	private readonly RelayCommand _decreaseFontSizeCommand;
 	private readonly RelayCommand _resetFontSizeCommand;
-	private FontFamily _selectedFontFamily;
-	private bool _isChangingFontFamily;
 }
