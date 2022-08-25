@@ -4,16 +4,16 @@ using Microsoft.UI.Xaml;
 namespace FluentFeeds.App.WinUI.Views.Modals;
 
 /// <summary>
-/// Flyout content presenting a <see cref="DeleteNodeViewModel"/>.
+/// Flyout content presenting a <see cref="DeleteFeedViewModel"/>.
 /// </summary>
-public sealed partial class DeleteNodeView : FlyoutView
+public sealed partial class DeleteFeedView : FlyoutView
 {
-	public DeleteNodeView()
+	public DeleteFeedView()
 	{
 		InitializeComponent();
 	}
 
-	public DeleteNodeViewModel ViewModel => (DeleteNodeViewModel)DataContext;
+	public DeleteFeedViewModel ViewModel => (DeleteFeedViewModel)DataContext;
 
 	private void HandleConfirmClicked(object sender, RoutedEventArgs e)
 	{

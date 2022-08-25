@@ -5,9 +5,8 @@
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:vm="using:FluentFeeds.App.Shared.ViewModels.Pages"
-	xmlns:items="using:FluentFeeds.Feeds.Base.Items"
+	xmlns:items="using:FluentFeeds.App.Shared.Models.Items"
 	xmlns:models="using:FluentFeeds.App.Shared.Models"
-	xmlns:converters="using:FluentFeeds.App.WinUI.Converters"
 	mc:Ignorable="d"
 	d:DataContext="{d:DesignInstance Type=vm:FeedViewModel}"
 	NavigationCacheMode="Required">
@@ -31,7 +30,7 @@
 		<x:Double x:Key="LeftPaneMaxWidth">325</x:Double>
 		<GridLength x:Key="PaneSeparatorWidth">1</GridLength>
 
-		<DataTemplate x:Key="ItemTemplate" x:DataType="items:StoredItem">
+		<DataTemplate x:Key="ItemTemplate" x:DataType="items:IItemView">
 			<StackPanel Orientation="Vertical" Padding="0,8">
 				<Grid ColumnSpacing="8">
 					<Grid.ColumnDefinitions>

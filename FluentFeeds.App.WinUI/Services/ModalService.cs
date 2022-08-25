@@ -40,14 +40,14 @@ public sealed class ModalService : IModalService
 		}
 	}
 
-	public void Show(NodeDataViewModel viewModel, NavigationItemViewModel relatedItem)
+	public void Show(FeedDataViewModel viewModel, NavigationItemViewModel relatedItem)
 	{
-		ShowDialog(new NodeDataView { DataContext = viewModel });
+		ShowDialog(new FeedDataView { DataContext = viewModel });
 	}
 
-	public void Show(DeleteNodeViewModel viewModel, NavigationItemViewModel relatedItem)
+	public void Show(DeleteFeedViewModel viewModel, NavigationItemViewModel relatedItem)
 	{
-		ShowNavigationFlyout(new DeleteNodeView { DataContext = viewModel }, relatedItem);
+		ShowNavigationFlyout(new DeleteFeedView { DataContext = viewModel }, relatedItem);
 	}
 
 	public void Show(ErrorViewModel viewModel)

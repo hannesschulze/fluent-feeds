@@ -55,7 +55,7 @@ public sealed class FeedStorage : IFeedStorage
 	/// <summary>
 	/// Load a feed and all of its children from its database representation.
 	/// </summary>
-	private async Task<StoredFeed> LoadNodeAsync(
+	private async Task<StoredFeed> LoadFeedAsync(
 		AppDbContext database, FeedDb dbFeed, IFeedView? parent, ICollection<StoredFeed>? allFeeds = null)
 	{
 		// Create loader factory
@@ -103,7 +103,7 @@ public sealed class FeedStorage : IFeedStorage
 			var children = new List<StoredFeed>();
 			foreach (var child in dbChildren)
 			{
-				children.Add(await LoadNodeAsync(database, child, feed, allFeeds));
+				children.Add(await LoadFeedAsync(database, child, feed, allFeeds));
 			}
 
 			var sortedChildren = children.OrderBy(f => f.DisplayName, StringComparer.CurrentCultureIgnoreCase);
@@ -116,12 +116,7 @@ public sealed class FeedStorage : IFeedStorage
 		return feed;
 	}
 
-	/// <summary>
-	/// Store a new feed and all its children, returning its stored representation.
-	/// </summary>
-	private async Task<StoredFeed> StoreNodeAsync(
-		AppDbContext database, FeedDescriptor descriptor, StoredFeed? parent, bool syncFirst,
-		ICollection<StoredFeed>? allFeeds = null)
+	private async Task<StoredFeed> CreateFeedAsync(FeedDescriptor descriptor, StoredFeed? parent, bool syncFirst)
 	{
 		// Create loader factory
 		var identifier = Guid.NewGuid();
@@ -155,7 +150,7 @@ public sealed class FeedStorage : IFeedStorage
 			default:
 				throw new IndexOutOfRangeException();
 		}
-		
+
 		// Create the local feed object
 		var feed = new StoredFeed(
 			identifier: identifier,
@@ -168,8 +163,6 @@ public sealed class FeedStorage : IFeedStorage
 			metadata: initialMetadata ?? new FeedMetadata(),
 			isUserCustomizable: descriptor.IsUserCustomizable,
 			isExcludedFromGroup: descriptor.IsExcludedFromGroup);
-
-		// Create the database object.
 		feed.Db =
 			new FeedDb
 			{
@@ -189,8 +182,6 @@ public sealed class FeedStorage : IFeedStorage
 				IsUserCustomizable = feed.IsUserCustomizable,
 				IsExcludedFromGroup = feed.IsExcludedFromGroup
 			};
-		await database.Feeds.AddAsync(feed.Db);
-		allFeeds?.Add(feed);
 
 		// Add children (sorted)
 		if (feed.Children != null)
@@ -198,12 +189,38 @@ public sealed class FeedStorage : IFeedStorage
 			var children = new List<StoredFeed> { Capacity = childDescriptors.Length };
 			foreach (var childDescriptor in childDescriptors)
 			{
-				children.Add(await StoreNodeAsync(database, childDescriptor, feed, syncFirst, allFeeds));
+				children.Add(await CreateFeedAsync(childDescriptor, feed, syncFirst));
 			}
 			var sortedChildren = children.OrderBy(f => f.DisplayName, StringComparer.CurrentCultureIgnoreCase);
 			foreach (var child in sortedChildren)
 			{
 				feed.Children.Add(child);
+			}
+		}
+
+		return feed;
+	}
+
+	/// <summary>
+	/// Store a new feed and all its children, returning its stored representation.
+	/// </summary>
+	private async Task<StoredFeed> StoreFeedAsync(
+		AppDbContext database, StoredFeed feed, ICollection<StoredFeed>? allFeeds = null)
+	{
+		// Determine deleted items.
+		var stack = new Stack<StoredFeed>();
+		stack.Push(feed);
+		while (stack.TryPop(out var currentFeed))
+		{
+			await database.Feeds.AddAsync(currentFeed.Db);
+			allFeeds?.Add(currentFeed);
+
+			if (currentFeed.Children != null)
+			{
+				foreach (var child in currentFeed.Children)
+				{
+					stack.Push((StoredFeed)child);
+				}
 			}
 		}
 
@@ -221,19 +238,20 @@ public sealed class FeedStorage : IFeedStorage
 			.FirstOrDefaultAsync();
 
 		var allFeeds = new List<StoredFeed>();
-		StoredFeed rootNode;
+		StoredFeed rootFeed;
 		if (existingRootNode != null)
 		{
-			rootNode = await LoadNodeAsync(database, existingRootNode, null, allFeeds);
+			rootFeed = await LoadFeedAsync(database, existingRootNode, null, allFeeds);
 		}
 		else
 		{
 			// This is a new provider, let it initialize the tree and store it in the database
 			var initialTree = Provider.CreateInitialTree();
-			rootNode = await StoreNodeAsync(database, initialTree, null, false, allFeeds);
+			rootFeed = await CreateFeedAsync(initialTree, null, syncFirst: false);
+			await StoreFeedAsync(database, rootFeed, allFeeds);
 			// Map the provider to the node
 			await database.FeedProviders.AddAsync(
-				new FeedProviderDb { Identifier = Identifier, RootNode = rootNode.Db });
+				new FeedProviderDb { Identifier = Identifier, RootNode = rootFeed.Db });
 		}
 
 		// Add nodes to the cache (no need for synchronization as this method is called before the storage is
@@ -243,7 +261,7 @@ public sealed class FeedStorage : IFeedStorage
 			_feeds.Add(feed.Identifier, feed);
 		}
 		
-		return rootNode;
+		return rootFeed;
 	}
 	
 	public IItemStorage GetItemStorage(Guid identifier)
@@ -263,21 +281,22 @@ public sealed class FeedStorage : IFeedStorage
 		if (parentFeed.Children == null)
 			throw new Exception("Invalid parent feed type.");
 
+		var feed = await Task.Run(() => CreateFeedAsync(descriptor, parentFeed, syncFirst));
+
 		// Update database
-		var storedFeed = await _databaseService.ExecuteAsync(
+		await _databaseService.ExecuteAsync(
 			async database =>
 			{
 				database.Attach(parentFeed.Db);
-				var stored = await StoreNodeAsync(database, descriptor, parentFeed, syncFirst);
+				await StoreFeedAsync(database, feed);
 				await database.SaveChangesAsync();
-				return stored;
 			});
 
 		// Update local copy
-		_feeds.Add(storedFeed.Identifier, storedFeed);
-		AddSorted(storedFeed, parentFeed.Children);
+		_feeds.Add(feed.Identifier, feed);
+		AddSorted(feed, parentFeed.Children);
 
-		return storedFeed;
+		return feed;
 	}
 
 	public async Task<IFeedView> RenameFeedAsync(Guid identifier, string newName)

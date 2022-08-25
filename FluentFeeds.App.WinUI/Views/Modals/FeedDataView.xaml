@@ -1,5 +1,5 @@
 ﻿<ContentDialog
-	x:Class="FluentFeeds.App.WinUI.Views.Modals.NodeDataView"
+	x:Class="FluentFeeds.App.WinUI.Views.Modals.FeedDataView"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -8,7 +8,7 @@
 	xmlns:views="using:FluentFeeds.App.WinUI.Views.Items.GroupSelection"
 	xmlns:converters="using:FluentFeeds.App.WinUI.Converters"
 	xmlns:selectors="using:FluentFeeds.App.WinUI.Selectors"
-	d:DataContext="{d:DesignInstance Type=vm:NodeDataViewModel}"
+	d:DataContext="{d:DesignInstance Type=vm:FeedDataViewModel}"
 	mc:Ignorable="d"
 	PrimaryButtonText="Save"
 	PrimaryButtonClick="HandlePrimaryButtonClick"

@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FluentFeeds.App.Shared.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20220815111502_InitialCreate")]
+    [Migration("20220824212535_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -19,29 +19,73 @@ namespace FluentFeeds.App.Shared.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.8");
 
-            modelBuilder.Entity("FluentFeeds.App.Shared.Models.Database.FeedNodeDb", b =>
+            modelBuilder.Entity("FluentFeeds.App.Shared.Models.Database.DeletedItemDb", b =>
                 {
                     b.Property<Guid>("Identifier")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Feed")
+                    b.Property<Guid>("ProviderIdentifier")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("StorageIdentifier")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserIdentifier")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Identifier");
+
+                    b.HasIndex("ProviderIdentifier", "StorageIdentifier");
+
+                    b.ToTable("DeletedItems");
+                });
+
+            modelBuilder.Entity("FluentFeeds.App.Shared.Models.Database.FeedDb", b =>
+                {
+                    b.Property<Guid>("Identifier")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ContentLoader")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("HasChildren")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("IsExcludedFromGroup")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("IsUserCustomizable")
                         .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("ItemStorageIdentifier")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MetadataAuthor")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MetadataDescription")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MetadataName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("MetadataSymbol")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
 
                     b.Property<Guid?>("ParentIdentifier")
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid>("ProviderIdentifier")
+                        .HasColumnType("TEXT");
+
                     b.Property<int?>("Symbol")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("Title")
-                        .HasColumnType("TEXT");
 
                     b.Property<int>("Type")
                         .HasColumnType("INTEGER");
@@ -50,7 +94,28 @@ namespace FluentFeeds.App.Shared.Migrations
 
                     b.HasIndex("ParentIdentifier");
 
-                    b.ToTable("FeedNodes");
+                    b.HasIndex("ProviderIdentifier", "ItemStorageIdentifier");
+
+                    b.ToTable("Feeds");
+                });
+
+            modelBuilder.Entity("FluentFeeds.App.Shared.Models.Database.FeedItemDb", b =>
+                {
+                    b.Property<Guid>("Identifier")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("FeedIdentifier")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ItemIdentifier")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Identifier");
+
+                    b.HasIndex("FeedIdentifier");
+
+                    b.ToTable("FeedItems");
                 });
 
             modelBuilder.Entity("FluentFeeds.App.Shared.Models.Database.FeedProviderDb", b =>
@@ -110,6 +175,9 @@ namespace FluentFeeds.App.Shared.Migrations
                     b.Property<string>("Url")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("UserIdentifier")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Identifier");
 
                     b.HasIndex("ProviderIdentifier", "StorageIdentifier");
@@ -117,9 +185,9 @@ namespace FluentFeeds.App.Shared.Migrations
                     b.ToTable("Items");
                 });
 
-            modelBuilder.Entity("FluentFeeds.App.Shared.Models.Database.FeedNodeDb", b =>
+            modelBuilder.Entity("FluentFeeds.App.Shared.Models.Database.FeedDb", b =>
                 {
-                    b.HasOne("FluentFeeds.App.Shared.Models.Database.FeedNodeDb", "Parent")
+                    b.HasOne("FluentFeeds.App.Shared.Models.Database.FeedDb", "Parent")
                         .WithMany()
                         .HasForeignKey("ParentIdentifier");
 
@@ -128,7 +196,7 @@ namespace FluentFeeds.App.Shared.Migrations
 
             modelBuilder.Entity("FluentFeeds.App.Shared.Models.Database.FeedProviderDb", b =>
                 {
-                    b.HasOne("FluentFeeds.App.Shared.Models.Database.FeedNodeDb", "RootNode")
+                    b.HasOne("FluentFeeds.App.Shared.Models.Database.FeedDb", "RootNode")
                         .WithMany()
                         .HasForeignKey("RootNodeIdentifier")
                         .OnDelete(DeleteBehavior.Cascade)

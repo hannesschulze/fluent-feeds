@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Linq;
 using FluentFeeds.App.Shared.Models;
+using FluentFeeds.App.Shared.Models.Items;
 using FluentFeeds.App.Shared.Models.Navigation;
 using FluentFeeds.App.Shared.ViewModels.Pages;
 using FluentFeeds.App.WinUI.Helpers;
@@ -83,7 +84,7 @@ public sealed partial class FeedPage : Page
 
 		_isChangingSelection = true;
 		ViewModel.SelectedItems = MainItemList.SelectedItems
-			.Select(item => (IReadOnlyStoredItem)item)
+			.Select(item => (IItemView)item)
 			.ToImmutableArray();
 		_isChangingSelection = false;
 	}

@@ -82,13 +82,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Page Update="Views\Modals\NodeDataView.xaml">
+		<Page Update="Views\Modals\FeedDataView.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
 	</ItemGroup>
 
 	<ItemGroup>
-		<Page Update="Views\Modals\DeleteNodeView.xaml">
+		<Page Update="Views\Modals\DeleteFeedView.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
 	</ItemGroup>
