@@ -5,7 +5,6 @@ namespace FluentFeeds.App.Shared.Helpers;
 
 public static class AppData
 {
-	private const string AppFolderName = "FluentFeeds";
 	private static readonly object Locker = new();
 
 	/// <summary>
@@ -14,7 +13,7 @@ public static class AppData
 	public static string GetPath(string fileName, bool ensureExists = true)
 	{
 		var allAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-		var appDataPath = Path.Combine(allAppDataPath, AppFolderName);
+		var appDataPath = Path.Combine(allAppDataPath, Constants.AppConfigName);
 		if (ensureExists)
 		{
 			lock (Locker)

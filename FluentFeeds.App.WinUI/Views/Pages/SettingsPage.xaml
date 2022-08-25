@@ -218,9 +218,13 @@
 					Spacing="{StaticResource AboutPanelButtonSpacing}"
 					Margin="{StaticResource AboutPanelButtonMargin}">
 					
-					<Button Content="Project Website" />
+					<Button
+						Content="Project Website"
+						Command="{x:Bind ViewModel.OpenProjectWebsiteCommand}" />
 
-					<Button Content="GitHub Issues" />
+					<Button
+						Content="GitHub Issues"
+						Command="{x:Bind ViewModel.OpenGitHubIssuesCommand}" />
 					
 				</StackPanel>
 
