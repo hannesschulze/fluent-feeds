@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Immutable;
 using System.Threading.Tasks;
+using FluentFeeds.App.Shared.Models.Feeds.Loaders;
 using FluentFeeds.App.Shared.Models.Navigation;
 using FluentFeeds.App.Shared.Tests.Mock;
 using FluentFeeds.App.Shared.ViewModels.Items.Navigation;
@@ -128,5 +130,32 @@ public class MainViewModelTests
 		Assert.Equal(MainNavigationRoute.Feed(FeedService.OverviewFeed), viewModel.CurrentRoute);
 		Assert.Equal(viewModel.FeedItems[0], viewModel.SelectedItem);
 		Assert.False(viewModel.GoBackCommand.CanExecute(null));
+	}
+
+	[Fact]
+	public void Search()
+	{
+		var viewModel = new MainViewModel(FeedService, ModalService);
+		FeedService.CompleteInitialization();
+
+		viewModel.SearchText = " foo   bar ";
+		viewModel.SearchCommand.Execute(null);
+		Assert.Equal(2, viewModel.FeedItems.Count);
+		var searchFeed = Assert.IsType<FeedNavigationItemViewModel>(viewModel.FeedItems[1]).Feed;
+		Assert.Equal(viewModel.FeedItems[1], viewModel.SelectedItem);
+		Assert.Equal(MainNavigationRoute.Feed(searchFeed), viewModel.CurrentRoute);
+		Assert.Equal("Search", searchFeed.Name);
+		Assert.Equal(Symbol.Search, searchFeed.Symbol);
+		var searchLoader = Assert.IsType<SearchFeedLoader>(searchFeed.Loader);
+		Assert.Equal(new[] { "foo", "bar" }, searchLoader.SearchTerms);
+		viewModel.SearchText = "baz";
+		viewModel.SearchCommand.Execute(null);
+		Assert.Equal(new[] { "baz" }, searchLoader.SearchTerms);
+		viewModel.SearchText = "";
+		viewModel.SearchCommand.Execute(null);
+		Assert.Equal(ImmutableArray<string>.Empty, searchLoader.SearchTerms);
+		Assert.Single(viewModel.FeedItems);
+		Assert.Equal(viewModel.FeedItems[0], viewModel.SelectedItem);
+		Assert.Equal(MainNavigationRoute.Feed(FeedService.OverviewFeed), viewModel.CurrentRoute);
 	}
 }

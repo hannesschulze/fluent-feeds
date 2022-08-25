@@ -88,7 +88,8 @@ public sealed class SearchFeedLoader : FeedLoader
 
 	private async void UpdateItems()
 	{
-		if (SearchTerms.IsEmpty)
+		_updateItemsToken = null;
+		if (SearchTerms.IsEmpty || Source.Items.IsEmpty)
 		{
 			Items = Source.Items;
 			return;

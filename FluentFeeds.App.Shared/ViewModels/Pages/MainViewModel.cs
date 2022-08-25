@@ -2,15 +2,18 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows.Input;
 using FluentFeeds.App.Shared.EventArgs;
 using FluentFeeds.App.Shared.Helpers;
 using FluentFeeds.App.Shared.Models.Feeds;
+using FluentFeeds.App.Shared.Models.Feeds.Loaders;
 using FluentFeeds.App.Shared.Models.Navigation;
 using FluentFeeds.App.Shared.Services;
 using FluentFeeds.App.Shared.ViewModels.Items.Navigation;
 using FluentFeeds.App.Shared.ViewModels.Modals;
 using FluentFeeds.Common;
+using FluentFeeds.Feeds.Base.Feeds.Content;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
 
@@ -27,12 +30,26 @@ public sealed class MainViewModel : ObservableObject
 		_modalService = modalService;
 		
 		_goBackCommand = new RelayCommand(HandleGoBackCommand, () => _backStack.Count > 1);
+		_searchCommand = new RelayCommand(HandleSearchCommand);
 		_settingsItem =
 			new NavigationItemViewModel(MainNavigationRoute.Settings, isExpandable: false, "Settings", Symbol.Settings);
 		_footerItems.Add(_settingsItem);
 		var overviewItem = new FeedNavigationItemViewModel(
 			modalService, feedService.OverviewFeed, null, _feedItemRegistry);
+		var searchFeed = new Feed(
+			identifier: Guid.Parse("604d90a3-3aed-43e4-8c4f-a371511cc374"),
+			storage: null,
+			loaderFactory: CreateSearchFeedLoader,
+			hasChildren: false,
+			parent: null,
+			name: "Search",
+			symbol: Symbol.Search,
+			metadata: new FeedMetadata(),
+			isUserCustomizable: false,
+			isExcludedFromGroup: false);
+		_searchItem = new FeedNavigationItemViewModel(modalService, searchFeed, null, _feedItemRegistry);
 		_feedItemRegistry.Add(feedService.OverviewFeed, overviewItem);
+		_feedItemRegistry.Add(searchFeed, _searchItem);
 		_feedItems.Add(overviewItem);
 		_feedItemTransformer = ObservableCollectionTransformer.CreateCached(
 			feedService.ProviderFeeds, _feedItems, CreateRootFeedViewModel, _feedItemRegistry);
@@ -72,6 +89,17 @@ public sealed class MainViewModel : ObservableObject
 	/// Go back to the previous page/feed.
 	/// </summary>
 	public ICommand GoBackCommand => _goBackCommand;
+
+	/// <summary>
+	/// Start a new search.
+	/// </summary>
+	public ICommand SearchCommand => _searchCommand;
+
+	public string SearchText
+	{
+		get => _searchText;
+		set => SetProperty(ref _searchText, value);
+	}
 
 	/// <summary>
 	/// The currently active navigation route.
@@ -133,17 +161,8 @@ public sealed class MainViewModel : ObservableObject
 		CurrentRoute = newRoute;
 	}
 
-	private void HandleFeedsDeleted(object? sender, FeedsDeletedEventArgs e)
+	private void RemoveFeedsFromBackStack(ImmutableHashSet<IFeedView> feeds)
 	{
-		var feeds = e.Feeds.ToImmutableHashSet();
-
-		// Clean up cache
-		foreach (var feed in feeds)
-		{
-			_feedItemRegistry.Remove(feed);
-		}
-
-		// Remove feeds from the back stack
 		bool changed = false;
 		MainNavigationRoute? previousRoute = null;
 		for (var i = _backStack.Count - 1; i >= 0; --i)
@@ -165,16 +184,77 @@ public sealed class MainViewModel : ObservableObject
 			HandleBackStackChanged();
 		}
 	}
+	
+	private void HandleFeedsDeleted(object? sender, FeedsDeletedEventArgs e)
+	{
+		var feeds = e.Feeds.ToImmutableHashSet();
+
+		// Clean up cache
+		foreach (var feed in feeds)
+		{
+			_feedItemRegistry.Remove(feed);
+		}
+
+		// Remove feeds from the back stack
+		RemoveFeedsFromBackStack(feeds);
+	}
+
+	private void Search(ImmutableArray<string> searchTerms)
+	{
+		var wasEmpty = _searchTerms.IsEmpty;
+		var isEmpty = searchTerms.IsEmpty;
+		_searchTerms = searchTerms;
+		if (_searchFeedLoader != null)
+		{
+			_searchFeedLoader.SearchTerms = searchTerms;
+		}
+
+		if (wasEmpty && !isEmpty)
+		{
+			_feedItems.Insert(1, _searchItem);
+			_feedItemTransformer.TargetOffset++;
+			SelectedItem = _searchItem;
+		}
+		else if (!wasEmpty && isEmpty)
+		{
+			RemoveFeedsFromBackStack(ImmutableHashSet.Create(_searchItem.Feed));
+			_feedItems.RemoveAt(1);
+			_feedItemTransformer.TargetOffset--;
+		}
+	}
+
+	private void HandleSearchCommand()
+	{
+		var searchTerms = String.IsNullOrEmpty(SearchText) 
+			? ImmutableArray<string>.Empty
+			: SearchText
+				.Split(' ')
+				.Select(term => term.Trim())
+				.Where(term => !String.IsNullOrEmpty(term))
+				.ToImmutableArray();
+		Search(searchTerms);
+	}
+
+	private FeedLoader CreateSearchFeedLoader(IFeedView feed)
+	{
+		_searchFeedLoader = new SearchFeedLoader(_feedService.OverviewFeed.Loader) { SearchTerms = _searchTerms };
+		return _searchFeedLoader;
+	}
 
 	private readonly IFeedService _feedService;
 	private readonly IModalService _modalService;
 	private readonly List<MainNavigationRoute> _backStack = new();
 	private readonly RelayCommand _goBackCommand;
+	private readonly RelayCommand _searchCommand;
 	private readonly NavigationItemViewModel _settingsItem;
+	private readonly FeedNavigationItemViewModel _searchItem;
 	private readonly ObservableCollection<NavigationItemViewModel> _feedItems = new();
 	private readonly ObservableCollection<NavigationItemViewModel> _footerItems = new();
 	private readonly ObservableCollectionTransformer<IFeedView, NavigationItemViewModel> _feedItemTransformer;
 	private readonly Dictionary<IFeedView, NavigationItemViewModel> _feedItemRegistry = new();
+	private SearchFeedLoader? _searchFeedLoader;
+	private ImmutableArray<string> _searchTerms = ImmutableArray<string>.Empty;
+	private string _searchText = String.Empty;
 	private MainNavigationRoute _currentRoute;
 	private NavigationItemViewModel? _selectedItem;
 	private bool _isChangingSelection;
