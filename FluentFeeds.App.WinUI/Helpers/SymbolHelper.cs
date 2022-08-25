@@ -49,6 +49,7 @@ public static class SymbolHelper
 			Symbol.FontSizeDecrease => CreateFont("\uE6CF", FontFamily_FluentSystemIcons_Resizable),
 			Symbol.FontSizeReset => CreateFont("\uE09B", FontFamily_FluentSystemIcons_Resizable),
 			Symbol.ColorPalette => CreateFont("\uE3FF", FontFamily_FluentSystemIcons_Resizable),
+			Symbol.Search => CreateFont("\uEB48", FontFamily_FluentSystemIcons_Resizable),
 			Symbol.Settings => CreateAnimated(
 				new AnimatedSettingsVisualSource(),
 				CreateFont("\xEB70", FontFamily_FluentSystemIcons_Resizable)),

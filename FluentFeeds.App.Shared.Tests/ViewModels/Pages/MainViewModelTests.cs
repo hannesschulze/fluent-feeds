@@ -135,7 +135,7 @@ public class MainViewModelTests
 	[Fact]
 	public void Search()
 	{
-		var viewModel = new MainViewModel(FeedService, ModalService);
+		var viewModel = new MainViewModel(FeedService, ModalService) { HasBuggySelection = false };
 		FeedService.CompleteInitialization();
 
 		viewModel.SearchText = " foo   bar ";
@@ -152,7 +152,6 @@ public class MainViewModelTests
 		viewModel.SearchCommand.Execute(null);
 		Assert.Equal(new[] { "baz" }, searchLoader.SearchTerms);
 		viewModel.SearchText = "";
-		viewModel.SearchCommand.Execute(null);
 		Assert.Equal(ImmutableArray<string>.Empty, searchLoader.SearchTerms);
 		Assert.Single(viewModel.FeedItems);
 		Assert.Equal(viewModel.FeedItems[0], viewModel.SelectedItem);

@@ -89,6 +89,9 @@ public sealed partial class MainPage : Page
 	private void HandleErrorBarClosed(InfoBar sender, InfoBarClosedEventArgs args) =>
 		ErrorBar.Margin = new Thickness(0);
 
+	private void HandleSearchQuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args) =>
+		ViewModel.SearchCommand.Execute(null);
+
 	private void UpdateBackButtonEnabled() =>
 		NavigationView.IsBackEnabled = ViewModel.GoBackCommand.CanExecute(null);
 

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using FluentFeeds.App.Shared.EventArgs;
 using FluentFeeds.App.Shared.Helpers;
@@ -63,6 +65,8 @@ public sealed class MainViewModel : ObservableObject
 		InitializeFeeds();
 	}
 
+	public bool HasBuggySelection { get; set; } = true;
+
 	private async void InitializeFeeds()
 	{
 		try
@@ -98,7 +102,13 @@ public sealed class MainViewModel : ObservableObject
 	public string SearchText
 	{
 		get => _searchText;
-		set => SetProperty(ref _searchText, value);
+		set
+		{
+			if (SetProperty(ref _searchText, value) && String.IsNullOrEmpty(value))
+			{
+				HandleSearchCommand();
+			}
+		}
 	}
 
 	/// <summary>
@@ -199,7 +209,7 @@ public sealed class MainViewModel : ObservableObject
 		RemoveFeedsFromBackStack(feeds);
 	}
 
-	private void Search(ImmutableArray<string> searchTerms)
+	private async void Search(ImmutableArray<string> searchTerms)
 	{
 		var wasEmpty = _searchTerms.IsEmpty;
 		var isEmpty = searchTerms.IsEmpty;
@@ -213,6 +223,12 @@ public sealed class MainViewModel : ObservableObject
 		{
 			_feedItems.Insert(1, _searchItem);
 			_feedItemTransformer.TargetOffset++;
+			// HACK: This schedules the selection on the current synchronization context to work around the navigation
+			// view not being ready to update the selection.
+			if (HasBuggySelection)
+			{
+				await Task.Delay(50);
+			}
 			SelectedItem = _searchItem;
 		}
 		else if (!wasEmpty && isEmpty)
