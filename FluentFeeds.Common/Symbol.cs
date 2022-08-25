@@ -22,5 +22,6 @@ public enum Symbol
 	FontSizeIncrease,
 	FontSizeDecrease,
 	FontSizeReset,
+	ColorPalette,
 	Settings
 }

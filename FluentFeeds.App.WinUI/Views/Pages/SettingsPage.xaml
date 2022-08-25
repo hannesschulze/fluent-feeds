@@ -1,18 +1,233 @@
 ﻿<Page
-    x:Class="FluentFeeds.App.WinUI.Views.Pages.SettingsPage"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d"
+	x:Class="FluentFeeds.App.WinUI.Views.Pages.SettingsPage"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:vm="using:FluentFeeds.App.Shared.ViewModels.Pages"
+	xmlns:models="using:FluentFeeds.App.Shared.Models"
+	mc:Ignorable="d"
+	d:DataContext="{d:DesignInstance Type=vm:SettingsViewModel}"
 	NavigationCacheMode="Required">
 
-	<Grid>
-		<TextBlock
-			Style="{ThemeResource HeaderTextBlockStyle}"
-			Text="Settings"
-			HorizontalAlignment="Center"
-			VerticalAlignment="Center" />
-	</Grid>
+	<Page.Resources>
+		<x:Double x:Key="MinWidthForSidebarLayout">692</x:Double>
+
+		<x:Double x:Key="ContentGridColumnSpacing">48</x:Double>
+		<Thickness x:Key="ContentGridMargin">48,32</Thickness>
+		<Thickness x:Key="ContentGridVerticalItemMargin">0,0,0,24</Thickness>
+		<Thickness x:Key="ContentAreaBorderThickness">1,1,0,0</Thickness>
+		<CornerRadius x:Key="ContentAreaCornerRadius">8,0,0,0</CornerRadius>
+
+		<x:Double x:Key="PanelSectionHeadingSpacing">8</x:Double>
+
+		<x:Double x:Key="AboutPanelMinWidth">200</x:Double>
+		<x:Double x:Key="AboutPanelMaxWidth">350</x:Double>
+		<x:Double x:Key="AboutPanelButtonSpacing">16</x:Double>
+		<Thickness x:Key="AboutPanelButtonMargin">0,8</Thickness>
+
+		<x:Double x:Key="SettingsPanelOptionHeaderColumnSpacing">12</x:Double>
+		<x:Double x:Key="SettingsPanelOptionHeaderIconSize">16</x:Double>
+		<x:Double x:Key="SettingsPanelOptionContentSpacing">4</x:Double>
+		<Thickness x:Key="SettingsPanelOptionHeaderMargin">0,12</Thickness>
+		<Thickness x:Key="SettingsPanelOptionContentMargin">32,0,0,0</Thickness>
+	</Page.Resources>
+
+	<ScrollViewer
+		x:Name="ContentArea"
+		Background="{ThemeResource LayerFillColorDefaultBrush}"
+		BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+		BorderThickness="{StaticResource ContentAreaBorderThickness}"
+		CornerRadius="{StaticResource ContentAreaCornerRadius}">
+
+		<VisualStateManager.VisualStateGroups>
+			<VisualStateGroup>
+				<VisualState>
+					<VisualState.StateTriggers>
+						<AdaptiveTrigger MinWindowWidth="{StaticResource MinWidthForSidebarLayout}" />
+					</VisualState.StateTriggers>
+					<VisualState.Setters>
+						<Setter Target="SettingsPanel.(Grid.Row)" Value="1" />
+						<Setter Target="SettingsPanel.(Grid.Column)" Value="0" />
+						<Setter Target="SettingsPanel.(Grid.ColumnSpan)" Value="1" />
+						<Setter Target="SettingsPanel.Margin" Value="0" />
+						<Setter Target="AboutPanel.(Grid.Row)" Value="1" />
+						<Setter Target="AboutPanel.(Grid.Column)" Value="1" />
+						<Setter Target="AboutPanel.(Grid.ColumnSpan)" Value="1" />
+					</VisualState.Setters>
+				</VisualState>
+			</VisualStateGroup>
+		</VisualStateManager.VisualStateGroups>
+
+		<Grid
+			x:Name="ContentGrid"
+			Padding="{StaticResource ContentGridMargin}"
+			ColumnSpacing="{StaticResource ContentGridColumnSpacing}">
+			
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="*" />
+				<ColumnDefinition
+					Width="Auto"
+					MinWidth="{StaticResource AboutPanelMinWidth}"
+					MaxWidth="{StaticResource AboutPanelMaxWidth}" />
+			</Grid.ColumnDefinitions>
+
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+			</Grid.RowDefinitions>
+
+			<TextBlock
+				Grid.Column="0"
+				Grid.ColumnSpan="2"
+				Grid.Row="0"
+				Margin="{StaticResource ContentGridVerticalItemMargin}"
+				Style="{ThemeResource TitleLargeTextBlockStyle}"
+				Text="Settings" />
+
+			<StackPanel
+				x:Name="SettingsPanel"
+				Grid.Column="0"
+				Grid.ColumnSpan="2"
+				Grid.Row="1"
+				Orientation="Vertical"
+				Spacing="{StaticResource PanelSectionHeadingSpacing}"
+				Margin="{StaticResource ContentGridVerticalItemMargin}">
+
+				<TextBlock
+					Text="Appearance"
+					Style="{ThemeResource BodyStrongTextBlockStyle}" />
+
+				<Expander
+					IsExpanded="False"
+					ExpandDirection="Down"
+					HorizontalAlignment="Stretch"
+					HorizontalContentAlignment="Left">
+
+					<Expander.Header>
+						<Grid
+							HorizontalAlignment="Stretch"
+							ColumnSpacing="{StaticResource SettingsPanelOptionHeaderColumnSpacing}"
+							Margin="{StaticResource SettingsPanelOptionHeaderMargin}">
+							
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="Auto" />
+								<ColumnDefinition Width="*" />
+							</Grid.ColumnDefinitions>
+
+							<Grid.RowDefinitions>
+								<RowDefinition Height="Auto" />
+								<RowDefinition Height="Auto" />
+							</Grid.RowDefinitions>
+
+							<Viewbox
+								Grid.Column="0"
+								Grid.Row="0"
+								Grid.RowSpan="2"
+								Height="{StaticResource SettingsPanelOptionHeaderIconSize}"
+								VerticalAlignment="Center"
+								Child="{x:Bind AppThemeSymbol}" />
+
+							<TextBlock
+								Grid.Column="1"
+								Grid.Row="0"
+								Text="App theme"
+								Style="{ThemeResource BodyTextBlockStyle}" />
+
+							<TextBlock
+								Grid.Column="1"
+								Grid.Row="1"
+								Text="Pick the theme used to display the app."
+								TextWrapping="WrapWholeWords"
+								Style="{ThemeResource CaptionTextBlockStyle}"
+								Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+							
+						</Grid>
+					</Expander.Header>
+
+					<Expander.Content>
+						<StackPanel
+							Orientation="Vertical"
+							Margin="{StaticResource SettingsPanelOptionContentMargin}"
+							Spacing="{StaticResource SettingsPanelOptionContentSpacing}">
+
+							<RadioButton
+								Content="Light"
+								GroupName="Themes"
+								IsChecked="{x:Bind IsThemeSelected(ViewModel.SelectedTheme, models:Theme.Light), Mode=OneWay}"
+								Command="{x:Bind SelectThemeCommand}">
+
+								<RadioButton.CommandParameter>
+									<models:Theme>Light</models:Theme>
+								</RadioButton.CommandParameter>
+
+							</RadioButton>
+
+							<RadioButton
+								Content="Dark"
+								GroupName="Themes"
+								IsChecked="{x:Bind IsThemeSelected(ViewModel.SelectedTheme, models:Theme.Dark), Mode=OneWay}"
+								Command="{x:Bind SelectThemeCommand}">
+
+								<RadioButton.CommandParameter>
+									<models:Theme>Dark</models:Theme>
+								</RadioButton.CommandParameter>
+
+							</RadioButton>
+
+							<RadioButton
+								Content="System default"
+								GroupName="Themes"
+								IsChecked="{x:Bind IsThemeSelected(ViewModel.SelectedTheme, models:Theme.SystemDefault), Mode=OneWay}"
+								Command="{x:Bind SelectThemeCommand}">
+
+								<RadioButton.CommandParameter>
+									<models:Theme>SystemDefault</models:Theme>
+								</RadioButton.CommandParameter>
+
+							</RadioButton>
+
+						</StackPanel>
+					</Expander.Content>
+
+				</Expander>
+
+			</StackPanel>
+
+			<StackPanel
+				x:Name="AboutPanel"
+				Grid.Column="0"
+				Grid.ColumnSpan="2"
+				Grid.Row="2"
+				Orientation="Vertical"
+				Spacing="{StaticResource PanelSectionHeadingSpacing}">
+				
+				<TextBlock
+					Text="About this app"
+					Style="{ThemeResource BodyStrongTextBlockStyle}" />
+
+				<TextBlock
+					Text="Fluent Feeds v0.1.0"
+					TextWrapping="WrapWholeWords"
+					IsTextSelectionEnabled="True"
+					Style="{ThemeResource BodyTextBlockStyle}" />
+
+				<StackPanel
+					Orientation="Vertical"
+					Spacing="{StaticResource AboutPanelButtonSpacing}"
+					Margin="{StaticResource AboutPanelButtonMargin}">
+					
+					<Button Content="Project Website" />
+
+					<Button Content="GitHub Issues" />
+					
+				</StackPanel>
+
+			</StackPanel>
+			
+		</Grid>
+		
+	</ScrollViewer>
 	
 </Page>

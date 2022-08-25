@@ -28,6 +28,7 @@ public partial class App : Application
 				.AddTransient<FeedViewModel>()
 				.AddTransient<SelectionViewModel>()
 				.AddTransient<ArticleViewModel>()
+				.AddTransient<SettingsViewModel>()
 				.BuildServiceProvider());
 
 		_window = new MainWindow();

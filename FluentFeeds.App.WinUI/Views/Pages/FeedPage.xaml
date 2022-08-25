@@ -43,14 +43,14 @@
 						Grid.Row="0"
 						Style="{StaticResource CaptionTextBlockStyle}"
 						TextTrimming="CharacterEllipsis"
-						Foreground="{ThemeResource SystemControlForegroundBaseMediumLowBrush}"
+						Foreground="{ThemeResource TextFillColorTertiaryBrush}"
 						Text="{Binding DisplayAuthor}" />
 
 					<TextBlock
 						Grid.Column="1"
 						Grid.Row="0"
 						Style="{StaticResource CaptionTextBlockStyle}"
-						Foreground="{ThemeResource SystemControlForegroundBaseMediumLowBrush}"
+						Foreground="{ThemeResource TextFillColorTertiaryBrush}"
 						Text="{Binding PublishedTimestamp, Converter={StaticResource TimestampToStringConverter}}" />
 				</Grid>
 

@@ -17,4 +17,9 @@ public interface ISettingsService : INotifyPropertyChanged
 	/// Font family used to display content.
 	/// </summary>
 	FontFamily ContentFontFamily { get; set; }
+
+	/// <summary>
+	/// The selected application theme.
+	/// </summary>
+	Theme AppTheme { get; set; }
 }

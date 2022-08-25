@@ -10,6 +10,14 @@
 	mc:Ignorable="d">
 	
 	<Page.Resources>
+		<x:Double x:Key="TitleBarIconSize">16</x:Double>
+		<x:Double x:Key="TitleBarSearchHeight">32</x:Double>
+		<Thickness x:Key="TitleBarSearchMargin">2,0</Thickness>
+		<Thickness x:Key="TitleBarTitleMargin">12,0,0,0</Thickness>
+
+		<Thickness x:Key="ErrorBarBorderThickness">1,1,0,1</Thickness>
+		<CornerRadius x:Key="ErrorBarCornerRadius">8,0,0,8</CornerRadius>
+		
 		<DataTemplate
 			xmlns:vm="using:FluentFeeds.App.Shared.ViewModels.Items.Navigation"
 			x:DataType="vm:NavigationItemViewModel"
@@ -108,14 +116,14 @@
 
 					<Image
 						Source="/Assets/Square44x44Logo.png"
-						Width="16" 
-						Height="16"
+						Width="{StaticResource TitleBarIconSize}" 
+						Height="{StaticResource TitleBarIconSize}"
 						VerticalAlignment="Center" />
 
 					<TextBlock 
 						Text="{x:Bind WindowTitle}" 
 						Style="{StaticResource CaptionTextBlockStyle}"
-						Margin="12,0,0,0"
+						Margin="{StaticResource TitleBarTitleMargin}"
 						VerticalAlignment="Center" />
 
 				</StackPanel>
@@ -126,8 +134,8 @@
 				Grid.Column="1" 
 				QueryIcon="Find"
 				PlaceholderText="Search"
-				Height="32"
-				Margin="8,0"
+				Height="{StaticResource TitleBarSearchHeight}"
+				Margin="{StaticResource TitleBarSearchMargin}"
 				VerticalAlignment="Center" 
 				BorderThickness="1"
 				SizeChanged="HandleDragRegionSizeChanged">
@@ -178,8 +186,8 @@
 					Severity="Error"
 					IsOpen="False"
 					Closed="HandleErrorBarClosed"
-					CornerRadius="8,0,0,8"
-					BorderThickness="1,1,0,1"
+					CornerRadius="{StaticResource ErrorBarCornerRadius}"
+					BorderThickness="{StaticResource ErrorBarBorderThickness}"
 					IsClosable="True" />
 
 				<Frame 

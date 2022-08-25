@@ -19,7 +19,7 @@
 			Text="{x:Bind ViewModel.InfoText, Mode=OneWay}"
 			TextAlignment="Center"
 			Style="{StaticResource SubtitleTextBlockStyle}"
-			Foreground="{ThemeResource SystemControlForegroundBaseMediumLowBrush}"
+			Foreground="{ThemeResource TextFillColorTertiaryBrush}"
 			Margin="0,8,0,0"
 			Visibility="{x:Bind ViewModel.IsInfoTextVisible, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}" />
 	</StackPanel>
