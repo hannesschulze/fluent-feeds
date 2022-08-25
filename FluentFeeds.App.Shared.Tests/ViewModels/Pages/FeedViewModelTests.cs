@@ -53,11 +53,28 @@ public class FeedViewModelTests
 		Assert.False(viewModel.ReloadContentCommand.CanExecute(null));
 		Assert.False(viewModel.OpenBrowserCommand.CanExecute(null));
 		Assert.Empty(viewModel.Items);
-		Assert.False(viewModel.IsSyncInProgress);
-		Assert.False(viewModel.IsLoadContentInProgress);
+		Assert.False(viewModel.IsLoadingItems);
+		Assert.False(viewModel.IsLoadingContent);
 		Assert.False(viewModel.IsItemSelected);
 		Assert.False(viewModel.IsReloadContentAvailable);
 		Assert.Equal(FeedNavigationRoute.Selection(0), viewModel.CurrentRoute);
+	}
+
+	[Fact]
+	public void CustomLoadingProgress()
+	{
+		var viewModel = new FeedViewModel(ModalService, FeedService, WebBrowserService, SettingsService);
+		var feed = new FeedLoaderMock();
+		feed.CompleteInitialize();
+		feed.SynchronizeAsync();
+		feed.CompleteSynchronize();
+		feed.UpdateIsLoadingCustom(true);
+		viewModel.Load(MainNavigationRoute.Feed(CreateFeed(feed)));
+		Assert.True(viewModel.SyncCommand.CanExecute(null));
+		Assert.True(viewModel.IsLoadingItems);
+		feed.UpdateIsLoadingCustom(false);
+		Assert.True(viewModel.SyncCommand.CanExecute(null));
+		Assert.False(viewModel.IsLoadingItems);
 	}
 
 	[Fact]
@@ -68,11 +85,11 @@ public class FeedViewModelTests
 		feed.CompleteInitialize();
 		viewModel.Load(MainNavigationRoute.Feed(CreateFeed(feed)));
 		Assert.False(viewModel.SyncCommand.CanExecute(null));
-		Assert.True(viewModel.IsSyncInProgress);
+		Assert.True(viewModel.IsLoadingItems);
 		FeedService.CompleteInitialization();
 		feed.CompleteSynchronize();
 		Assert.True(viewModel.SyncCommand.CanExecute(null));
-		Assert.False(viewModel.IsSyncInProgress);
+		Assert.False(viewModel.IsLoadingItems);
 	}
 
 	[Fact]
@@ -85,7 +102,7 @@ public class FeedViewModelTests
 		feed.CompleteSynchronize();
 		viewModel.Load(MainNavigationRoute.Feed(CreateFeed(feed)));
 		Assert.True(viewModel.SyncCommand.CanExecute(null));
-		Assert.False(viewModel.IsSyncInProgress);
+		Assert.False(viewModel.IsLoadingItems);
 	}
 
 	[Fact]
@@ -97,7 +114,7 @@ public class FeedViewModelTests
 		viewModel.Load(MainNavigationRoute.Feed(CreateFeed(feed)));
 		FeedService.CompleteInitialization(new Exception("error"));
 		Assert.True(viewModel.SyncCommand.CanExecute(null));
-		Assert.False(viewModel.IsSyncInProgress);
+		Assert.False(viewModel.IsLoadingItems);
 	}
 
 	[Fact]
@@ -114,7 +131,7 @@ public class FeedViewModelTests
 		Assert.Equal("Synchronization failed", errorArgs.ViewModel.Title);
 		Assert.Equal("An error occurred while trying to synchronize your feeds. Please try again later.", errorArgs.ViewModel.Message);
 		Assert.True(viewModel.SyncCommand.CanExecute(null));
-		Assert.False(viewModel.IsSyncInProgress);
+		Assert.False(viewModel.IsLoadingItems);
 	}
 
 	[Fact]
@@ -131,10 +148,10 @@ public class FeedViewModelTests
 		FeedService.CompleteInitialization();
 		feedA.CompleteSynchronize();
 		Assert.False(viewModel.SyncCommand.CanExecute(null));
-		Assert.True(viewModel.IsSyncInProgress);
+		Assert.True(viewModel.IsLoadingItems);
 		feedB.CompleteSynchronize();
 		Assert.True(viewModel.SyncCommand.CanExecute(null));
-		Assert.False(viewModel.IsSyncInProgress);
+		Assert.False(viewModel.IsLoadingItems);
 	}
 	
 	private DateTimeOffset DummyItemBaseTimestamp { get; } = DateTimeOffset.Now;
@@ -288,7 +305,7 @@ public class FeedViewModelTests
 		Assert.True(viewModel.ReloadContentCommand.CanExecute(null));
 		Assert.True(viewModel.OpenBrowserCommand.CanExecute(null));
 		Assert.True(viewModel.IsItemSelected);
-		Assert.False(viewModel.IsLoadContentInProgress);
+		Assert.False(viewModel.IsLoadingContent);
 		Assert.True(viewModel.IsReloadContentAvailable);
 		Assert.Equal(FeedNavigationRoute.Article(item, contentA), viewModel.CurrentRoute);
 		((Item)item).ContentLoader = new StaticItemContentLoader(contentB);
@@ -297,7 +314,7 @@ public class FeedViewModelTests
 		Assert.False(viewModel.ReloadContentCommand.CanExecute(null));
 		Assert.True(viewModel.OpenBrowserCommand.CanExecute(null));
 		Assert.True(viewModel.IsItemSelected);
-		Assert.False(viewModel.IsLoadContentInProgress);
+		Assert.False(viewModel.IsLoadingContent);
 		Assert.False(viewModel.IsReloadContentAvailable);
 		Assert.Equal(FeedNavigationRoute.Article(item, contentB), viewModel.CurrentRoute);
 	}
@@ -318,7 +335,7 @@ public class FeedViewModelTests
 		Assert.False(viewModel.ReloadContentCommand.CanExecute(null));
 		Assert.True(viewModel.OpenBrowserCommand.CanExecute(null));
 		Assert.True(viewModel.IsItemSelected);
-		Assert.True(viewModel.IsLoadContentInProgress);
+		Assert.True(viewModel.IsLoadingContent);
 		Assert.False(viewModel.IsReloadContentAvailable);
 		Assert.Equal(FeedNavigationRoute.Article(item, contentA), viewModel.CurrentRoute);
 		contentLoader.CompleteLoad(contentB);
@@ -327,7 +344,7 @@ public class FeedViewModelTests
 		Assert.True(viewModel.ReloadContentCommand.CanExecute(null));
 		Assert.True(viewModel.OpenBrowserCommand.CanExecute(null));
 		Assert.True(viewModel.IsItemSelected);
-		Assert.False(viewModel.IsLoadContentInProgress);
+		Assert.False(viewModel.IsLoadingContent);
 		Assert.True(viewModel.IsReloadContentAvailable);
 		Assert.Equal(FeedNavigationRoute.Article(item, contentB), viewModel.CurrentRoute);
 	}
@@ -349,7 +366,7 @@ public class FeedViewModelTests
 		Assert.False(viewModel.ReloadContentCommand.CanExecute(null));
 		Assert.True(viewModel.OpenBrowserCommand.CanExecute(null));
 		Assert.True(viewModel.IsItemSelected);
-		Assert.False(viewModel.IsLoadContentInProgress);
+		Assert.False(viewModel.IsLoadingContent);
 		Assert.False(viewModel.IsReloadContentAvailable);
 		Assert.Equal(FeedNavigationRoute.Selection(0), viewModel.CurrentRoute);
 	}

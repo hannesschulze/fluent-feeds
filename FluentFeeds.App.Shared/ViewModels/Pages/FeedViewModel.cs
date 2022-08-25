@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -68,14 +67,17 @@ public sealed class FeedViewModel : ObservableObject
 		if (_feed != null)
 		{
 			_feed.Loader.ItemsUpdated -= HandleItemsUpdated;
+			_feed.Loader.LoadingStateChanged -= HandleLoadingStateChanged;
 		}
 
 		_feed = route.SelectedFeed!;
 		_syncToken = _updateItemsToken = null;
 		IsSyncInProgress = false;
+		IsLoadingItems = CheckLoadingItems();
 
 		UpdateItems(reload: true);
 		_feed.Loader.ItemsUpdated += HandleItemsUpdated;
+		_feed.Loader.LoadingStateChanged += HandleLoadingStateChanged;
 
 		if (_feed.Loader.LastSynchronized == null)
 		{
@@ -133,7 +135,7 @@ public sealed class FeedViewModel : ObservableObject
 				_loadItemContentToken = null;
 				_openBrowserCommand.NotifyCanExecuteChanged();
 				IsReloadContentAvailable = false;
-				IsLoadContentInProgress = false;
+				IsLoadingContent = false;
 				if (_selectedItems.Length == 1)
 				{
 					// Single selection automatically marks the item as "read"
@@ -188,27 +190,21 @@ public sealed class FeedViewModel : ObservableObject
 	}
 
 	/// <summary>
-	/// Indicates if the app is currently fetching new feeds from the web.
+	/// Indicates if the app is currently fetching new items from the web.
 	/// </summary>
-	public bool IsSyncInProgress
+	public bool IsLoadingItems
 	{
-		get => _isSyncInProgress;
-		private set
-		{
-			if (SetProperty(ref _isSyncInProgress, value))
-			{
-				_syncCommand.NotifyCanExecuteChanged();
-			}
-		}
+		get => _isLoadingItems;
+		private set => SetProperty(ref _isLoadingItems, value);
 	}
 
 	/// <summary>
 	/// Indicates if the app is currently loading the content for the selected item.
 	/// </summary>
-	public bool IsLoadContentInProgress
+	public bool IsLoadingContent
 	{
-		get => _isLoadContentInProgress;
-		private set => SetProperty(ref _isLoadContentInProgress, value);
+		get => _isLoadingContent;
+		private set => SetProperty(ref _isLoadingContent, value);
 	}
 
 	/// <summary>
@@ -277,6 +273,22 @@ public sealed class FeedViewModel : ObservableObject
 			}
 		}
 	}
+	
+	private bool IsSyncInProgress
+	{
+		get => _isSyncInProgress;
+		set
+		{
+			if (_isSyncInProgress != value)
+			{
+				_isSyncInProgress = value;
+				_syncCommand.NotifyCanExecuteChanged();
+				IsLoadingItems = CheckLoadingItems();
+			}
+		}
+	}
+
+	private bool CheckLoadingItems() => IsSyncInProgress || (_feed != null && _feed.Loader.IsLoadingCustom);
 
 	private static IEnumerable<IItemView> SortItems(IEnumerable<IItemView> items, ItemSortMode sortMode)
 	{
@@ -315,7 +327,7 @@ public sealed class FeedViewModel : ObservableObject
 		var contentTask = item.LoadContentAsync(reload);
 		if (!contentTask.IsCompletedSuccessfully)
 		{
-			IsLoadContentInProgress = true;
+			IsLoadingContent = true;
 			IsReloadContentAvailable = false;
 		}
 
@@ -328,7 +340,7 @@ public sealed class FeedViewModel : ObservableObject
 		{
 			_modalService.Show(new ErrorViewModel(
 				"Unable to load content", "An error occurred while trying to load the selected item's content."));
-			IsLoadContentInProgress = false;
+			IsLoadingContent = false;
 			return;
 		}
 
@@ -340,7 +352,7 @@ public sealed class FeedViewModel : ObservableObject
 					ItemContentType.Article => FeedNavigationRoute.Article(item, (ArticleItemContent)content),
 					_ => throw new IndexOutOfRangeException()
 				};
-			IsLoadContentInProgress = false;
+			IsLoadingContent = false;
 			IsReloadContentAvailable = content.IsReloadable;
 		}
 	}
@@ -437,6 +449,11 @@ public sealed class FeedViewModel : ObservableObject
 	private void HandleItemsUpdated(object? sender, FeedItemsUpdatedEventArgs e)
 	{
 		UpdateItems();
+	}
+
+	private void HandleLoadingStateChanged(object? sender, System.EventArgs e)
+	{
+		IsLoadingItems = CheckLoadingItems();
 	}
 
 	private void HandleItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -550,8 +567,9 @@ public sealed class FeedViewModel : ObservableObject
 	private ImmutableArray<IItemView> _selectedItems = ImmutableArray<IItemView>.Empty;
 	private ItemSortMode _selectedSortMode = ItemSortMode.Newest;
 	private Symbol _toggleReadSymbol = Symbol.MailUnread;
+	private bool _isLoadingItems;
+	private bool _isLoadingContent;
 	private bool _isSyncInProgress;
-	private bool _isLoadContentInProgress;
 	private bool _isItemSelected;
 	private bool _isReloadContentAvailable;
 	private FeedNavigationRoute _currentRoute = FeedNavigationRoute.Selection(0);

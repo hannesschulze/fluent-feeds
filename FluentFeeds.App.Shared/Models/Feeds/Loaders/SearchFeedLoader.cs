@@ -89,6 +89,7 @@ public sealed class SearchFeedLoader : FeedLoader
 	private async void UpdateItems()
 	{
 		_updateItemsToken = null;
+		IsLoadingCustom = false;
 		if (SearchTerms.IsEmpty || Source.Items.IsEmpty)
 		{
 			Items = Source.Items;
@@ -97,6 +98,7 @@ public sealed class SearchFeedLoader : FeedLoader
 
 		var token = new object();
 		_updateItemsToken = token;
+		IsLoadingCustom = true;
 
 		var searchableItems = Source.Items
 			.Select(item => new SearchableItem(item, item.Title, item.Author, item.Summary))
@@ -105,6 +107,7 @@ public sealed class SearchFeedLoader : FeedLoader
 
 		if (_updateItemsToken == token)
 		{
+			IsLoadingCustom = false;
 			Items = result;
 		}
 	}

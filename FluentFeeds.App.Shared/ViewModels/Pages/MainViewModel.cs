@@ -219,15 +219,18 @@ public sealed class MainViewModel : ObservableObject
 			_searchFeedLoader.SearchTerms = searchTerms;
 		}
 
-		if (wasEmpty && !isEmpty)
+		if (!isEmpty)
 		{
-			_feedItems.Insert(1, _searchItem);
-			_feedItemTransformer.TargetOffset++;
-			// HACK: This schedules the selection on the current synchronization context to work around the navigation
-			// view not being ready to update the selection.
-			if (HasBuggySelection)
+			if (wasEmpty)
 			{
-				await Task.Delay(50);
+				_feedItems.Insert(1, _searchItem);
+				_feedItemTransformer.TargetOffset++;
+				// HACK: This schedules the selection on the current synchronization context to work around the navigation
+				// view not being ready to update the selection.
+				if (HasBuggySelection)
+				{
+					await Task.Delay(50);
+				}
 			}
 			SelectedItem = _searchItem;
 		}
