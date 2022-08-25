@@ -76,7 +76,8 @@ public sealed class MainViewModel : ObservableObject
 		catch (Exception)
 		{
 			_modalService.Show(
-				new ErrorViewModel("A database error occurred", "Fluent Feeds was unable to initialize its database."));
+				new ErrorViewModel(
+					"A database error occurred", $"{Constants.AppName} was unable to initialize its database."));
 		}
 	}
 
@@ -99,6 +100,14 @@ public sealed class MainViewModel : ObservableObject
 	/// </summary>
 	public ICommand SearchCommand => _searchCommand;
 
+	/// <summary>
+	/// The window title.
+	/// </summary>
+	public string Title => Constants.AppName;
+
+	/// <summary>
+	/// Current text value of the search field.
+	/// </summary>
 	public string SearchText
 	{
 		get => _searchText;
