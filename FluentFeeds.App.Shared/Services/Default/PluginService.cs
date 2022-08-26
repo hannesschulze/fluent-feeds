@@ -9,6 +9,7 @@ public class PluginService : IPluginService
 	public IEnumerable<FeedProvider> GetAvailableFeedProviders() =>
 		new FeedProvider[]
 		{
-			new SyndicationFeedProvider()
+			//new SyndicationFeedProvider()
+			new DummyFeedProvider()
 		};
 }
