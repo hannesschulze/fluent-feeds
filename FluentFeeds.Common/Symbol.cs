@@ -24,6 +24,10 @@ public enum Symbol
 	FontSizeReset,
 	ColorPalette,
 	Search,
+	Trending,
+	Question,
+	Presentation,
+	Briefcase,
 	HackerNews,
 	Settings
 }

@@ -51,6 +51,10 @@ public static class SymbolHelper
 			Symbol.FontSizeReset => CreateFont("\uE09B", FontFamily_FluentSystemIcons_Resizable),
 			Symbol.ColorPalette => CreateFont("\uE3FF", FontFamily_FluentSystemIcons_Resizable),
 			Symbol.Search => CreateFont("\uEB48", FontFamily_FluentSystemIcons_Resizable),
+			Symbol.Trending => CreateFont("\uE127", FontFamily_FluentSystemIcons_Resizable),
+			Symbol.Question => CreateFont("\uEAA2", FontFamily_FluentSystemIcons_Resizable),
+			Symbol.Presentation => CreateFont("\uEB42", FontFamily_FluentSystemIcons_Resizable),
+			Symbol.Briefcase => CreateFont("\uE229", FontFamily_FluentSystemIcons_Resizable),
 			Symbol.HackerNews => CreateFont("Y", FontFamily_Tahoma),
 			Symbol.Settings => CreateAnimated(
 				new AnimatedSettingsVisualSource(),
