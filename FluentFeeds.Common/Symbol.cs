@@ -24,5 +24,6 @@ public enum Symbol
 	FontSizeReset,
 	ColorPalette,
 	Search,
+	HackerNews,
 	Settings
 }

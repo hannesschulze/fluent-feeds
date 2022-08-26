@@ -10,6 +10,7 @@ public static class SymbolHelper
 {
 	private static readonly FontFamily FontFamily_FluentSystemIcons_Resizable = 
 		new("/Assets/FluentSystemIcons-Resizable.ttf#FluentSystemIcons-Resizable");
+	private static readonly FontFamily FontFamily_Tahoma = new("Tahoma");
 
 	private static MUXC.IconSource CreateFont(string glyph, FontFamily fontFamily) =>
 		new MUXC.FontIconSource
@@ -50,6 +51,7 @@ public static class SymbolHelper
 			Symbol.FontSizeReset => CreateFont("\uE09B", FontFamily_FluentSystemIcons_Resizable),
 			Symbol.ColorPalette => CreateFont("\uE3FF", FontFamily_FluentSystemIcons_Resizable),
 			Symbol.Search => CreateFont("\uEB48", FontFamily_FluentSystemIcons_Resizable),
+			Symbol.HackerNews => CreateFont("Y", FontFamily_Tahoma),
 			Symbol.Settings => CreateAnimated(
 				new AnimatedSettingsVisualSource(),
 				CreateFont("\xEB70", FontFamily_FluentSystemIcons_Resizable)),

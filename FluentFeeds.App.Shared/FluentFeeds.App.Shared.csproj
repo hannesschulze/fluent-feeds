@@ -18,6 +18,7 @@
 		<ProjectReference Include="..\FluentFeeds.Documents\FluentFeeds.Documents.csproj" />
 		<ProjectReference Include="..\FluentFeeds.Feeds.Base\FluentFeeds.Feeds.Base.csproj" />
 		<ProjectReference Include="..\FluentFeeds.Feeds.Syndication\FluentFeeds.Feeds.Syndication.csproj" />
+		<ProjectReference Include="..\FluentFeeds.Feeds.HackerNews\FluentFeeds.Feeds.HackerNews.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
