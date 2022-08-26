@@ -8,6 +8,7 @@ using FluentFeeds.App.Shared.Models.Database;
 using FluentFeeds.App.Shared.Models.Feeds;
 using FluentFeeds.App.Shared.Models.Feeds.Loaders;
 using FluentFeeds.App.Shared.Models.Storage;
+using FluentFeeds.App.Shared.Resources;
 using FluentFeeds.Common;
 using FluentFeeds.Feeds.Base;
 using FluentFeeds.Feeds.Base.Feeds.Content;
@@ -32,7 +33,7 @@ public sealed class FeedService : IFeedService
 			loaderFactory: _ => _overviewFeedLoader,
 			hasChildren: false,
 			parent: null,
-			name: "Overview",
+			name: LocalizedStrings.BuiltInFeedOverviewName,
 			symbol: Symbol.Home,
 			metadata: new FeedMetadata(),
 			isUserCustomizable: false,

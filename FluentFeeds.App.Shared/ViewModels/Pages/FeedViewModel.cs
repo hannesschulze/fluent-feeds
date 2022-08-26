@@ -12,6 +12,7 @@ using FluentFeeds.App.Shared.Models.Feeds;
 using FluentFeeds.App.Shared.Models.Items;
 using FluentFeeds.App.Shared.Models.Navigation;
 using FluentFeeds.App.Shared.Models.Storage;
+using FluentFeeds.App.Shared.Resources;
 using FluentFeeds.App.Shared.Services;
 using FluentFeeds.App.Shared.ViewModels.Modals;
 using FluentFeeds.Common;
@@ -339,7 +340,7 @@ public sealed class FeedViewModel : ObservableObject
 		catch (Exception)
 		{
 			_modalService.Show(new ErrorViewModel(
-				"Unable to load content", "An error occurred while trying to load the selected item's content."));
+				LocalizedStrings.LoadContentErrorTitle, LocalizedStrings.LoadContentErrorMessage));
 			IsLoadingContent = false;
 			return;
 		}
@@ -485,9 +486,7 @@ public sealed class FeedViewModel : ObservableObject
 			catch (Exception)
 			{
 				_modalService.Show(
-					new ErrorViewModel(
-						"Synchronization failed",
-						"An error occurred while trying to synchronize your feeds. Please try again later."));
+					new ErrorViewModel(LocalizedStrings.SyncErrorTitle, LocalizedStrings.SyncErrorMessage));
 			}
 		}
 		catch (Exception)

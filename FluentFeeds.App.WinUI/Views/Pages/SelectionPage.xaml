@@ -16,12 +16,12 @@
 			Style="{StaticResource TitleTextBlockStyle}" />
 
 		<TextBlock
-			Text="{x:Bind ViewModel.InfoText, Mode=OneWay}"
+			Text="{x:Bind ViewModel.Message, Mode=OneWay}"
 			TextAlignment="Center"
 			Style="{StaticResource SubtitleTextBlockStyle}"
 			Foreground="{ThemeResource TextFillColorTertiaryBrush}"
 			Margin="0,8,0,0"
-			Visibility="{x:Bind ViewModel.IsInfoTextVisible, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}" />
+			Visibility="{x:Bind ViewModel.IsMessageVisible, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}" />
 	</StackPanel>
 	
 </Page>

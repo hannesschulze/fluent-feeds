@@ -19,7 +19,7 @@
 			TextWrapping="WrapWholeWords" />
 
 		<TextBlock
-			Text="{x:Bind ViewModel.InfoText}"
+			Text="{x:Bind ViewModel.Message}"
 			TextWrapping="WrapWholeWords" />
 
 		<StackPanel

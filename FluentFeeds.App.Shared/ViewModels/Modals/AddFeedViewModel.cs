@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using FluentFeeds.App.Shared.Models.Feeds;
 using FluentFeeds.App.Shared.Models.Storage;
+using FluentFeeds.App.Shared.Resources;
 using FluentFeeds.App.Shared.Services;
 using FluentFeeds.Feeds.Base.Factories;
 using FluentFeeds.Feeds.Base.Feeds;
@@ -13,15 +14,12 @@ namespace FluentFeeds.App.Shared.ViewModels.Modals;
 /// </summary>
 public sealed class AddFeedViewModel : FeedDataViewModel
 {
-	public AddFeedViewModel(
-		IModalService modalService, IUrlFeedFactory factory, IFeedView rootFeed, IFeedView? parentGroup,
-		IFeedStorage storage)
+	public AddFeedViewModel(IUrlFeedFactory factory, IFeedView rootFeed, IFeedView? parentGroup, IFeedStorage storage)
 		: base(
-			title: "Add a feed", errorTitle: "Unable to create the feed",
-			errorMessage: "An error occurred while trying to create a feed for the provided URL.", inputLabel: "URL",
+			title: LocalizedStrings.AddFeedTitle, errorTitle: LocalizedStrings.AddFeedErrorTitle,
+			errorMessage: LocalizedStrings.AddFeedErrorMessage, inputLabel: LocalizedStrings.AddFeedInputLabel,
 			showProgressSpinner: true, rootFeed, parentGroup, null)
 	{
-		_modalService = modalService;
 		_factory = factory;
 		_storage = storage;
 	}
@@ -39,7 +37,6 @@ public sealed class AddFeedViewModel : FeedDataViewModel
 		IsInputValid = _parsedUrl != null;
 	}
 
-	private readonly IModalService _modalService;
 	private readonly IUrlFeedFactory _factory;
 	private readonly IFeedStorage _storage;
 	private Uri? _parsedUrl;

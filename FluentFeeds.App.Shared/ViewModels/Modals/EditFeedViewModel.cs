@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using FluentFeeds.App.Shared.Models.Feeds;
 using FluentFeeds.App.Shared.Models.Storage;
+using FluentFeeds.App.Shared.Resources;
 
 namespace FluentFeeds.App.Shared.ViewModels.Modals;
 
@@ -12,8 +13,8 @@ public sealed class EditFeedViewModel : FeedDataViewModel
 {
 	public EditFeedViewModel(IFeedView rootFeed, IFeedView feed, IFeedStorage storage)
 		: base(
-			title: "Edit an item", errorTitle: "Unable to edit the item",
-			errorMessage: "An error occurred while trying to apply changes to the item.", inputLabel: "Name",
+			title: LocalizedStrings.EditFeedTitle, errorTitle: LocalizedStrings.EditFeedErrorTitle,
+			errorMessage: LocalizedStrings.EditFeedErrorMessage, inputLabel: LocalizedStrings.EditFeedInputLabel,
 			showProgressSpinner: false, rootFeed, feed.Parent, feed)
 	{
 		_feed = feed;

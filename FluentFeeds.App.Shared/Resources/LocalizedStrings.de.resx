@@ -20,4 +20,103 @@
 	<data name="FallbackItemSummary" xml:space="preserve">
 		<value>Dieses Element hat keine Zusammenfassung.</value>
 	</data>
+	<data name="BuiltInFeedSearchName" xml:space="preserve">
+		<value>Suche</value>
+	</data>
+	<data name="BuiltInFeedOverviewName" xml:space="preserve">
+		<value>Überblick</value>
+	</data>
+	<data name="FeedActionAddFeed" xml:space="preserve">
+		<value>Neuer Feed…</value>
+	</data>
+	<data name="FeedActionAddGroup" xml:space="preserve">
+		<value>Neue Gruppe…</value>
+	</data>
+	<data name="FeedActionDelete" xml:space="preserve">
+		<value>Löschen</value>
+	</data>
+	<data name="FeedActionEdit" xml:space="preserve">
+		<value>Bearbeiten…</value>
+	</data>
+	<data name="AddFeedTitle" xml:space="preserve">
+		<value>Neuer Feed</value>
+	</data>
+	<data name="AddFeedErrorTitle" xml:space="preserve">
+		<value>Feed konnte nicht erstellt werden</value>
+	</data>
+	<data name="AddFeedErrorMessage" xml:space="preserve">
+		<value>Beim Erstellen eines Feeds mit der angegebenen URL trat ein Fehler auf.</value>
+	</data>
+	<data name="AddFeedInputLabel" xml:space="preserve">
+		<value>URL</value>
+	</data>
+	<data name="AddGroupTitle" xml:space="preserve">
+		<value>Neue Gruppe</value>
+	</data>
+	<data name="AddGroupErrorTitle" xml:space="preserve">
+		<value>Gruppe konnte nicht erstellt werden</value>
+	</data>
+	<data name="AddGroupErrorMessage" xml:space="preserve">
+		<value>Beim Erstellen der Gruppe trat ein Fehler auf.</value>
+	</data>
+	<data name="AddGroupInputLabel" xml:space="preserve">
+		<value>Name</value>
+	</data>
+	<data name="DeleteFeedMessage" xml:space="preserve">
+		<value>Mit dieser Aktion werden "{0}" und alle untergeordneten Feeds permanent gelöscht. Bist du dir sicher, dass du fortfahren möchtest?</value>
+	</data>
+	<data name="DeleteFeedErrorTitle" xml:space="preserve">
+		<value>Ein Datenbank-Fehler ist aufgetreten</value>
+	</data>
+	<data name="DeleteFeedErrorMessage" xml:space="preserve">
+		<value>{0} konnte den ausgewählten Feed nicht aus der Datenbank löschen.</value>
+	</data>
+	<data name="EditFeedTitle" xml:space="preserve">
+		<value>Feed bearbeiten</value>
+	</data>
+	<data name="EditFeedErrorTitle" xml:space="preserve">
+		<value>Änderungen am Feed konnten nicht gespeichert werden</value>
+	</data>
+	<data name="EditFeedErrorMessage" xml:space="preserve">
+		<value>Beim Anwenden der Änderungen trat ein Fehler auf.</value>
+	</data>
+	<data name="EditFeedInputLabel" xml:space="preserve">
+		<value>Name</value>
+	</data>
+	<data name="ItemInfoWithAuthor" xml:space="preserve">
+		<value>Veröffentlicht von {0} am {1}</value>
+	</data>
+	<data name="ItemInfoWithoutAuthor" xml:space="preserve">
+		<value>Veröffentlicht am {0}</value>
+	</data>
+	<data name="LoadContentErrorTitle" xml:space="preserve">
+		<value>Inhalt konnte nicht geladen werden</value>
+	</data>
+	<data name="LoadContentErrorMessage" xml:space="preserve">
+		<value>Beim Laden des Inhalts für das ausgewählte Element trat ein Fehler auf.</value>
+	</data>
+	<data name="SyncErrorTitle" xml:space="preserve">
+		<value>Synchronisation fehlgeschlagen</value>
+	</data>
+	<data name="SyncErrorMessage" xml:space="preserve">
+		<value>Beim Synchronisieren deiner Feeds ist ein Fehler aufgetreten. Bitte versuche es später erneut.</value>
+	</data>
+	<data name="InitializeDatabaseErrorTitle" xml:space="preserve">
+		<value>Ein Datenbank-Fehler ist aufgetreten</value>
+	</data>
+	<data name="InitializeDatabaseErrorMessage" xml:space="preserve">
+		<value>{0} konnte die Datenbank nicht initialisieren.</value>
+	</data>
+	<data name="SettingsTitle" xml:space="preserve">
+		<value>Einstellungen</value>
+	</data>
+	<data name="SelectionTitleNoItems" xml:space="preserve">
+		<value>Keine Elemente ausgewählt</value>
+	</data>
+	<data name="SelectionMessage" xml:space="preserve">
+		<value>Der Inhalt des ausgewählten Elements wird hier angezeigt.</value>
+	</data>
+	<data name="SelectionTitleMultipleItems" xml:space="preserve">
+		<value>{0} Elemente ausgewählt</value>
+	</data>
 </root>

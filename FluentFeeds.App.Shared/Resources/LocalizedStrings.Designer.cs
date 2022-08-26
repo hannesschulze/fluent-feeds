@@ -60,6 +60,159 @@ namespace FluentFeeds.App.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to An error occurred while trying to create a feed for the provided URL..
+        /// </summary>
+        internal static string AddFeedErrorMessage {
+            get {
+                return ResourceManager.GetString("AddFeedErrorMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to create the feed.
+        /// </summary>
+        internal static string AddFeedErrorTitle {
+            get {
+                return ResourceManager.GetString("AddFeedErrorTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to URL.
+        /// </summary>
+        internal static string AddFeedInputLabel {
+            get {
+                return ResourceManager.GetString("AddFeedInputLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add a feed.
+        /// </summary>
+        internal static string AddFeedTitle {
+            get {
+                return ResourceManager.GetString("AddFeedTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An error occurred while trying to create the group..
+        /// </summary>
+        internal static string AddGroupErrorMessage {
+            get {
+                return ResourceManager.GetString("AddGroupErrorMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to create the group.
+        /// </summary>
+        internal static string AddGroupErrorTitle {
+            get {
+                return ResourceManager.GetString("AddGroupErrorTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Name.
+        /// </summary>
+        internal static string AddGroupInputLabel {
+            get {
+                return ResourceManager.GetString("AddGroupInputLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add a group.
+        /// </summary>
+        internal static string AddGroupTitle {
+            get {
+                return ResourceManager.GetString("AddGroupTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Overview.
+        /// </summary>
+        internal static string BuiltInFeedOverviewName {
+            get {
+                return ResourceManager.GetString("BuiltInFeedOverviewName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search.
+        /// </summary>
+        internal static string BuiltInFeedSearchName {
+            get {
+                return ResourceManager.GetString("BuiltInFeedSearchName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} was unable to delete the selected item from the database..
+        /// </summary>
+        internal static string DeleteFeedErrorMessage {
+            get {
+                return ResourceManager.GetString("DeleteFeedErrorMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A database error occurred.
+        /// </summary>
+        internal static string DeleteFeedErrorTitle {
+            get {
+                return ResourceManager.GetString("DeleteFeedErrorTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This action will permanently delete &quot;{0}&quot; and all of its children. Are you sure you want to continue?.
+        /// </summary>
+        internal static string DeleteFeedMessage {
+            get {
+                return ResourceManager.GetString("DeleteFeedMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An error occurred while trying to apply changes to the feed..
+        /// </summary>
+        internal static string EditFeedErrorMessage {
+            get {
+                return ResourceManager.GetString("EditFeedErrorMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to save changes to the feed.
+        /// </summary>
+        internal static string EditFeedErrorTitle {
+            get {
+                return ResourceManager.GetString("EditFeedErrorTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Name.
+        /// </summary>
+        internal static string EditFeedInputLabel {
+            get {
+                return ResourceManager.GetString("EditFeedInputLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Edit a feed.
+        /// </summary>
+        internal static string EditFeedTitle {
+            get {
+                return ResourceManager.GetString("EditFeedTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unnamed feed.
         /// </summary>
         internal static string FallbackFeedName {
@@ -83,6 +236,150 @@ namespace FluentFeeds.App.Shared.Resources {
         internal static string FallbackItemSummary {
             get {
                 return ResourceManager.GetString("FallbackItemSummary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add feed….
+        /// </summary>
+        internal static string FeedActionAddFeed {
+            get {
+                return ResourceManager.GetString("FeedActionAddFeed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add group….
+        /// </summary>
+        internal static string FeedActionAddGroup {
+            get {
+                return ResourceManager.GetString("FeedActionAddGroup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete.
+        /// </summary>
+        internal static string FeedActionDelete {
+            get {
+                return ResourceManager.GetString("FeedActionDelete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Edit….
+        /// </summary>
+        internal static string FeedActionEdit {
+            get {
+                return ResourceManager.GetString("FeedActionEdit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} was unable to initialize its database..
+        /// </summary>
+        internal static string InitializeDatabaseErrorMessage {
+            get {
+                return ResourceManager.GetString("InitializeDatabaseErrorMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A database error occurred.
+        /// </summary>
+        internal static string InitializeDatabaseErrorTitle {
+            get {
+                return ResourceManager.GetString("InitializeDatabaseErrorTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Published by {0} on {1}.
+        /// </summary>
+        internal static string ItemInfoWithAuthor {
+            get {
+                return ResourceManager.GetString("ItemInfoWithAuthor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Published on {0}.
+        /// </summary>
+        internal static string ItemInfoWithoutAuthor {
+            get {
+                return ResourceManager.GetString("ItemInfoWithoutAuthor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An error occurred while trying to load the selected item&apos;s content..
+        /// </summary>
+        internal static string LoadContentErrorMessage {
+            get {
+                return ResourceManager.GetString("LoadContentErrorMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to load content.
+        /// </summary>
+        internal static string LoadContentErrorTitle {
+            get {
+                return ResourceManager.GetString("LoadContentErrorTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The content of the selected item will be shown here..
+        /// </summary>
+        internal static string SelectionMessage {
+            get {
+                return ResourceManager.GetString("SelectionMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} items selected.
+        /// </summary>
+        internal static string SelectionTitleMultipleItems {
+            get {
+                return ResourceManager.GetString("SelectionTitleMultipleItems", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No items selected.
+        /// </summary>
+        internal static string SelectionTitleNoItems {
+            get {
+                return ResourceManager.GetString("SelectionTitleNoItems", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Settings.
+        /// </summary>
+        internal static string SettingsTitle {
+            get {
+                return ResourceManager.GetString("SettingsTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An error occurred while trying to synchronize your feeds. Please try again later..
+        /// </summary>
+        internal static string SyncErrorMessage {
+            get {
+                return ResourceManager.GetString("SyncErrorMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Synchronization failed.
+        /// </summary>
+        internal static string SyncErrorTitle {
+            get {
+                return ResourceManager.GetString("SyncErrorTitle", resourceCulture);
             }
         }
     }

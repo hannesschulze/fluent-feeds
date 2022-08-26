@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using FluentFeeds.App.Shared.EventArgs;
@@ -11,6 +10,7 @@ using FluentFeeds.App.Shared.Helpers;
 using FluentFeeds.App.Shared.Models.Feeds;
 using FluentFeeds.App.Shared.Models.Feeds.Loaders;
 using FluentFeeds.App.Shared.Models.Navigation;
+using FluentFeeds.App.Shared.Resources;
 using FluentFeeds.App.Shared.Services;
 using FluentFeeds.App.Shared.ViewModels.Items.Navigation;
 using FluentFeeds.App.Shared.ViewModels.Modals;
@@ -33,8 +33,8 @@ public sealed class MainViewModel : ObservableObject
 		
 		_goBackCommand = new RelayCommand(HandleGoBackCommand, () => _backStack.Count > 1);
 		_searchCommand = new RelayCommand(HandleSearchCommand);
-		_settingsItem =
-			new NavigationItemViewModel(MainNavigationRoute.Settings, isExpandable: false, "Settings", Symbol.Settings);
+		_settingsItem = new NavigationItemViewModel(
+			MainNavigationRoute.Settings, isExpandable: false, LocalizedStrings.SettingsTitle, Symbol.Settings);
 		_footerItems.Add(_settingsItem);
 		var overviewItem = new FeedNavigationItemViewModel(
 			modalService, feedService.OverviewFeed, null, _feedItemRegistry);
@@ -44,7 +44,7 @@ public sealed class MainViewModel : ObservableObject
 			loaderFactory: CreateSearchFeedLoader,
 			hasChildren: false,
 			parent: null,
-			name: "Search",
+			name: LocalizedStrings.BuiltInFeedSearchName,
 			symbol: Symbol.Search,
 			metadata: new FeedMetadata(),
 			isUserCustomizable: false,
@@ -77,7 +77,8 @@ public sealed class MainViewModel : ObservableObject
 		{
 			_modalService.Show(
 				new ErrorViewModel(
-					"A database error occurred", $"{Constants.AppName} was unable to initialize its database."));
+					LocalizedStrings.InitializeDatabaseErrorTitle,
+					String.Format(LocalizedStrings.InitializeDatabaseErrorMessage, Constants.AppName)));
 		}
 	}
 

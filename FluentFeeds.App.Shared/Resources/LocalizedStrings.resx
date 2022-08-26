@@ -27,4 +27,103 @@
 	<data name="FallbackItemSummary" xml:space="preserve">
 		<value>This item does not have a summary.</value>
 	</data>
+	<data name="BuiltInFeedOverviewName" xml:space="preserve">
+		<value>Overview</value>
+	</data>
+	<data name="BuiltInFeedSearchName" xml:space="preserve">
+		<value>Search</value>
+	</data>
+	<data name="FeedActionAddFeed" xml:space="preserve">
+		<value>Add feed…</value>
+	</data>
+	<data name="FeedActionAddGroup" xml:space="preserve">
+		<value>Add group…</value>
+	</data>
+	<data name="FeedActionEdit" xml:space="preserve">
+		<value>Edit…</value>
+	</data>
+	<data name="FeedActionDelete" xml:space="preserve">
+		<value>Delete</value>
+	</data>
+	<data name="AddFeedTitle" xml:space="preserve">
+		<value>Add a feed</value>
+	</data>
+	<data name="AddFeedErrorTitle" xml:space="preserve">
+		<value>Unable to create the feed</value>
+	</data>
+	<data name="AddFeedErrorMessage" xml:space="preserve">
+		<value>An error occurred while trying to create a feed for the provided URL.</value>
+	</data>
+	<data name="AddFeedInputLabel" xml:space="preserve">
+		<value>URL</value>
+	</data>
+	<data name="AddGroupTitle" xml:space="preserve">
+		<value>Add a group</value>
+	</data>
+	<data name="AddGroupErrorTitle" xml:space="preserve">
+		<value>Unable to create the group</value>
+	</data>
+	<data name="AddGroupErrorMessage" xml:space="preserve">
+		<value>An error occurred while trying to create the group.</value>
+	</data>
+	<data name="AddGroupInputLabel" xml:space="preserve">
+		<value>Name</value>
+	</data>
+	<data name="DeleteFeedMessage" xml:space="preserve">
+		<value>This action will permanently delete "{0}" and all of its children. Are you sure you want to continue?</value>
+	</data>
+	<data name="DeleteFeedErrorTitle" xml:space="preserve">
+		<value>A database error occurred</value>
+	</data>
+	<data name="DeleteFeedErrorMessage" xml:space="preserve">
+		<value>{0} was unable to delete the selected item from the database.</value>
+	</data>
+	<data name="EditFeedTitle" xml:space="preserve">
+		<value>Edit a feed</value>
+	</data>
+	<data name="EditFeedErrorTitle" xml:space="preserve">
+		<value>Unable to save changes to the feed</value>
+	</data>
+	<data name="EditFeedErrorMessage" xml:space="preserve">
+		<value>An error occurred while trying to apply changes to the feed.</value>
+	</data>
+	<data name="EditFeedInputLabel" xml:space="preserve">
+		<value>Name</value>
+	</data>
+	<data name="ItemInfoWithAuthor" xml:space="preserve">
+		<value>Published by {0} on {1}</value>
+	</data>
+	<data name="ItemInfoWithoutAuthor" xml:space="preserve">
+		<value>Published on {0}</value>
+	</data>
+	<data name="LoadContentErrorTitle" xml:space="preserve">
+		<value>Unable to load content</value>
+	</data>
+	<data name="LoadContentErrorMessage" xml:space="preserve">
+		<value>An error occurred while trying to load the selected item's content.</value>
+	</data>
+	<data name="SyncErrorTitle" xml:space="preserve">
+		<value>Synchronization failed</value>
+	</data>
+	<data name="SyncErrorMessage" xml:space="preserve">
+		<value>An error occurred while trying to synchronize your feeds. Please try again later.</value>
+	</data>
+	<data name="InitializeDatabaseErrorTitle" xml:space="preserve">
+		<value>A database error occurred</value>
+	</data>
+	<data name="InitializeDatabaseErrorMessage" xml:space="preserve">
+		<value>{0} was unable to initialize its database.</value>
+	</data>
+	<data name="SettingsTitle" xml:space="preserve">
+		<value>Settings</value>
+	</data>
+	<data name="SelectionTitleNoItems" xml:space="preserve">
+		<value>No items selected</value>
+	</data>
+	<data name="SelectionMessage" xml:space="preserve">
+		<value>The content of the selected item will be shown here.</value>
+	</data>
+	<data name="SelectionTitleMultipleItems" xml:space="preserve">
+		<value>{0} items selected</value>
+	</data>
 </root>

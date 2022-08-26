@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentFeeds.App.Shared.Models.Feeds;
 using FluentFeeds.App.Shared.Models.Feeds.Loaders;
@@ -15,6 +17,11 @@ namespace FluentFeeds.App.Shared.Tests.ViewModels.Items;
 
 public class FeedNavigationItemViewModelTests
 {
+	public FeedNavigationItemViewModelTests()
+	{
+		Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture; 
+	}
+	
 	private ModalServiceMock ModalService { get; } = new();
 
 	[Fact]
