@@ -8,8 +8,4 @@
 	<ItemGroup>
 		<ProjectReference Include="..\FluentFeeds.Feeds.Base\FluentFeeds.Feeds.Base.csproj" />
 	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Models" />
-	</ItemGroup>
 </Project>

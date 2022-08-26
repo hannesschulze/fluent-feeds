@@ -1,6 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using FluentFeeds.Feeds.Base.Feeds.Content;
 using FluentFeeds.Feeds.HackerNews.Download;
+using FluentFeeds.Feeds.HackerNews.Helpers;
+using FluentFeeds.Feeds.HackerNews.Models;
 
 namespace FluentFeeds.Feeds.HackerNews;
 
@@ -9,6 +13,8 @@ namespace FluentFeeds.Feeds.HackerNews;
 /// </summary>
 public sealed class HackerNewsFeedContentLoader : IFeedContentLoader
 {
+	private const int MaxItemsPerFetch = 10;
+	
 	public HackerNewsFeedContentLoader(IDownloader downloader, HackerNewsFeedType feedType)
 	{
 		Downloader = downloader;
@@ -25,8 +31,17 @@ public sealed class HackerNewsFeedContentLoader : IFeedContentLoader
 	/// </summary>
 	public HackerNewsFeedType FeedType { get; }
 	
-	public Task<FeedContent> LoadAsync()
+	public async Task<FeedContent> LoadAsync()
 	{
-		return Task.FromResult(new FeedContent());
+		var list = await Downloader.DownloadItemListAsync(FeedType);
+		var items = new List<ItemResponse>();
+		foreach (var identifier in list.Identifiers.Take(MaxItemsPerFetch))
+		{
+			items.Add(await Downloader.DownloadItemAsync(identifier));
+		}
+
+		var descriptors = await ConversionHelpers.ParallelTransformAsync(
+			items, item => ConversionHelpers.ConvertItemDescriptorAsync(Downloader, item));
+		return new FeedContent { Items = descriptors };
 	}
 }
