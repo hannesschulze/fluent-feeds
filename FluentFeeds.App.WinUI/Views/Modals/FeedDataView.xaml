@@ -7,7 +7,6 @@
 	xmlns:vm="using:FluentFeeds.App.Shared.ViewModels.Modals"
 	xmlns:items="using:FluentFeeds.App.WinUI.Views.ListItems.GroupSelection"
 	xmlns:converters="using:FluentFeeds.App.WinUI.Converters"
-	xmlns:selectors="using:FluentFeeds.App.WinUI.Selectors"
 	d:DataContext="{d:DesignInstance Type=vm:FeedDataViewModel}"
 	mc:Ignorable="d"
 	PrimaryButtonText="{x:Bind ViewModel.SaveLabel}"
@@ -41,7 +40,7 @@
 			
 		</DataTemplate>
 
-		<selectors:ComboBoxItemTemplateSelector
+		<items:GroupSelectionTemplateSelector
 			x:Key="ItemTemplateSelector"
 			MenuTemplate="{StaticResource MenuItemTemplate}"
 			SelectedTemplate="{StaticResource SelectedItemTemplate}" />

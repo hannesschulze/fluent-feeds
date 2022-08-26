@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
@@ -18,12 +18,6 @@ namespace FluentFeeds.App.Shared.Tests.ViewModels.Pages;
 
 public class ArticleItemViewModelTests
 {
-	public ArticleItemViewModelTests()
-	{
-		Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
-		Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-	}
-	
 	private SettingsServiceMock SettingsService { get; } = new();
 
 	[Fact]

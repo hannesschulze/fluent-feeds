@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using FluentFeeds.App.Shared.Models;
 using FluentFeeds.App.Shared.Models.Navigation;
@@ -15,9 +15,6 @@ public sealed class ArticleItemViewModel : ItemViewModel
 	public ArticleItemViewModel(ISettingsService settingsService)
 	{
 		_settingsService = settingsService;
-
-		_fontFamily = _settingsService.ContentFontFamily;
-		_fontSize = _settingsService.ContentFontSize;
 		_settingsService.PropertyChanged += HandleSettingsChanged;
 	}
 
@@ -26,26 +23,36 @@ public sealed class ArticleItemViewModel : ItemViewModel
 		if (route.Type != FeedNavigationRouteType.ArticleItem)
 			throw new Exception("Invalid route type.");
 
-		Content = route.ArticleContent!.Body;
 		base.Load(route);
+		Content = route.ArticleContent!.Body;
 	}
 
 	/// <summary>
 	/// Font family used to display the content.
 	/// </summary>
-	public FontFamily FontFamily
-	{
-		get => _fontFamily;
-		private set => SetProperty(ref _fontFamily, value);
-	}
+	public FontFamily FontFamily => _settingsService.ContentFontFamily;
 
 	/// <summary>
 	/// Font size used to display the content.
 	/// </summary>
-	public FontSize FontSize
+	public FontSize FontSize => _settingsService.ContentFontSize;
+
+	/// <summary>
+	/// Title of the article.
+	/// </summary>
+	public string Title
 	{
-		get => _fontSize;
-		private set => SetProperty(ref _fontSize, value);
+		get => _title;
+		private set => SetProperty(ref _title, value);
+	}
+
+	/// <summary>
+	/// Line of text shown below the title.
+	/// </summary>
+	public string ItemInfo
+	{
+		get => _itemInfo;
+		private set => SetProperty(ref _itemInfo, value);
 	}
 
 	/// <summary>
@@ -57,21 +64,31 @@ public sealed class ArticleItemViewModel : ItemViewModel
 		private set => SetProperty(ref _content, value);
 	}
 
+	protected override void UpdateTitle(string title)
+	{
+		Title = title;
+	}
+
+	protected override void UpdateItemInfo(string itemInfo)
+	{
+		ItemInfo = itemInfo;
+	}
+
 	private void HandleSettingsChanged(object? sender, PropertyChangedEventArgs e)
 	{
 		switch (e.PropertyName)
 		{
 			case nameof(ISettingsService.ContentFontFamily):
-				FontFamily = _settingsService.ContentFontFamily;
+				OnPropertyChanged(nameof(FontFamily));
 				break;
 			case nameof(ISettingsService.ContentFontSize):
-				FontSize = _settingsService.ContentFontSize;
+				OnPropertyChanged(nameof(FontSize));
 				break;
 		}
 	}
 
 	private readonly ISettingsService _settingsService;
 	private RichText _content = new();
-	private FontFamily _fontFamily;
-	private FontSize _fontSize;
+	private string _title = String.Empty;
+	private string _itemInfo = String.Empty;
 }

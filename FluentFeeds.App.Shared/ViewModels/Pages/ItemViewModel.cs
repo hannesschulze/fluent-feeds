@@ -33,29 +33,15 @@ public abstract class ItemViewModel : ObservableObject
 		UpdateItemInfo();
 	}
 
-	/// <summary>
-	/// Title of the article.
-	/// </summary>
-	public string Title
-	{
-		get => _title;
-		private set => SetProperty(ref _title, value);
-	}
+	protected abstract void UpdateTitle(string title);
 
-	/// <summary>
-	/// Line of text shown below the title.
-	/// </summary>
-	public string ItemInfo
-	{
-		get => _itemInfo;
-		private set => SetProperty(ref _itemInfo, value);
-	}
+	protected abstract void UpdateItemInfo(string itemInfo);
 
 	private void UpdateTitle()
 	{
 		if (_item != null)
 		{
-			Title = _item?.Title ?? String.Empty;
+			UpdateTitle(_item?.Title ?? String.Empty);
 		}
 	}
 
@@ -64,9 +50,9 @@ public abstract class ItemViewModel : ObservableObject
 		if (_item != null)
 		{
 			var publishedTimestamp = _item.PublishedTimestamp.ToLocalTime();
-			ItemInfo = _item.Author != null
+			UpdateItemInfo(_item.Author != null
 				? String.Format(LocalizedStrings.ItemInfoWithAuthor, _item.Author, publishedTimestamp.ToString("f"))
-				: String.Format(LocalizedStrings.ItemInfoWithoutAuthor, publishedTimestamp.ToString("f"));
+				: String.Format(LocalizedStrings.ItemInfoWithoutAuthor, publishedTimestamp.ToString("f")));
 		}
 	}
 

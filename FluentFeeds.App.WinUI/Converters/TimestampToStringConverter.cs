@@ -11,14 +11,7 @@ public sealed class TimestampToStringConverter : IValueConverter
 	public object Convert(object value, Type targetType, object parameter, string language)
 	{
 		var localTimestamp = ((DateTimeOffset)value).LocalDateTime;
-		if (localTimestamp.Date == DateTime.Today)
-		{
-			// Only show time
-			return localTimestamp.ToString("t");
-		}
-
-		// Show the full date
-		return localTimestamp.ToString("d");
+		return localTimestamp.ToString(localTimestamp.Date == DateTime.Today ? "t" : "d");
 	}
 
 	public object ConvertBack(object value, Type targetType, object parameter, string language) =>

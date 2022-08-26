@@ -37,7 +37,10 @@ public sealed class DummyFeedProvider : FeedProvider
 			return ImmutableArray.Create(
 				new ItemDescriptor(
 					"item", "Test Item", null, null, DateTimeOffset.Now, DateTimeOffset.Now, null, null,
-					new StaticItemContentLoader(CreateItemContent())));
+					new StaticItemContentLoader(CreateItemContent())),
+				new ItemDescriptor(
+					"item2", "Article Item", null, null, DateTimeOffset.Now, DateTimeOffset.Now, null, null,
+					new StaticItemContentLoader(new ArticleItemContent(new RichText(new GenericBlock(new TextInline(LoremIpsum1)))))));
 		}
 
 		public Task<FeedContent> LoadAsync()
