@@ -19,6 +19,18 @@ public class ItemViewModelTests
 {
 	private sealed class TestViewModel : ItemViewModel
 	{
+		public string Title { get; private set; } = String.Empty;
+		public string ItemInfo { get; private set; } = String.Empty;
+		
+		protected override void UpdateTitle(string title)
+		{
+			Title = title;
+		}
+
+		protected override void UpdateItemInfo(string itemInfo)
+		{
+			ItemInfo = itemInfo;
+		}
 	}
 	
 	public ItemViewModelTests()

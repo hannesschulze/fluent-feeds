@@ -18,7 +18,7 @@ public sealed class Comment : IEquatable<Comment>
 		Children = ImmutableArray<Comment>.Empty;
 	}
 
-	public Comment(string author, DateTimeOffset publishedTimestamp, RichText body, params Comment[] children)
+	public Comment(string? author, DateTimeOffset publishedTimestamp, RichText body, params Comment[] children)
 	{
 		Author = author;
 		PublishedTimestamp = publishedTimestamp;

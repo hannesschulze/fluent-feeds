@@ -18,16 +18,24 @@ namespace FluentFeeds.App.Shared.Tests.ViewModels.Pages;
 
 public class ArticleItemViewModelTests
 {
+	public ArticleItemViewModelTests()
+	{
+		Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+		Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+	}
+	
 	private SettingsServiceMock SettingsService { get; } = new();
 
 	[Fact]
 	public void LoadArticle()
 	{
 		var content = new ArticleItemContent(new RichText(new GenericBlock(new TextInline("content"))));
-		var item = ItemViewModelTests.CreateItem("title", null, DateTimeOffset.Now, content);
+		var item = ItemViewModelTests.CreateItem(
+			"title", null, new DateTime(2022, 8, 23, 22, 33, 15, DateTimeKind.Local), content);
 		var viewModel = new ArticleItemViewModel(SettingsService);
 		viewModel.Load(FeedNavigationRoute.ArticleItem(item, content));
 		Assert.Equal("title", viewModel.Title);
+		Assert.Equal("Published on Tuesday, 23 August 2022 22:33", viewModel.ItemInfo);
 		Assert.Equal(content.Body, viewModel.Content);
 	}
 
