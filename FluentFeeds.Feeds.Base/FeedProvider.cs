@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Immutable;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -16,7 +17,7 @@ namespace FluentFeeds.Feeds.Base;
 /// </summary>
 public abstract class FeedProvider
 {
-	private record SerializedContent(ItemContentType Type, RichText? ArticleBody);
+	private record SerializedContent(ItemContentType Type, RichText? ArticleBody, ImmutableArray<Comment>? Comments);
 	
 	protected FeedProvider(FeedProviderMetadata metadata)
 	{
@@ -58,7 +59,8 @@ public abstract class FeedProvider
 	public virtual async Task<string> StoreItemContentAsync(IItemContentLoader contentLoader)
 	{
 		var loaded = await contentLoader.LoadAsync();
-		var content = new SerializedContent(loaded.Type, (loaded as ArticleItemContent)?.Body);
+		var content = new SerializedContent(
+			loaded.Type, (loaded as ArticleItemContent)?.Body, (loaded as CommentItemContent)?.Comments);
 		var options = new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
 		return JsonSerializer.Serialize(content, options);
 	}
@@ -73,7 +75,10 @@ public abstract class FeedProvider
 		return Task.FromResult<IItemContentLoader>(new StaticItemContentLoader(
 			content.Type switch
 			{
-				ItemContentType.Article => new ArticleItemContent(content.ArticleBody ?? new RichText()),
+				ItemContentType.Article =>
+					new ArticleItemContent(content.ArticleBody ?? new RichText()),
+				ItemContentType.Comment =>
+					new CommentItemContent { Comments = content.Comments ?? ImmutableArray<Comment>.Empty },
 				_ => throw new IndexOutOfRangeException()
 			}));
 	}

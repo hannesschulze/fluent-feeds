@@ -8,5 +8,9 @@ public enum ItemContentType
 	/// <summary>
 	/// <see cref="ArticleItemContent"/>
 	/// </summary>
-	Article
+	Article,
+	/// <summary>
+	/// <see cref="CommentItemContent"/>
+	/// </summary>
+	Comment
 }
