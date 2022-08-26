@@ -14,6 +14,9 @@
 		<Nullable>enable</Nullable>
 		<AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
 	</PropertyGroup>
+	<ItemGroup>
+	  <None Remove="Controls\StyledRichTextViewer.xaml" />
+	</ItemGroup>
 	
 	<ItemGroup>
 		<Content Include="Assets\Large310x310Logo.scale-100.png" />
@@ -73,6 +76,12 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\FluentFeeds.App.Shared\FluentFeeds.App.Shared.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Page Update="Controls\StyledRichTextViewer.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </Page>
 	</ItemGroup>
 
 	<ItemGroup>

@@ -22,9 +22,9 @@
 			xmlns:vm="using:FluentFeeds.App.Shared.ViewModels.ListItems.Navigation"
 			x:DataType="vm:NavigationItemViewModel"
 			x:Key="NavigationItemTemplate">
-					
+
 			<items:NavigationItemView DataContext="{x:Bind}" />
-					
+
 		</DataTemplate>
 	</Page.Resources>
 

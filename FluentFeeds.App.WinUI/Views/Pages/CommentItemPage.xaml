@@ -118,8 +118,10 @@
 						Foreground="{ThemeResource TextFillColorTertiaryBrush}"
 						IsTextSelectionEnabled="True" />
 
-					<controls:RichTextViewer
-						RichText="{x:Bind CommentBody, Mode=OneWay}" />
+					<controls:StyledRichTextViewer
+						RichText="{x:Bind CommentBody, Mode=OneWay}"
+						StyledFontFamily="{x:Bind FontFamily, Mode=OneWay}"
+						StyledFontSize="{x:Bind FontSize, Mode=OneWay}" />
 				</StackPanel>
 
 			</TreeViewItem>
