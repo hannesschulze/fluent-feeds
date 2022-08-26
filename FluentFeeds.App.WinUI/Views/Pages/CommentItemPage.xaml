@@ -1,0 +1,26 @@
+﻿<Page
+	x:Class="FluentFeeds.App.WinUI.Views.Pages.CommentItemPage"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:vm="using:FluentFeeds.App.Shared.ViewModels.Pages"
+	mc:Ignorable="d"
+	d:DataContext="{d:DesignInstance Type=vm:CommentItemViewModel}"
+	NavigationCacheMode="Required">
+
+	<StackPanel Orientation="Vertical" Margin="16">
+		<TextBlock
+			Text="{x:Bind ViewModel.Title, Mode=OneWay}"
+			Style="{StaticResource TitleTextBlockStyle}"
+			IsTextSelectionEnabled="True" />
+
+		<TextBlock
+			Text="{x:Bind ViewModel.ItemInfo, Mode=OneWay}"
+			Style="{StaticResource CaptionTextBlockStyle}"
+			Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+			Margin="0,8,0,0"
+			IsTextSelectionEnabled="True" />
+	</StackPanel>
+
+</Page>

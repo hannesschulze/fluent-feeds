@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentFeeds.App.Shared.EventArgs;
 using FluentFeeds.App.Shared.Models.Database;
@@ -33,7 +34,7 @@ public sealed class ItemStorage : IItemStorage
 			_identifier = identifier;
 		}
 
-		public async Task<ItemContent> LoadAsync(bool reload = false)
+		public async Task<ItemContent> LoadAsync(bool reload = false, CancellationToken cancellation = default)
 		{
 			var loader = await _cache.GetLoaderAsync(_identifier, LoadFromDatabaseAsync);
 			return await loader.LoadAsync(reload);

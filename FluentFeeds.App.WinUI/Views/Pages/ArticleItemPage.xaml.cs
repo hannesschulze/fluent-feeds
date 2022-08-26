@@ -11,15 +11,15 @@ namespace FluentFeeds.App.WinUI.Views.Pages;
 /// <summary>
 /// Page displaying an article.
 /// </summary>
-public sealed partial class ArticlePage : Page
+public sealed partial class ArticleItemPage : Page
 {
-	public ArticlePage()
+	public ArticleItemPage()
 	{
-		DataContext = Ioc.Default.GetRequiredService<ArticleViewModel>();
+		DataContext = Ioc.Default.GetRequiredService<ArticleItemViewModel>();
 		InitializeComponent();
 	}
 
-	public ArticleViewModel ViewModel => (ArticleViewModel)DataContext;
+	public ArticleItemViewModel ViewModel => (ArticleItemViewModel)DataContext;
 
 	protected override void OnNavigatedTo(NavigationEventArgs e)
 	{

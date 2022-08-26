@@ -10,7 +10,11 @@ public enum FeedNavigationRouteType
 	/// </summary>
 	Selection,
 	/// <summary>
-	/// Page displaying article content for an item.
+	/// Page displaying an item with article content.
 	/// </summary>
-	Article
+	ArticleItem,
+	/// <summary>
+	/// Page displaying an item with comment content.
+	/// </summary>
+	CommentItem
 }

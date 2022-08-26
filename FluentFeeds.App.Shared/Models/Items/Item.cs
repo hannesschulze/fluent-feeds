@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentFeeds.App.Shared.Models.Storage;
 using FluentFeeds.App.Shared.Resources;
@@ -117,7 +118,8 @@ public sealed class Item : ObservableObject, IItemView
 		set => SetProperty(ref _contentLoader, value);
 	}
 	
-	public Task<ItemContent> LoadContentAsync(bool reload = false) => ContentLoader.LoadAsync(reload);
+	public Task<ItemContent> LoadContentAsync(bool reload = false, CancellationToken cancellation = default) =>
+		ContentLoader.LoadAsync(reload, cancellation);
 	
 	private string GetDisplayAuthor() => Author ?? LocalizedStrings.FallbackItemAuthor;
 
