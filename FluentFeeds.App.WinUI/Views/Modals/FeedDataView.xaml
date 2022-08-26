@@ -5,7 +5,7 @@
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:vm="using:FluentFeeds.App.Shared.ViewModels.Modals"
-	xmlns:views="using:FluentFeeds.App.WinUI.Views.Items.GroupSelection"
+	xmlns:items="using:FluentFeeds.App.WinUI.Views.ListItems.GroupSelection"
 	xmlns:converters="using:FluentFeeds.App.WinUI.Converters"
 	xmlns:selectors="using:FluentFeeds.App.WinUI.Selectors"
 	d:DataContext="{d:DesignInstance Type=vm:FeedDataViewModel}"
@@ -22,7 +22,7 @@
 			BaseThickness="16,0,0,0" />
 
 		<DataTemplate
-			xmlns:vm="using:FluentFeeds.App.Shared.ViewModels.Items.GroupSelection"
+			xmlns:vm="using:FluentFeeds.App.Shared.ViewModels.ListItems.GroupSelection"
 			x:Key="MenuItemTemplate"
 			x:DataType="vm:GroupSelectionItemViewModel">
 			
@@ -33,7 +33,7 @@
 		</DataTemplate>
 
 		<DataTemplate
-			xmlns:vm="using:FluentFeeds.App.Shared.ViewModels.Items.GroupSelection"
+			xmlns:vm="using:FluentFeeds.App.Shared.ViewModels.ListItems.GroupSelection"
 			x:Key="SelectedItemTemplate"
 			x:DataType="vm:GroupSelectionItemViewModel">
 			
@@ -78,7 +78,7 @@
 			<StackPanel Orientation="Vertical" Spacing="4">
 				<TextBlock Text="{x:Bind ViewModel.LocationLabel}" LineHeight="20" />
 
-				<views:GroupSelectionComboBox
+				<items:GroupSelectionComboBox
 					SelectedItem="{x:Bind ViewModel.SelectedGroup, Mode=TwoWay}"
 					ItemsSource="{x:Bind ViewModel.GroupItems}"
 					ItemTemplateSelector="{StaticResource ItemTemplateSelector}"

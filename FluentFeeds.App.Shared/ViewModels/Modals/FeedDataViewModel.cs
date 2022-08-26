@@ -1,4 +1,4 @@
-﻿using FluentFeeds.App.Shared.ViewModels.Items.GroupSelection;
+﻿using FluentFeeds.App.Shared.ViewModels.ListItems.GroupSelection;
 using System;
 using System.Collections.ObjectModel;
 using Microsoft.Toolkit.Mvvm.ComponentModel;

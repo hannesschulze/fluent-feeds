@@ -1,4 +1,4 @@
-﻿using FluentFeeds.App.Shared.ViewModels.Items.Navigation;
+﻿using FluentFeeds.App.Shared.ViewModels.ListItems.Navigation;
 using FluentFeeds.App.Shared.ViewModels.Modals;
 
 namespace FluentFeeds.App.Shared.Services;

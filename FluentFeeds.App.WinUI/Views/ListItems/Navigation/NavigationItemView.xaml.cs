@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Immutable;
 using System.ComponentModel;
-using FluentFeeds.App.Shared.ViewModels.Items.Navigation;
+using FluentFeeds.App.Shared.ViewModels.ListItems.Navigation;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
-namespace FluentFeeds.App.WinUI.Views.Items.Navigation;
+namespace FluentFeeds.App.WinUI.Views.ListItems.Navigation;
 
 /// <summary>
 /// <para>A navigation view item which presents a <see cref="NavigationItemViewModel"/>.</para>

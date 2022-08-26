@@ -12,7 +12,7 @@ using FluentFeeds.App.Shared.Models.Feeds.Loaders;
 using FluentFeeds.App.Shared.Models.Navigation;
 using FluentFeeds.App.Shared.Resources;
 using FluentFeeds.App.Shared.Services;
-using FluentFeeds.App.Shared.ViewModels.Items.Navigation;
+using FluentFeeds.App.Shared.ViewModels.ListItems.Navigation;
 using FluentFeeds.App.Shared.ViewModels.Modals;
 using FluentFeeds.Common;
 using FluentFeeds.Feeds.Base.Feeds.Content;

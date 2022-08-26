@@ -1,7 +1,7 @@
-﻿using FluentFeeds.App.Shared.ViewModels.Items.Navigation;
+﻿using FluentFeeds.App.Shared.ViewModels.ListItems.Navigation;
 using Microsoft.UI.Xaml.Controls;
 
-namespace FluentFeeds.App.WinUI.Views.Items.Navigation;
+namespace FluentFeeds.App.WinUI.Views.ListItems.Navigation;
 
 /// <summary>
 /// A menu flyout item which presents a <see cref="NavigationItemActionViewModel"/>.

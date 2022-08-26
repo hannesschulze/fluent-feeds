@@ -14,9 +14,6 @@
 		<Nullable>enable</Nullable>
 		<AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
 	</PropertyGroup>
-	<ItemGroup>
-	  <None Remove="Views\Pages\CommentItemPage.xaml" />
-	</ItemGroup>
 	
 	<ItemGroup>
 		<Content Include="Assets\Large310x310Logo.scale-100.png" />
@@ -79,9 +76,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Page Update="Views\Pages\CommentItemPage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </Page>
+		<Page Update="Views\Pages\CommentItemPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
 	</ItemGroup>
 
 	<ItemGroup>
