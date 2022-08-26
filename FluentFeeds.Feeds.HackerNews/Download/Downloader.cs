@@ -20,7 +20,6 @@ public sealed class Downloader : IDownloader
 		_jsonOptions =
 			new JsonSerializerOptions
 			{
-				PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
 				DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
 				Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
 			};
@@ -41,6 +40,15 @@ public sealed class Downloader : IDownloader
 		response.EnsureSuccessStatusCode();
 		var identifiers = await response.Content.ReadFromJsonAsync<ImmutableArray<long>>(_jsonOptions, cancellation);
 		return new ItemListResponse(Identifiers: identifiers);
+	}
+
+	public async Task<ItemCommentsResponse> DownloadItemCommentsAsync(
+		long identifier, CancellationToken cancellation = default)
+	{
+		var response = await _httpClient.GetAsync($"https://hn.algolia.com/api/v1/items/{identifier}", cancellation);
+		response.EnsureSuccessStatusCode();
+		var result = await response.Content.ReadFromJsonAsync<ItemCommentsResponse>(_jsonOptions, cancellation);
+		return result ?? throw new JsonException();
 	}
 
 	public async Task<ItemResponse> DownloadItemAsync(long identifier, CancellationToken cancellation = default)

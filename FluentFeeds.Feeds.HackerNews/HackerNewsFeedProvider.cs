@@ -11,7 +11,7 @@ using FluentFeeds.Feeds.HackerNews.Download;
 namespace FluentFeeds.Feeds.HackerNews;
 
 /// <summary>
-/// Feed provider implementation fetching feeds using the public Hacker News API.
+/// Feed provider implementation fetching feeds using both the official Hacker News API as well as the Algolia API.
 /// </summary>
 public class HackerNewsFeedProvider : FeedProvider
 {
@@ -22,7 +22,7 @@ public class HackerNewsFeedProvider : FeedProvider
 		: base(new FeedProviderMetadata(
 			Identifier: Guid.Parse("9a9d8c17-c940-4069-999a-0016bfdddb11"),
 			Name: "Hacker News Feed Provider",
-			Description: "A feed provider fetching feeds using the public Hacker News API."))
+			Description: "A feed provider fetching feeds from Hacker News."))
 	{
 	}
 

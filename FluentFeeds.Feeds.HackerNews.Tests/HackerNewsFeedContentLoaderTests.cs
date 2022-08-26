@@ -23,8 +23,6 @@ public class HackerNewsFeedContentLoaderTests
 							new(8863, "story")
 							{
 								By = "dhouston",
-								Descendants = 71,
-								Score = 111,
 								Time = 1175714200,
 								Title = "My YC app: Dropbox - Throw away your USB drive",
 								Url = "http://www.getdropbox.com/u/2/screencast.html"
@@ -33,8 +31,6 @@ public class HackerNewsFeedContentLoaderTests
 							new(121003, "story")
 							{
 								By = "tel",
-								Descendants = 16,
-								Score = 25,
 								Text =
 									"<i>or</i> HN: the Next Iteration<p>I get the impression that with Arc being " +
 									"released a lot of people who never had time for HN before are suddenly dropping " +

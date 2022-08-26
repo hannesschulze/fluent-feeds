@@ -15,6 +15,11 @@ public interface IDownloader
 	Task<ItemListResponse> DownloadItemListAsync(HackerNewsFeedType feedType, CancellationToken cancellation = default);
 
 	/// <summary>
+	/// Fetch the comments for an item.
+	/// </summary>
+	Task<ItemCommentsResponse> DownloadItemCommentsAsync(long identifier, CancellationToken cancellation = default);
+
+	/// <summary>
 	/// Fetch an item with the provided identifier.
 	/// </summary>
 	Task<ItemResponse> DownloadItemAsync(long identifier, CancellationToken cancellation = default);
