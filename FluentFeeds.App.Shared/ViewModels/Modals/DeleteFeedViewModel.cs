@@ -29,9 +29,24 @@ public sealed class DeleteFeedViewModel : ObservableObject
 	public ICommand ConfirmCommand => _confirmCommand;
 
 	/// <summary>
+	/// Title of the dialog.
+	/// </summary>
+	public string Title => LocalizedStrings.DeleteFeedTitle;
+
+	/// <summary>
 	/// Text informing the user about the consequences of deleting the feed.
 	/// </summary>
 	public string Message { get; }
+
+	/// <summary>
+	/// Label of the "confirm" button.
+	/// </summary>
+	public string ConfirmLabel => LocalizedStrings.DeleteFeedConfirmLabel;
+
+	/// <summary>
+	/// Label of the "cancel" button.
+	/// </summary>
+	public string CancelLabel => LocalizedStrings.DeleteFeedCancelLabel;
 
 	private async void HandleConfirmCommand()
 	{

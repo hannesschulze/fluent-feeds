@@ -31,9 +31,9 @@ public sealed partial class ArticlePage : Page
 	private FontFamily GetFontFamily(Shared.Models.FontFamily fontFamily) =>
 		fontFamily switch
 		{
-			Shared.Models.FontFamily.SansSerif => new("Segoe UI"),
-			Shared.Models.FontFamily.Serif => new("Times New Roman"),
-			Shared.Models.FontFamily.Monospace => new("Consolas"),
+			Shared.Models.FontFamily.SansSerif => new FontFamily("Segoe UI"),
+			Shared.Models.FontFamily.Serif => new FontFamily("Times New Roman"),
+			Shared.Models.FontFamily.Monospace => new FontFamily("Consolas"),
 			_ => throw new IndexOutOfRangeException()
 		};
 

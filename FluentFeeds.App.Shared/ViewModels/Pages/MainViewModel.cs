@@ -107,6 +107,11 @@ public sealed class MainViewModel : ObservableObject
 	public string Title => Constants.AppName;
 
 	/// <summary>
+	/// Placeholder text shown in the search field if it is empty.
+	/// </summary>
+	public string SearchPlaceholder => LocalizedStrings.SearchPlaceholder;
+
+	/// <summary>
 	/// Current text value of the search field.
 	/// </summary>
 	public string SearchText

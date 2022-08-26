@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using System.Threading.Tasks;
 using FluentFeeds.App.Shared.Models.Feeds;
+using FluentFeeds.App.Shared.Resources;
 
 namespace FluentFeeds.App.Shared.ViewModels.Modals;
 
@@ -108,6 +109,21 @@ public abstract class FeedDataViewModel : ObservableObject
 	/// Label for the <see cref="Input"/> field.
 	/// </summary>
 	public string InputLabel { get; }
+
+	/// <summary>
+	/// Label displayed above the location picker.
+	/// </summary>
+	public string LocationLabel => LocalizedStrings.FeedDataLocationLabel;
+
+	/// <summary>
+	/// Label for the "save" button.
+	/// </summary>
+	public string SaveLabel => LocalizedStrings.FeedDataSaveLabel;
+	
+	/// <summary>
+	/// Label for the "cancel" button.
+	/// </summary>
+	public string CancelLabel => LocalizedStrings.FeedDataCancelLabel;
 
 	/// <summary>
 	/// Current text input value.

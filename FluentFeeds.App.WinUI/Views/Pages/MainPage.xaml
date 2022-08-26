@@ -134,7 +134,7 @@
 				Grid.Column="1"
 				QueryIcon="Find"
 				QuerySubmitted="HandleSearchQuerySubmitted"
-				PlaceholderText="Search"
+				PlaceholderText="{x:Bind ViewModel.SearchPlaceholder}"
 				Height="{StaticResource TitleBarSearchHeight}"
 				Margin="{StaticResource TitleBarSearchMargin}"
 				VerticalAlignment="Center"

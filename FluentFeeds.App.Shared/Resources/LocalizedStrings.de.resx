@@ -119,4 +119,85 @@
 	<data name="SelectionTitleMultipleItems" xml:space="preserve">
 		<value>{0} Elemente ausgewählt</value>
 	</data>
+	<data name="DeleteFeedTitle" xml:space="preserve">
+		<value>Feed permanent löschen?</value>
+	</data>
+	<data name="DeleteFeedConfirmLabel" xml:space="preserve">
+		<value>Löschen</value>
+	</data>
+	<data name="DeleteFeedCancelLabel" xml:space="preserve">
+		<value>Abbrechen</value>
+	</data>
+	<data name="FeedDataLocationLabel" xml:space="preserve">
+		<value>Ort</value>
+	</data>
+	<data name="FeedDataSaveLabel" xml:space="preserve">
+		<value>Speichern</value>
+	</data>
+	<data name="FeedDataCancelLabel" xml:space="preserve">
+		<value>Abbrechen</value>
+	</data>
+	<data name="FeedSyncLabel" xml:space="preserve">
+		<value>Sync</value>
+	</data>
+	<data name="FeedSortModeNewestLabel" xml:space="preserve">
+		<value>Neuste</value>
+	</data>
+	<data name="FeedSortModeOldestLabel" xml:space="preserve">
+		<value>Älteste</value>
+	</data>
+	<data name="FeedReloadContentLabel" xml:space="preserve">
+		<value>Neuladen</value>
+	</data>
+	<data name="DisplayOptionsFontFamilyLabel" xml:space="preserve">
+		<value>Schriftart</value>
+	</data>
+	<data name="DisplayOptionsFontFamilySansSerifLabel" xml:space="preserve">
+		<value>Sans-Serif</value>
+	</data>
+	<data name="DisplayOptionsFontFamilySerifLabel" xml:space="preserve">
+		<value>Serif</value>
+	</data>
+	<data name="DisplayOptionsFontFamilyMonospaceLabel" xml:space="preserve">
+		<value>Monospace</value>
+	</data>
+	<data name="DisplayOptionsIncreaseFontSizeLabel" xml:space="preserve">
+		<value>Schriftgröße erhöhen</value>
+	</data>
+	<data name="DisplayOptionsDecreaseFontSizeLabel" xml:space="preserve">
+		<value>Schriftgröße verringern</value>
+	</data>
+	<data name="DisplayOptionsResetFontSizeLabel" xml:space="preserve">
+		<value>Schriftgröße zurücksetzen</value>
+	</data>
+	<data name="SearchPlaceholder" xml:space="preserve">
+		<value>Suche</value>
+	</data>
+	<data name="SettingsAppearanceHeading" xml:space="preserve">
+		<value>Darstellung</value>
+	</data>
+	<data name="SettingsAboutHeading" xml:space="preserve">
+		<value>Info zu dieser App</value>
+	</data>
+	<data name="SettingsThemeLabel" xml:space="preserve">
+		<value>App-Design</value>
+	</data>
+	<data name="SettingsThemeDescription" xml:space="preserve">
+		<value>Wähle das Design aus, welches in der App verwendet wird.</value>
+	</data>
+	<data name="SettingsThemeLightLabel" xml:space="preserve">
+		<value>Hell</value>
+	</data>
+	<data name="SettingsThemeDarkLabel" xml:space="preserve">
+		<value>Dunkel</value>
+	</data>
+	<data name="SettingsThemeSystemDefaultLabel" xml:space="preserve">
+		<value>Systemeinstellung verwenden</value>
+	</data>
+	<data name="SettingsOpenProjectWebsiteLabel" xml:space="preserve">
+		<value>Projektwebseite</value>
+	</data>
+	<data name="OpenGitHubIssuesLabel" xml:space="preserve">
+		<value>GitHub-Issues</value>
+	</data>
 </root>

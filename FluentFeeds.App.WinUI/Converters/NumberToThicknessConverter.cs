@@ -14,7 +14,7 @@ public sealed class NumberToThicknessConverter : IValueConverter
 	/// </summary>
 	public Thickness BaseThickness { get; set; } = new(0.0);
 
-	public object Convert(object value, Type targetType, object parameter, string language)
+	public object Convert(object? value, Type targetType, object parameter, string language)
 	{
 		var factor = (int?)value ?? 0;
 		return new Thickness(

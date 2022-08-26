@@ -10,10 +10,10 @@
 	xmlns:selectors="using:FluentFeeds.App.WinUI.Selectors"
 	d:DataContext="{d:DesignInstance Type=vm:FeedDataViewModel}"
 	mc:Ignorable="d"
-	PrimaryButtonText="Save"
+	PrimaryButtonText="{x:Bind ViewModel.SaveLabel}"
 	PrimaryButtonClick="HandlePrimaryButtonClick"
 	IsPrimaryButtonEnabled="{x:Bind ViewModel.IsSaveEnabled, Mode=OneWay}"
-	CloseButtonText="Cancel"
+	CloseButtonText="{x:Bind ViewModel.CancelLabel}"
 	DefaultButton="Primary">
 
 	<ContentDialog.Resources>
@@ -76,7 +76,7 @@
 			</StackPanel>
 
 			<StackPanel Orientation="Vertical" Spacing="4">
-				<TextBlock Text="Location" LineHeight="20" />
+				<TextBlock Text="{x:Bind ViewModel.LocationLabel}" LineHeight="20" />
 
 				<views:GroupSelectionComboBox
 					SelectedItem="{x:Bind ViewModel.SelectedGroup, Mode=TwoWay}"

@@ -150,6 +150,24 @@ namespace FluentFeeds.App.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cancel.
+        /// </summary>
+        internal static string DeleteFeedCancelLabel {
+            get {
+                return ResourceManager.GetString("DeleteFeedCancelLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete.
+        /// </summary>
+        internal static string DeleteFeedConfirmLabel {
+            get {
+                return ResourceManager.GetString("DeleteFeedConfirmLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} was unable to delete the selected item from the database..
         /// </summary>
         internal static string DeleteFeedErrorMessage {
@@ -173,6 +191,78 @@ namespace FluentFeeds.App.Shared.Resources {
         internal static string DeleteFeedMessage {
             get {
                 return ResourceManager.GetString("DeleteFeedMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete this feed permanently?.
+        /// </summary>
+        internal static string DeleteFeedTitle {
+            get {
+                return ResourceManager.GetString("DeleteFeedTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Decrease font size.
+        /// </summary>
+        internal static string DisplayOptionsDecreaseFontSizeLabel {
+            get {
+                return ResourceManager.GetString("DisplayOptionsDecreaseFontSizeLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Font family.
+        /// </summary>
+        internal static string DisplayOptionsFontFamilyLabel {
+            get {
+                return ResourceManager.GetString("DisplayOptionsFontFamilyLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Monospace.
+        /// </summary>
+        internal static string DisplayOptionsFontFamilyMonospaceLabel {
+            get {
+                return ResourceManager.GetString("DisplayOptionsFontFamilyMonospaceLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sans Serif.
+        /// </summary>
+        internal static string DisplayOptionsFontFamilySansSerifLabel {
+            get {
+                return ResourceManager.GetString("DisplayOptionsFontFamilySansSerifLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Serif.
+        /// </summary>
+        internal static string DisplayOptionsFontFamilySerifLabel {
+            get {
+                return ResourceManager.GetString("DisplayOptionsFontFamilySerifLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Increase font size.
+        /// </summary>
+        internal static string DisplayOptionsIncreaseFontSizeLabel {
+            get {
+                return ResourceManager.GetString("DisplayOptionsIncreaseFontSizeLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reset font size.
+        /// </summary>
+        internal static string DisplayOptionsResetFontSizeLabel {
+            get {
+                return ResourceManager.GetString("DisplayOptionsResetFontSizeLabel", resourceCulture);
             }
         }
         
@@ -276,6 +366,69 @@ namespace FluentFeeds.App.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cancel.
+        /// </summary>
+        internal static string FeedDataCancelLabel {
+            get {
+                return ResourceManager.GetString("FeedDataCancelLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Location.
+        /// </summary>
+        internal static string FeedDataLocationLabel {
+            get {
+                return ResourceManager.GetString("FeedDataLocationLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Save.
+        /// </summary>
+        internal static string FeedDataSaveLabel {
+            get {
+                return ResourceManager.GetString("FeedDataSaveLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reload.
+        /// </summary>
+        internal static string FeedReloadContentLabel {
+            get {
+                return ResourceManager.GetString("FeedReloadContentLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Newest.
+        /// </summary>
+        internal static string FeedSortModeNewestLabel {
+            get {
+                return ResourceManager.GetString("FeedSortModeNewestLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Oldest.
+        /// </summary>
+        internal static string FeedSortModeOldestLabel {
+            get {
+                return ResourceManager.GetString("FeedSortModeOldestLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sync.
+        /// </summary>
+        internal static string FeedSyncLabel {
+            get {
+                return ResourceManager.GetString("FeedSyncLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} was unable to initialize its database..
         /// </summary>
         internal static string InitializeDatabaseErrorMessage {
@@ -330,6 +483,24 @@ namespace FluentFeeds.App.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to GitHub Issues.
+        /// </summary>
+        internal static string OpenGitHubIssuesLabel {
+            get {
+                return ResourceManager.GetString("OpenGitHubIssuesLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search.
+        /// </summary>
+        internal static string SearchPlaceholder {
+            get {
+                return ResourceManager.GetString("SearchPlaceholder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The content of the selected item will be shown here..
         /// </summary>
         internal static string SelectionMessage {
@@ -353,6 +524,78 @@ namespace FluentFeeds.App.Shared.Resources {
         internal static string SelectionTitleNoItems {
             get {
                 return ResourceManager.GetString("SelectionTitleNoItems", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to About this app.
+        /// </summary>
+        internal static string SettingsAboutHeading {
+            get {
+                return ResourceManager.GetString("SettingsAboutHeading", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Appearance.
+        /// </summary>
+        internal static string SettingsAppearanceHeading {
+            get {
+                return ResourceManager.GetString("SettingsAppearanceHeading", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Project Website.
+        /// </summary>
+        internal static string SettingsOpenProjectWebsiteLabel {
+            get {
+                return ResourceManager.GetString("SettingsOpenProjectWebsiteLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Dark.
+        /// </summary>
+        internal static string SettingsThemeDarkLabel {
+            get {
+                return ResourceManager.GetString("SettingsThemeDarkLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pick the theme used by the app..
+        /// </summary>
+        internal static string SettingsThemeDescription {
+            get {
+                return ResourceManager.GetString("SettingsThemeDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to App theme.
+        /// </summary>
+        internal static string SettingsThemeLabel {
+            get {
+                return ResourceManager.GetString("SettingsThemeLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Light.
+        /// </summary>
+        internal static string SettingsThemeLightLabel {
+            get {
+                return ResourceManager.GetString("SettingsThemeLightLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use system default.
+        /// </summary>
+        internal static string SettingsThemeSystemDefaultLabel {
+            get {
+                return ResourceManager.GetString("SettingsThemeSystemDefaultLabel", resourceCulture);
             }
         }
         

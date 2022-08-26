@@ -113,6 +113,65 @@ public sealed class FeedViewModel : ObservableObject
 	public ICommand OpenBrowserCommand => _openBrowserCommand;
 
 	/// <summary>
+	/// Symbol for <see cref="SyncCommand"/>.
+	/// </summary>
+	public Symbol SyncSymbol => Symbol.Synchronize;
+
+	/// <summary>
+	/// Symbol for <see cref="ToggleReadCommand"/>.
+	/// </summary>
+	public Symbol ToggleReadSymbol
+	{
+		get => _toggleReadSymbol;
+		private set => SetProperty(ref _toggleReadSymbol, value);
+	}
+
+	/// <summary>
+	/// Symbol for <see cref="DeleteCommand"/>.
+	/// </summary>
+	public Symbol DeleteSymbol => Symbol.Trash;
+
+	/// <summary>
+	/// Symbol for the <see cref="SelectedSortMode"/> menu.
+	/// </summary>
+	public Symbol SortModeSymbol => Symbol.SortOrder;
+
+	/// <summary>
+	/// Symbol for <see cref="ReloadContentCommand"/>.
+	/// </summary>
+	public Symbol ReloadContentSymbol => Symbol.Refresh;
+
+	/// <summary>
+	/// Symbol for the <see cref="DisplayOptions"/> menu.
+	/// </summary>
+	public Symbol DisplayOptionsSymbol => Symbol.Font;
+
+	/// <summary>
+	/// Symbol for <see cref="OpenBrowserCommand"/>.
+	/// </summary>
+	public Symbol OpenBrowserSymbol => Symbol.OpenExternal;
+
+	/// <summary>
+	/// Label for <see cref="SyncCommand"/>.
+	/// </summary>
+	public string SyncLabel => LocalizedStrings.FeedSyncLabel;
+
+	/// <summary>
+	/// Menu label for <see cref="ItemSortMode.Newest"/>.
+	/// </summary>
+	public string SortModeNewestLabel => LocalizedStrings.FeedSortModeNewestLabel;
+
+	/// <summary>
+	/// Menu label for <see cref="ItemSortMode.Oldest"/>.
+	/// </summary>
+	public string SortModeOldestLabel => LocalizedStrings.FeedSortModeOldestLabel;
+
+	/// <summary>
+	/// Label for <see cref="ReloadContentCommand"/>.
+	/// </summary>
+	public string ReloadContentLabel => LocalizedStrings.FeedReloadContentLabel;
+	
+	/// <summary>
 	/// Items provided by the feed, sorted using the current sort mode.
 	/// </summary>
 	public ReadOnlyObservableCollection<IItemView> Items { get; }
@@ -179,15 +238,6 @@ public sealed class FeedViewModel : ObservableObject
 				UpdateItems(reload: true);
 			}
 		}
-	}
-
-	/// <summary>
-	/// Symbol for <see cref="ToggleReadCommand"/>.
-	/// </summary>
-	public Symbol ToggleReadSymbol
-	{
-		get => _toggleReadSymbol;
-		private set => SetProperty(ref _toggleReadSymbol, value);
 	}
 
 	/// <summary>
