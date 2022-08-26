@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Immutable;
+using System.Globalization;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentFeeds.App.Shared.Models.Feeds.Loaders;
 using FluentFeeds.App.Shared.Models.Navigation;
@@ -16,6 +18,7 @@ public class MainViewModelTests
 {
 	public MainViewModelTests()
 	{
+		Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 		ModalService = new ModalServiceMock();
 		FeedService = new FeedServiceMock();
 	}

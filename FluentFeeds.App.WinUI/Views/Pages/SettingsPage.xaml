@@ -84,7 +84,7 @@
 				Grid.Row="0"
 				Margin="{StaticResource ContentGridVerticalItemMargin}"
 				Style="{ThemeResource TitleLargeTextBlockStyle}"
-				Text="Settings" />
+				Text="{x:Bind ViewModel.Title}" />
 
 			<StackPanel
 				x:Name="SettingsPanel"
@@ -96,7 +96,7 @@
 				Margin="{StaticResource ContentGridVerticalItemMargin}">
 
 				<TextBlock
-					Text="Appearance"
+					Text="{x:Bind ViewModel.AppearanceHeading}"
 					Style="{ThemeResource BodyStrongTextBlockStyle}" />
 
 				<Expander
@@ -127,18 +127,18 @@
 								Grid.RowSpan="2"
 								Height="{StaticResource SettingsPanelOptionHeaderIconSize}"
 								VerticalAlignment="Center"
-								Child="{x:Bind AppThemeSymbol}" />
+								Child="{x:Bind ViewModel.ThemeSymbol, Converter={StaticResource SymbolToIconElementConverter}}" />
 
 							<TextBlock
 								Grid.Column="1"
 								Grid.Row="0"
-								Text="App theme"
+								Text="{x:Bind ViewModel.ThemeLabel}"
 								Style="{ThemeResource BodyTextBlockStyle}" />
 
 							<TextBlock
 								Grid.Column="1"
 								Grid.Row="1"
-								Text="Pick the theme used to display the app."
+								Text="{x:Bind ViewModel.ThemeDescription}"
 								TextWrapping="WrapWholeWords"
 								Style="{ThemeResource CaptionTextBlockStyle}"
 								Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
@@ -153,7 +153,7 @@
 							Spacing="{StaticResource SettingsPanelOptionContentSpacing}">
 
 							<RadioButton
-								Content="Light"
+								Content="{x:Bind ViewModel.ThemeLightLabel}"
 								GroupName="Themes"
 								IsChecked="{x:Bind IsThemeSelected(ViewModel.SelectedTheme, models:Theme.Light), Mode=OneWay}"
 								Command="{x:Bind SelectThemeCommand}">
@@ -165,7 +165,7 @@
 							</RadioButton>
 
 							<RadioButton
-								Content="Dark"
+								Content="{x:Bind ViewModel.ThemeDarkLabel}"
 								GroupName="Themes"
 								IsChecked="{x:Bind IsThemeSelected(ViewModel.SelectedTheme, models:Theme.Dark), Mode=OneWay}"
 								Command="{x:Bind SelectThemeCommand}">
@@ -177,7 +177,7 @@
 							</RadioButton>
 
 							<RadioButton
-								Content="System default"
+								Content="{x:Bind ViewModel.ThemeSystemDefaultLabel}"
 								GroupName="Themes"
 								IsChecked="{x:Bind IsThemeSelected(ViewModel.SelectedTheme, models:Theme.SystemDefault), Mode=OneWay}"
 								Command="{x:Bind SelectThemeCommand}">
@@ -204,11 +204,11 @@
 				Spacing="{StaticResource PanelSectionHeadingSpacing}">
 				
 				<TextBlock
-					Text="About this app"
+					Text="{x:Bind ViewModel.AboutHeading}"
 					Style="{ThemeResource BodyStrongTextBlockStyle}" />
 
 				<TextBlock
-					Text="Fluent Feeds v0.1.0"
+					Text="{x:Bind ViewModel.AboutText}"
 					TextWrapping="WrapWholeWords"
 					IsTextSelectionEnabled="True"
 					Style="{ThemeResource BodyTextBlockStyle}" />
@@ -219,11 +219,11 @@
 					Margin="{StaticResource AboutPanelButtonMargin}">
 					
 					<Button
-						Content="Project Website"
+						Content="{x:Bind ViewModel.OpenProjectWebsiteLabel}"
 						Command="{x:Bind ViewModel.OpenProjectWebsiteCommand}" />
 
 					<Button
-						Content="GitHub Issues"
+						Content="{x:Bind ViewModel.OpenGitHubIssuesLabel}"
 						Command="{x:Bind ViewModel.OpenGitHubIssuesCommand}" />
 					
 				</StackPanel>

@@ -1,4 +1,6 @@
 using System;
+using System.Globalization;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentFeeds.Common;
 using FluentFeeds.Feeds.Syndication.Download;
@@ -10,6 +12,11 @@ namespace FluentFeeds.Feeds.Syndication.Tests;
 public class SyndicationFeedProviderTests
 {
 	private SyndicationFeedProvider Provider { get; } = new();
+
+	public SyndicationFeedProviderTests()
+	{
+		Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+	}
 	
 	[Fact]
 	public void InitialStructure()

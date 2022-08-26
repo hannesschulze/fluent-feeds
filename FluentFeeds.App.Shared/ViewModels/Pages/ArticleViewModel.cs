@@ -3,6 +3,7 @@ using System.ComponentModel;
 using FluentFeeds.App.Shared.Models;
 using FluentFeeds.App.Shared.Models.Items;
 using FluentFeeds.App.Shared.Models.Navigation;
+using FluentFeeds.App.Shared.Resources;
 using FluentFeeds.App.Shared.Services;
 using FluentFeeds.Documents;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
@@ -103,8 +104,8 @@ public sealed class ArticleViewModel : ObservableObject
 		{
 			var publishedTimestamp = _item.PublishedTimestamp.ToLocalTime();
 			ItemInfo = _item.Author != null
-				? $"Published by {_item.Author} on {publishedTimestamp:f}"
-				: $"Published on {publishedTimestamp:f}";
+				? String.Format(LocalizedStrings.ItemInfoWithAuthor, _item.Author, publishedTimestamp.ToString("f"))
+				: String.Format(LocalizedStrings.ItemInfoWithoutAuthor, publishedTimestamp.ToString("f"));
 		}
 	}
 

@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Immutable;
+using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentFeeds.App.Shared.Models;
 using FluentFeeds.App.Shared.Models.Feeds;
@@ -20,6 +22,11 @@ namespace FluentFeeds.App.Shared.Tests.ViewModels.Pages;
 
 public class FeedViewModelTests
 {
+	public FeedViewModelTests()
+	{
+		Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+	}
+	
 	private FeedServiceMock FeedService { get; } = new();
 
 	private ModalServiceMock ModalService { get; } = new();

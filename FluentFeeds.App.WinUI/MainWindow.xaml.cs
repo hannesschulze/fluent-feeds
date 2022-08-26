@@ -25,7 +25,7 @@ public sealed partial class MainWindow : Window
 		_settingsService.PropertyChanged += HandleSettingsChanged;
 		UpdateTheme();
 
-		Title = MainPage.WindowTitle;
+		Title = MainPage.ViewModel.Title;
 		this.GetAppWindow().SetIcon(MainPage.WindowIcon);
 
 		if (MicaController.IsSupported())

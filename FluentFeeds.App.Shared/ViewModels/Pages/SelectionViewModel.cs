@@ -1,5 +1,6 @@
 ﻿using System;
 using FluentFeeds.App.Shared.Models.Navigation;
+using FluentFeeds.App.Shared.Resources;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 
 namespace FluentFeeds.App.Shared.ViewModels.Pages;
@@ -11,9 +12,8 @@ public sealed class SelectionViewModel : ObservableObject
 {
 	public SelectionViewModel()
 	{
-		_title = "No items selected";
-		_isInfoTextVisible = true;
-		InfoText = "The content of the selected item will be shown here.";
+		_title = LocalizedStrings.SelectionTitleNoItems;
+		_isMessageVisible = true;
 	}
 
 	/// <summary>
@@ -25,8 +25,10 @@ public sealed class SelectionViewModel : ObservableObject
 		if (route.Type != FeedNavigationRouteType.Selection)
 			throw new Exception("Invalid route type.");
 
-		Title = route.SelectionCount == 0 ? "No items selected" : $"{route.SelectionCount} items selected";
-		IsInfoTextVisible = route.SelectionCount == 0;
+		Title = route.SelectionCount == 0
+			? LocalizedStrings.SelectionTitleNoItems
+			: String.Format(LocalizedStrings.SelectionTitleMultipleItems, route.SelectionCount);
+		IsMessageVisible = route.SelectionCount == 0;
 	}
 
 	/// <summary>
@@ -39,19 +41,19 @@ public sealed class SelectionViewModel : ObservableObject
 	}
 
 	/// <summary>
-	/// Info text displayed below the title if <see cref="IsInfoTextVisible"/> is true.
+	/// Info text displayed below the title if <see cref="IsMessageVisible"/> is true.
 	/// </summary>
-	public string InfoText { get; }
+	public string Message => LocalizedStrings.SelectionMessage;
 
 	/// <summary>
-	/// Flag indicating if <see cref="InfoText"/> should be shown to the user.
+	/// Flag indicating if <see cref="Message"/> should be shown to the user.
 	/// </summary>
-	public bool IsInfoTextVisible
+	public bool IsMessageVisible
 	{
-		get => _isInfoTextVisible;
-		private set => SetProperty(ref _isInfoTextVisible, value);
+		get => _isMessageVisible;
+		private set => SetProperty(ref _isMessageVisible, value);
 	}
 
 	private string _title;
-	private bool _isInfoTextVisible;
+	private bool _isMessageVisible;
 }

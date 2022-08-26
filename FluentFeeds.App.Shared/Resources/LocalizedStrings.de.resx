@@ -1,0 +1,203 @@
+﻿<root>
+	<resheader name="resmimetype">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="version">
+		<value>1.3</value>
+	</resheader>
+	<resheader name="reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<resheader name="writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<data name="FallbackFeedName" xml:space="preserve">
+		<value>Unbenannter Feed</value>
+	</data>
+	<data name="FallbackItemAuthor" xml:space="preserve">
+		<value>Unbekannter Autor</value>
+	</data>
+	<data name="FallbackItemSummary" xml:space="preserve">
+		<value>Dieses Element hat keine Zusammenfassung.</value>
+	</data>
+	<data name="BuiltInFeedSearchName" xml:space="preserve">
+		<value>Suche</value>
+	</data>
+	<data name="BuiltInFeedOverviewName" xml:space="preserve">
+		<value>Überblick</value>
+	</data>
+	<data name="FeedActionAddFeed" xml:space="preserve">
+		<value>Neuer Feed…</value>
+	</data>
+	<data name="FeedActionAddGroup" xml:space="preserve">
+		<value>Neue Gruppe…</value>
+	</data>
+	<data name="FeedActionDelete" xml:space="preserve">
+		<value>Löschen</value>
+	</data>
+	<data name="FeedActionEdit" xml:space="preserve">
+		<value>Bearbeiten…</value>
+	</data>
+	<data name="AddFeedTitle" xml:space="preserve">
+		<value>Neuer Feed</value>
+	</data>
+	<data name="AddFeedErrorTitle" xml:space="preserve">
+		<value>Feed konnte nicht erstellt werden</value>
+	</data>
+	<data name="AddFeedErrorMessage" xml:space="preserve">
+		<value>Beim Erstellen eines Feeds mit der angegebenen URL trat ein Fehler auf.</value>
+	</data>
+	<data name="AddFeedInputLabel" xml:space="preserve">
+		<value>URL</value>
+	</data>
+	<data name="AddGroupTitle" xml:space="preserve">
+		<value>Neue Gruppe</value>
+	</data>
+	<data name="AddGroupErrorTitle" xml:space="preserve">
+		<value>Gruppe konnte nicht erstellt werden</value>
+	</data>
+	<data name="AddGroupErrorMessage" xml:space="preserve">
+		<value>Beim Erstellen der Gruppe trat ein Fehler auf.</value>
+	</data>
+	<data name="AddGroupInputLabel" xml:space="preserve">
+		<value>Name</value>
+	</data>
+	<data name="DeleteFeedMessage" xml:space="preserve">
+		<value>Mit dieser Aktion werden "{0}" und alle untergeordneten Feeds permanent gelöscht. Bist du dir sicher, dass du fortfahren möchtest?</value>
+	</data>
+	<data name="DeleteFeedErrorTitle" xml:space="preserve">
+		<value>Ein Datenbank-Fehler ist aufgetreten</value>
+	</data>
+	<data name="DeleteFeedErrorMessage" xml:space="preserve">
+		<value>{0} konnte den ausgewählten Feed nicht aus der Datenbank löschen.</value>
+	</data>
+	<data name="EditFeedTitle" xml:space="preserve">
+		<value>Feed bearbeiten</value>
+	</data>
+	<data name="EditFeedErrorTitle" xml:space="preserve">
+		<value>Änderungen am Feed konnten nicht gespeichert werden</value>
+	</data>
+	<data name="EditFeedErrorMessage" xml:space="preserve">
+		<value>Beim Anwenden der Änderungen trat ein Fehler auf.</value>
+	</data>
+	<data name="EditFeedInputLabel" xml:space="preserve">
+		<value>Name</value>
+	</data>
+	<data name="ItemInfoWithAuthor" xml:space="preserve">
+		<value>Veröffentlicht von {0} am {1}</value>
+	</data>
+	<data name="ItemInfoWithoutAuthor" xml:space="preserve">
+		<value>Veröffentlicht am {0}</value>
+	</data>
+	<data name="LoadContentErrorTitle" xml:space="preserve">
+		<value>Inhalt konnte nicht geladen werden</value>
+	</data>
+	<data name="LoadContentErrorMessage" xml:space="preserve">
+		<value>Beim Laden des Inhalts für das ausgewählte Element trat ein Fehler auf.</value>
+	</data>
+	<data name="SyncErrorTitle" xml:space="preserve">
+		<value>Synchronisation fehlgeschlagen</value>
+	</data>
+	<data name="SyncErrorMessage" xml:space="preserve">
+		<value>Beim Synchronisieren deiner Feeds ist ein Fehler aufgetreten. Bitte versuche es später erneut.</value>
+	</data>
+	<data name="InitializeDatabaseErrorTitle" xml:space="preserve">
+		<value>Ein Datenbank-Fehler ist aufgetreten</value>
+	</data>
+	<data name="InitializeDatabaseErrorMessage" xml:space="preserve">
+		<value>{0} konnte die Datenbank nicht initialisieren.</value>
+	</data>
+	<data name="SettingsTitle" xml:space="preserve">
+		<value>Einstellungen</value>
+	</data>
+	<data name="SelectionTitleNoItems" xml:space="preserve">
+		<value>Keine Elemente ausgewählt</value>
+	</data>
+	<data name="SelectionMessage" xml:space="preserve">
+		<value>Der Inhalt des ausgewählten Elements wird hier angezeigt.</value>
+	</data>
+	<data name="SelectionTitleMultipleItems" xml:space="preserve">
+		<value>{0} Elemente ausgewählt</value>
+	</data>
+	<data name="DeleteFeedTitle" xml:space="preserve">
+		<value>Feed permanent löschen?</value>
+	</data>
+	<data name="DeleteFeedConfirmLabel" xml:space="preserve">
+		<value>Löschen</value>
+	</data>
+	<data name="DeleteFeedCancelLabel" xml:space="preserve">
+		<value>Abbrechen</value>
+	</data>
+	<data name="FeedDataLocationLabel" xml:space="preserve">
+		<value>Ort</value>
+	</data>
+	<data name="FeedDataSaveLabel" xml:space="preserve">
+		<value>Speichern</value>
+	</data>
+	<data name="FeedDataCancelLabel" xml:space="preserve">
+		<value>Abbrechen</value>
+	</data>
+	<data name="FeedSyncLabel" xml:space="preserve">
+		<value>Sync</value>
+	</data>
+	<data name="FeedSortModeNewestLabel" xml:space="preserve">
+		<value>Neuste</value>
+	</data>
+	<data name="FeedSortModeOldestLabel" xml:space="preserve">
+		<value>Älteste</value>
+	</data>
+	<data name="FeedReloadContentLabel" xml:space="preserve">
+		<value>Neuladen</value>
+	</data>
+	<data name="DisplayOptionsFontFamilyLabel" xml:space="preserve">
+		<value>Schriftart</value>
+	</data>
+	<data name="DisplayOptionsFontFamilySansSerifLabel" xml:space="preserve">
+		<value>Sans-Serif</value>
+	</data>
+	<data name="DisplayOptionsFontFamilySerifLabel" xml:space="preserve">
+		<value>Serif</value>
+	</data>
+	<data name="DisplayOptionsFontFamilyMonospaceLabel" xml:space="preserve">
+		<value>Monospace</value>
+	</data>
+	<data name="DisplayOptionsIncreaseFontSizeLabel" xml:space="preserve">
+		<value>Schriftgröße erhöhen</value>
+	</data>
+	<data name="DisplayOptionsDecreaseFontSizeLabel" xml:space="preserve">
+		<value>Schriftgröße verringern</value>
+	</data>
+	<data name="DisplayOptionsResetFontSizeLabel" xml:space="preserve">
+		<value>Schriftgröße zurücksetzen</value>
+	</data>
+	<data name="SearchPlaceholder" xml:space="preserve">
+		<value>Suche</value>
+	</data>
+	<data name="SettingsAppearanceHeading" xml:space="preserve">
+		<value>Darstellung</value>
+	</data>
+	<data name="SettingsAboutHeading" xml:space="preserve">
+		<value>Info zu dieser App</value>
+	</data>
+	<data name="SettingsThemeLabel" xml:space="preserve">
+		<value>App-Design</value>
+	</data>
+	<data name="SettingsThemeDescription" xml:space="preserve">
+		<value>Wähle das Design aus, welches in der App verwendet wird.</value>
+	</data>
+	<data name="SettingsThemeLightLabel" xml:space="preserve">
+		<value>Hell</value>
+	</data>
+	<data name="SettingsThemeDarkLabel" xml:space="preserve">
+		<value>Dunkel</value>
+	</data>
+	<data name="SettingsThemeSystemDefaultLabel" xml:space="preserve">
+		<value>Systemeinstellung verwenden</value>
+	</data>
+	<data name="SettingsOpenProjectWebsiteLabel" xml:space="preserve">
+		<value>Projektwebseite</value>
+	</data>
+	<data name="OpenGitHubIssuesLabel" xml:space="preserve">
+		<value>GitHub-Issues</value>
+	</data>
+</root>

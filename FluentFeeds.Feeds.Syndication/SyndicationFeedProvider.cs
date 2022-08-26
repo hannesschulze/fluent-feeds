@@ -6,6 +6,7 @@ using FluentFeeds.Feeds.Base;
 using FluentFeeds.Feeds.Base.Feeds;
 using FluentFeeds.Feeds.Base.Feeds.Content;
 using FluentFeeds.Feeds.Syndication.Download;
+using FluentFeeds.Feeds.Syndication.Resources;
 
 namespace FluentFeeds.Feeds.Syndication;
 
@@ -27,7 +28,7 @@ public sealed class SyndicationFeedProvider : FeedProvider
 
 	public override GroupFeedDescriptor CreateInitialTree()
 	{
-		return new GroupFeedDescriptor(name: "RSS/Atom feeds", symbol: Symbol.Feed);
+		return new GroupFeedDescriptor(name: LocalizedStrings.GroupName, symbol: Symbol.Feed);
 	}
 
 	public override Task<IFeedContentLoader> LoadFeedAsync(string serialized)

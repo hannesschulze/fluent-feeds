@@ -17,13 +17,10 @@ public sealed partial class SettingsPage : Page
 		DataContext = Ioc.Default.GetRequiredService<SettingsViewModel>();
 		InitializeComponent();
 
-		AppThemeSymbol = Common.Symbol.ColorPalette.ToIconElement();
 		SelectThemeCommand = new RelayCommand<Theme>(theme => ViewModel.SelectedTheme = theme);
 	}
 
 	public SettingsViewModel ViewModel => (SettingsViewModel)DataContext;
-
-	private IconElement AppThemeSymbol { get; }
 
 	private RelayCommand<Theme> SelectThemeCommand { get; }
 

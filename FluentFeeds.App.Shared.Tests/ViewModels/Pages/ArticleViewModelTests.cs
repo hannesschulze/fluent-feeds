@@ -20,6 +20,7 @@ public class ArticleViewModelTests
 {
 	public ArticleViewModelTests()
 	{
+		Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 		Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 	}
 	

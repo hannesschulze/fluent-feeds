@@ -2,6 +2,7 @@
 using System.Windows.Input;
 using FluentFeeds.App.Shared.Models.Feeds;
 using FluentFeeds.App.Shared.Models.Storage;
+using FluentFeeds.App.Shared.Resources;
 using FluentFeeds.App.Shared.Services;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
@@ -19,9 +20,7 @@ public sealed class DeleteFeedViewModel : ObservableObject
 		_feed = feed;
 		_storage = storage;
 		_confirmCommand = new RelayCommand(HandleConfirmCommand);
-		InfoText =
-			$"This action will permanently delete \"{feed.DisplayName}\" and all of its children. Are you sure you" + 
-			" want to continue?";
+		Message = String.Format(LocalizedStrings.DeleteFeedMessage, feed.DisplayName);
 	}
 
 	/// <summary>
@@ -30,9 +29,24 @@ public sealed class DeleteFeedViewModel : ObservableObject
 	public ICommand ConfirmCommand => _confirmCommand;
 
 	/// <summary>
+	/// Title of the dialog.
+	/// </summary>
+	public string Title => LocalizedStrings.DeleteFeedTitle;
+
+	/// <summary>
 	/// Text informing the user about the consequences of deleting the feed.
 	/// </summary>
-	public string InfoText { get; }
+	public string Message { get; }
+
+	/// <summary>
+	/// Label of the "confirm" button.
+	/// </summary>
+	public string ConfirmLabel => LocalizedStrings.DeleteFeedConfirmLabel;
+
+	/// <summary>
+	/// Label of the "cancel" button.
+	/// </summary>
+	public string CancelLabel => LocalizedStrings.DeleteFeedCancelLabel;
 
 	private async void HandleConfirmCommand()
 	{
@@ -44,8 +58,8 @@ public sealed class DeleteFeedViewModel : ObservableObject
 		{
 			_modalService.Show(
 				new ErrorViewModel(
-					"A database error occurred",
-					"Fluent Feeds was unable to delete the selected item from the database."));
+					LocalizedStrings.DeleteFeedErrorTitle,
+					String.Format(LocalizedStrings.DeleteFeedErrorMessage, Constants.AppName)));
 		}
 	}
 

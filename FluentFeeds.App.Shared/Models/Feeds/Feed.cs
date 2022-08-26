@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using FluentFeeds.App.Shared.Models.Feeds.Loaders;
 using FluentFeeds.App.Shared.Models.Storage;
+using FluentFeeds.App.Shared.Resources;
 using FluentFeeds.Common;
 using FluentFeeds.Feeds.Base.Feeds.Content;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
@@ -120,7 +121,7 @@ public class Feed : ObservableObject, IFeedView
 		set => SetProperty(ref _isExcludedFromGroup, value);
 	}
 	
-	private string GetDisplayName() => Name ?? Metadata.Name ?? "Unnamed feed";
+	private string GetDisplayName() => Name ?? Metadata.Name ?? LocalizedStrings.FallbackFeedName;
 
 	private Symbol GetDisplaySymbol() => Symbol ?? Metadata.Symbol ?? Common.Symbol.Feed;
 

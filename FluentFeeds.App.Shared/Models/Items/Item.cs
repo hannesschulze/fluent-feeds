@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using FluentFeeds.App.Shared.Models.Storage;
+using FluentFeeds.App.Shared.Resources;
 using FluentFeeds.Feeds.Base.Items.Content;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 
@@ -118,9 +119,9 @@ public sealed class Item : ObservableObject, IItemView
 	
 	public Task<ItemContent> LoadContentAsync(bool reload = false) => ContentLoader.LoadAsync(reload);
 	
-	private string GetDisplayAuthor() => Author ?? "Unknown author";
+	private string GetDisplayAuthor() => Author ?? LocalizedStrings.FallbackItemAuthor;
 
-	private string GetDisplaySummary() => Summary ?? "This item does not have a summary.";
+	private string GetDisplaySummary() => Summary ?? LocalizedStrings.FallbackItemSummary;
 
 	private string _title;
 	private string? _author;

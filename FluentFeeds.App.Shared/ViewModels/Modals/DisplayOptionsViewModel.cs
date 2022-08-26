@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Windows.Input;
 using FluentFeeds.App.Shared.Models;
+using FluentFeeds.App.Shared.Resources;
 using FluentFeeds.App.Shared.Services;
+using FluentFeeds.Common;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
 
@@ -39,6 +41,61 @@ public sealed class DisplayOptionsViewModel : ObservableObject
 	/// Reset the selected font size <see cref="FontSize.Normal"/>.
 	/// </summary>
 	public ICommand ResetFontSizeCommand => _resetFontSizeCommand;
+
+	/// <summary>
+	/// Symbol for the <see cref="SelectedFontFamily"/> menu.
+	/// </summary>
+	public Symbol FontFamilySymbol => Symbol.FontFamily;
+
+	/// <summary>
+	/// Symbol for <see cref="IncreaseFontSizeCommand"/>.
+	/// </summary>
+	public Symbol IncreaseFontSizeSymbol => Symbol.FontSizeIncrease;
+
+	/// <summary>
+	/// Symbol for <see cref="DecreaseFontSizeCommand"/>.
+	/// </summary>
+	public Symbol DecreaseFontSizeSymbol => Symbol.FontSizeDecrease;
+
+	/// <summary>
+	/// Symbol for <see cref="ResetFontSizeCommand"/>.
+	/// </summary>
+	public Symbol ResetFontSizeSymbol => Symbol.FontSizeReset;
+
+	/// <summary>
+	/// Label for the <see cref="SelectedFontFamily"/> menu.
+	/// </summary>
+	public string FontFamilyLabel => LocalizedStrings.DisplayOptionsFontFamilyLabel;
+
+	/// <summary>
+	/// Menu label for <see cref="FontFamily.SansSerif"/>.
+	/// </summary>
+	public string FontFamilySansSerifLabel => LocalizedStrings.DisplayOptionsFontFamilySansSerifLabel;
+
+	/// <summary>
+	/// Menu label for <see cref="FontFamily.Serif"/>.
+	/// </summary>
+	public string FontFamilySerifLabel => LocalizedStrings.DisplayOptionsFontFamilySerifLabel;
+	
+	/// <summary>
+	/// Menu label for <see cref="FontFamily.Monospace"/>.
+	/// </summary>
+	public string FontFamilyMonospaceLabel => LocalizedStrings.DisplayOptionsFontFamilyMonospaceLabel;
+
+	/// <summary>
+	/// Label for <see cref="IncreaseFontSizeCommand"/>.
+	/// </summary>
+	public string IncreaseFontSizeLabel => LocalizedStrings.DisplayOptionsIncreaseFontSizeLabel;
+	
+	/// <summary>
+	/// Label for <see cref="DecreaseFontSizeCommand"/>.
+	/// </summary>
+	public string DecreaseFontSizeLabel => LocalizedStrings.DisplayOptionsDecreaseFontSizeLabel;
+	
+	/// <summary>
+	/// Label for <see cref="ResetFontSizeCommand"/>.
+	/// </summary>
+	public string ResetFontSizeLabel => LocalizedStrings.DisplayOptionsResetFontSizeLabel;
 
 	/// <summary>
 	/// Font family selection.

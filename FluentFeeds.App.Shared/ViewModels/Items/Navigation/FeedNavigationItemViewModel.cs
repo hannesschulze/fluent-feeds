@@ -4,6 +4,7 @@ using System.ComponentModel;
 using FluentFeeds.App.Shared.Helpers;
 using FluentFeeds.App.Shared.Models.Feeds;
 using FluentFeeds.App.Shared.Models.Navigation;
+using FluentFeeds.App.Shared.Resources;
 using FluentFeeds.App.Shared.Services;
 using FluentFeeds.App.Shared.ViewModels.Modals;
 using Microsoft.Toolkit.Mvvm.Input;
@@ -30,22 +31,22 @@ public sealed class FeedNavigationItemViewModel : NavigationItemViewModel
 			{
 				result.Add(new NavigationItemActionViewModel(
 					new RelayCommand(() => _modalService.Show(
-						new AddFeedViewModel(_modalService, urlFactory, RootFeed, Feed, storage), this)),
-					"Add feed…", null));
+						new AddFeedViewModel(urlFactory, RootFeed, Feed, storage), this)),
+					LocalizedStrings.FeedActionAddFeed, null));
 			}
 			result.Add(new NavigationItemActionViewModel(
 				new RelayCommand(() => _modalService.Show(new AddGroupViewModel(RootFeed, Feed, storage), this)),
-				"Add group…", null));
+				LocalizedStrings.FeedActionAddGroup, null));
 		}
 		
 		if (Feed != RootFeed)
 		{
 			result.Add(new NavigationItemActionViewModel(
 				new RelayCommand(() => _modalService.Show(new EditFeedViewModel(RootFeed, Feed, storage), this)),
-				"Edit…", null));
+				LocalizedStrings.FeedActionEdit, null));
 			result.Add(new NavigationItemActionViewModel(
 				new RelayCommand(() => _modalService.Show(new DeleteFeedViewModel(_modalService, Feed, storage), this)),
-				"Delete", null));
+				LocalizedStrings.FeedActionDelete, null));
 		}
 		
 		return result.ToImmutableArray();

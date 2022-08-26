@@ -6,8 +6,6 @@ using FluentFeeds.App.Shared.Models;
 using FluentFeeds.App.Shared.Models.Items;
 using FluentFeeds.App.Shared.Models.Navigation;
 using FluentFeeds.App.Shared.ViewModels.Pages;
-using FluentFeeds.App.WinUI.Helpers;
-using FluentFeeds.Feeds.Base.Items;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Input;
 using Microsoft.UI.Xaml.Controls;
@@ -23,16 +21,6 @@ public sealed partial class FeedPage : Page
 		DataContext = Ioc.Default.GetRequiredService<FeedViewModel>();
 		InitializeComponent();
 
-		SynchronizeSymbol = Common.Symbol.Synchronize.ToIconElement();
-		RefreshSymbol = Common.Symbol.Refresh.ToIconElement();
-		TrashSymbol = Common.Symbol.Trash.ToIconElement();
-		SortOrderSymbol = Common.Symbol.SortOrder.ToIconElement();
-		OpenExternalSymbol = Common.Symbol.OpenExternal.ToIconElement();
-		FontSymbol = Common.Symbol.Font.ToIconElement();
-		FontFamilySymbol = Common.Symbol.FontFamily.ToIconElement();
-		FontSizeIncreaseSymbol = Common.Symbol.FontSizeIncrease.ToIconElement();
-		FontSizeDecreaseSymbol = Common.Symbol.FontSizeDecrease.ToIconElement();
-		FontSizeResetSymbol = Common.Symbol.FontSizeReset.ToIconElement();
 		SelectSortModeCommand = new RelayCommand<ItemSortMode>(sortMode => ViewModel.SelectedSortMode = sortMode);
 		SelectFontFamilyCommand = new RelayCommand<FontFamily>(
 			fontFamily => ViewModel.DisplayOptions.SelectedFontFamily = fontFamily);
@@ -43,17 +31,6 @@ public sealed partial class FeedPage : Page
 	}
 
 	public FeedViewModel ViewModel => (FeedViewModel)DataContext;
-
-	private IconElement SynchronizeSymbol { get; }
-	private IconElement RefreshSymbol { get; }
-	private IconElement TrashSymbol { get; }
-	private IconElement SortOrderSymbol { get; }
-	private IconElement OpenExternalSymbol { get; }
-	private IconElement FontSymbol { get; }
-	private IconElement FontFamilySymbol { get; }
-	private IconElement FontSizeIncreaseSymbol { get; }
-	private IconElement FontSizeDecreaseSymbol { get; }
-	private IconElement FontSizeResetSymbol { get; }
 
 	private RelayCommand<ItemSortMode> SelectSortModeCommand { get; }
 	private RelayCommand<FontFamily> SelectFontFamilyCommand { get; }
