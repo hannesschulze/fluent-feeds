@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FluentFeeds.Feeds.Base.Items.Content;
@@ -17,5 +18,6 @@ public sealed class StaticItemContentLoader : IItemContentLoader
 	/// </summary>
 	public ItemContent Content { get; }
 
-	public Task<ItemContent> LoadAsync(bool reload = false) => Task.FromResult(Content);
+	public Task<ItemContent> LoadAsync(bool reload = false, CancellationToken cancellation = default) =>
+		Task.FromResult(Content);
 }

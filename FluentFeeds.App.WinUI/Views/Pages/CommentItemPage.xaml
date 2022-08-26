@@ -1,0 +1,145 @@
+﻿<Page
+	x:Class="FluentFeeds.App.WinUI.Views.Pages.CommentItemPage"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:vm="using:FluentFeeds.App.Shared.ViewModels.Pages"
+	xmlns:items="using:FluentFeeds.App.WinUI.Views.ListItems.Comments"
+	xmlns:controls="using:FluentFeeds.App.WinUI.Controls"
+	mc:Ignorable="d"
+	d:DataContext="{d:DesignInstance Type=vm:CommentItemViewModel}"
+	NavigationCacheMode="Required">
+	
+	<Page.Resources>
+		<Style TargetType="TreeViewItem" x:Key="HeaderItemStyle">
+			<Setter Property="Template">
+				<Setter.Value>
+					<ControlTemplate TargetType="TreeViewItem">
+						<ContentPresenter x:Name="ContentPresenter" />
+					</ControlTemplate>
+				</Setter.Value>
+			</Setter>
+		</Style>
+
+		<Style TargetType="TreeViewItem" x:Key="CommentItemStyle">
+			<Setter Property="Template">
+				<Setter.Value>
+					<ControlTemplate TargetType="TreeViewItem">
+						<Grid
+							x:Name="ContentPresenterGrid"
+							Padding="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TreeViewItemTemplateSettings.Indentation}">
+							
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="Auto" />
+								<ColumnDefinition Width="*" />
+							</Grid.ColumnDefinitions>
+
+							<Grid
+								x:Name="ExpandCollapseChevron"
+								Grid.Column="0"
+								Padding="16,9,4,9"
+								Width="Auto"
+								Opacity="{TemplateBinding GlyphOpacity}"
+								Background="Transparent">
+
+								<TextBlock
+									Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+									Width="12"
+									Height="12"
+									Visibility="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TreeViewItemTemplateSettings.CollapsedGlyphVisibility}"
+									FontSize="{TemplateBinding GlyphSize}" Text="{TemplateBinding CollapsedGlyph}"
+									FontFamily="{StaticResource SymbolThemeFontFamily}"
+									VerticalAlignment="Top"
+									AutomationProperties.AccessibilityView="Raw"
+									IsTextScaleFactorEnabled="False"
+									IsHitTestVisible="False"/>
+
+								<TextBlock
+									Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+									Width="12"
+									Height="12"
+									Visibility="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TreeViewItemTemplateSettings.ExpandedGlyphVisibility}" 
+									FontSize="{TemplateBinding GlyphSize}"
+									Text="{TemplateBinding ExpandedGlyph}"
+									FontFamily="{StaticResource SymbolThemeFontFamily}"
+									VerticalAlignment="Top"
+									AutomationProperties.AccessibilityView="Raw"
+									IsTextScaleFactorEnabled="False"
+									IsHitTestVisible="False"/>
+
+							</Grid>
+
+							<ContentPresenter x:Name="ContentPresenter" Grid.Column="1" Margin="0,0,16,0" />
+
+						</Grid>
+					</ControlTemplate>
+				</Setter.Value>
+			</Setter>
+		</Style>
+
+		<DataTemplate
+			xmlns:vm="using:FluentFeeds.App.Shared.ViewModels.ListItems.Comments"
+			x:Key="HeaderItemTemplate"
+			x:DataType="vm:CommentHeaderViewModel">
+
+			<TreeViewItem Style="{StaticResource HeaderItemStyle}">
+				<StackPanel Orientation="Vertical" Spacing="8" Margin="16,16,16,12">
+					<TextBlock
+						Text="{x:Bind Title, Mode=OneWay}"
+						Style="{StaticResource TitleTextBlockStyle}"
+						TextWrapping="WrapWholeWords"
+						IsTextSelectionEnabled="True" />
+
+					<TextBlock
+						Text="{x:Bind ItemInfo, Mode=OneWay}"
+						Style="{StaticResource CaptionTextBlockStyle}"
+						Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+						IsTextSelectionEnabled="True" />
+				</StackPanel>
+			</TreeViewItem>
+			
+		</DataTemplate>
+
+		<DataTemplate
+			xmlns:vm="using:FluentFeeds.App.Shared.ViewModels.ListItems.Comments"
+			x:Key="CommentItemTemplate"
+			x:DataType="vm:CommentViewModel">
+			
+			<TreeViewItem
+				ItemsSource="{x:Bind Children, Mode=OneWay}"
+				Style="{StaticResource CommentItemStyle}"
+				IsExpanded="True">
+
+				<StackPanel Orientation="Vertical" Margin="0,4" Spacing="2">
+					<TextBlock
+						Text="{x:Bind CommentInfo, Mode=OneWay}"
+						Style="{ThemeResource CaptionTextBlockStyle}"
+						Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+						IsTextSelectionEnabled="True" />
+
+					<controls:StyledRichTextViewer
+						RichText="{x:Bind CommentBody, Mode=OneWay}"
+						StyledFontFamily="{x:Bind FontFamily, Mode=OneWay}"
+						StyledFontSize="{x:Bind FontSize, Mode=OneWay}" />
+				</StackPanel>
+
+			</TreeViewItem>
+			
+		</DataTemplate>
+
+		<items:CommentTemplateSelector
+			x:Key="ItemTemplateSelector"
+			HeaderTemplate="{StaticResource HeaderItemTemplate}"
+			CommentTemplate="{StaticResource CommentItemTemplate}" />
+	</Page.Resources>
+
+	<TreeView
+		x:Name="CommentTree"
+		CanDragItems="False"
+		CanReorderItems="False"
+		SelectionMode="None"
+		ItemsSource="{x:Bind ViewModel.Items, Mode=OneWay}"
+		ItemTemplateSelector="{StaticResource ItemTemplateSelector}" />
+
+</Page>

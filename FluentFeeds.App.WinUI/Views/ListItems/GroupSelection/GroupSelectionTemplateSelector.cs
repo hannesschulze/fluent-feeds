@@ -2,7 +2,7 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 
-namespace FluentFeeds.App.WinUI.Selectors;
+namespace FluentFeeds.App.WinUI.Views.ListItems.GroupSelection;
 
 /// <summary>
 /// A data template selector which picks the template based on the item type in a context menu.
@@ -10,7 +10,7 @@ namespace FluentFeeds.App.WinUI.Selectors;
 /// <remarks>
 /// This selector is based on: https://stackoverflow.com/a/3996627
 /// </remarks>
-public sealed class ComboBoxItemTemplateSelector : DataTemplateSelector
+public sealed class GroupSelectionTemplateSelector : DataTemplateSelector
 {
 	/// <summary>
 	/// Template used in the context menu.

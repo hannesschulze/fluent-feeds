@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using FluentFeeds.App.Shared.EventArgs;
@@ -193,6 +194,8 @@ public sealed class FeedViewModel : ObservableObject
 				}
 
 				_loadItemContentToken = null;
+				_loadItemCancellation?.Cancel();
+				_loadItemCancellation = null;
 				_openBrowserCommand.NotifyCanExecuteChanged();
 				IsReloadContentAvailable = false;
 				IsLoadingContent = false;
@@ -374,8 +377,10 @@ public sealed class FeedViewModel : ObservableObject
 		var item = SelectedItems[0];
 		var token = new object();
 		_loadItemContentToken = token;
+		_loadItemCancellation?.Cancel();
+		_loadItemCancellation = new CancellationTokenSource();
 
-		var contentTask = item.LoadContentAsync(reload);
+		var contentTask = item.LoadContentAsync(reload, _loadItemCancellation.Token);
 		if (!contentTask.IsCompletedSuccessfully)
 		{
 			IsLoadingContent = true;
@@ -389,9 +394,12 @@ public sealed class FeedViewModel : ObservableObject
 		}
 		catch (Exception)
 		{
-			_modalService.Show(new ErrorViewModel(
-				LocalizedStrings.LoadContentErrorTitle, LocalizedStrings.LoadContentErrorMessage));
-			IsLoadingContent = false;
+			if (_loadItemContentToken == token)
+			{
+				_modalService.Show(new ErrorViewModel(
+					LocalizedStrings.LoadContentErrorTitle, LocalizedStrings.LoadContentErrorMessage));
+				IsLoadingContent = false;
+			}
 			return;
 		}
 
@@ -400,7 +408,8 @@ public sealed class FeedViewModel : ObservableObject
 			CurrentRoute =
 				content.Type switch
 				{
-					ItemContentType.Article => FeedNavigationRoute.Article(item, (ArticleItemContent)content),
+					ItemContentType.Article => FeedNavigationRoute.ArticleItem(item, (ArticleItemContent)content),
+					ItemContentType.Comment => FeedNavigationRoute.CommentItem(item, (CommentItemContent)content),
 					_ => throw new IndexOutOfRangeException()
 				};
 			IsLoadingContent = false;
@@ -535,8 +544,11 @@ public sealed class FeedViewModel : ObservableObject
 			}
 			catch (Exception)
 			{
-				_modalService.Show(
-					new ErrorViewModel(LocalizedStrings.SyncErrorTitle, LocalizedStrings.SyncErrorMessage));
+				if (_syncToken == token)
+				{
+					_modalService.Show(
+						new ErrorViewModel(LocalizedStrings.SyncErrorTitle, LocalizedStrings.SyncErrorMessage));
+				}
 			}
 		}
 		catch (Exception)
@@ -612,6 +624,7 @@ public sealed class FeedViewModel : ObservableObject
 	private object? _syncToken;
 	private object? _updateItemsToken;
 	private object? _loadItemContentToken;
+	private CancellationTokenSource? _loadItemCancellation;
 	private IFeedView? _feed;
 	private ImmutableArray<IItemView> _selectedItems = ImmutableArray<IItemView>.Empty;
 	private ItemSortMode _selectedSortMode = ItemSortMode.Newest;

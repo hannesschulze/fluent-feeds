@@ -82,7 +82,8 @@ public sealed partial class FeedPage : Page
 		MainContentFrame.Navigate(
 			ViewModel.CurrentRoute.Type switch
 			{
-				FeedNavigationRouteType.Article => typeof(ArticlePage),
+				FeedNavigationRouteType.ArticleItem => typeof(ArticleItemPage),
+				FeedNavigationRouteType.CommentItem => typeof(CommentItemPage),
 				FeedNavigationRouteType.Selection => typeof(SelectionPage),
 				_ => throw new IndexOutOfRangeException()
 			}, ViewModel.CurrentRoute, new EntranceNavigationTransitionInfo());

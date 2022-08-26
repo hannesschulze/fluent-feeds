@@ -1,6 +1,6 @@
 ﻿using System;
 using FluentFeeds.App.Shared.Services;
-using FluentFeeds.App.Shared.ViewModels.Items.Navigation;
+using FluentFeeds.App.Shared.ViewModels.ListItems.Navigation;
 using FluentFeeds.App.Shared.ViewModels.Modals;
 using FluentFeeds.App.WinUI.Views.Modals;
 using Microsoft.UI.Xaml;

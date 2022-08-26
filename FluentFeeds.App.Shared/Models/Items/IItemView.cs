@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentFeeds.App.Shared.Models.Storage;
 using FluentFeeds.Feeds.Base.Items.Content;
@@ -84,5 +85,5 @@ public interface IItemView : INotifyPropertyChanged
 	/// <summary>
 	/// Asynchronously load the item's content.
 	/// </summary>
-	Task<ItemContent> LoadContentAsync(bool reload = false);
+	Task<ItemContent> LoadContentAsync(bool reload = false, CancellationToken cancellation = default);
 }

@@ -1,8 +1,7 @@
-﻿using System;
+using System;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
-using FluentFeeds.App.Shared.Models;
 using FluentFeeds.App.Shared.Models.Items;
 using FluentFeeds.App.Shared.Models.Navigation;
 using FluentFeeds.App.Shared.Tests.Mock;
@@ -16,18 +15,32 @@ using Xunit;
 
 namespace FluentFeeds.App.Shared.Tests.ViewModels.Pages;
 
-public class ArticleViewModelTests
+public class ItemViewModelTests
 {
-	public ArticleViewModelTests()
+	private sealed class TestViewModel : ItemViewModel
+	{
+		public string Title { get; private set; } = String.Empty;
+		public string ItemInfo { get; private set; } = String.Empty;
+		
+		protected override void UpdateTitle(string title)
+		{
+			Title = title;
+		}
+
+		protected override void UpdateItemInfo(string itemInfo)
+		{
+			ItemInfo = itemInfo;
+		}
+	}
+	
+	public ItemViewModelTests()
 	{
 		Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 		Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 	}
-	
-	private SettingsServiceMock SettingsService { get; } = new();
 
-	private static IItemView CreateItem(
-		string title, string? author, DateTimeOffset publishedTimestamp, ArticleItemContent content)
+	public static IItemView CreateItem(
+		string title, string? author, DateTimeOffset publishedTimestamp, ItemContent content)
 	{
 		var storage = new ItemStorageMock();
 		return storage.AddItems(
@@ -43,42 +56,26 @@ public class ArticleViewModelTests
 	[Theory]
 	[InlineData(null, "Published on Tuesday, 23 August 2022 22:33")]
 	[InlineData("author", "Published by author on Tuesday, 23 August 2022 22:33")]
-	public void LoadArticle(string? author, string expectedItemInfo)
+	public void LoadItem(string? author, string expectedItemInfo)
 	{
 		var content = new ArticleItemContent(new RichText(new GenericBlock(new TextInline("content"))));
 		var item = CreateItem("title", author, new DateTime(2022, 8, 23, 22, 33, 15, DateTimeKind.Local), content);
-		var viewModel = new ArticleViewModel(SettingsService);
-		viewModel.Load(FeedNavigationRoute.Article(item, content));
+		var viewModel = new TestViewModel();
+		viewModel.Load(FeedNavigationRoute.ArticleItem(item, content));
 		Assert.Equal("title", viewModel.Title);
 		Assert.Equal(expectedItemInfo, viewModel.ItemInfo);
-		Assert.Equal(content.Body, viewModel.Content);
 	}
 
 	[Fact]
-	public void UpdateArticle()
+	public void UpdateItem()
 	{
 		var content = new ArticleItemContent(new RichText(new GenericBlock(new TextInline("content"))));
 		var item = CreateItem("title", "author", new DateTime(2022, 8, 23, 22, 33, 15, DateTimeKind.Local), content);
-		var viewModel = new ArticleViewModel(SettingsService);
-		viewModel.Load(FeedNavigationRoute.Article(item, content));
+		var viewModel = new TestViewModel();
+		viewModel.Load(FeedNavigationRoute.ArticleItem(item, content));
 		((Item)item).Title = "updated title";
 		((Item)item).Author = "updated author";
 		Assert.Equal("updated title", viewModel.Title);
 		Assert.Equal("Published by updated author on Tuesday, 23 August 2022 22:33", viewModel.ItemInfo);
-		Assert.Equal(content.Body, viewModel.Content);
-	}
-
-	[Fact]
-	public void UpdateDisplaySettings()
-	{
-		SettingsService.ContentFontFamily = FontFamily.Serif;
-		SettingsService.ContentFontSize = FontSize.Small;
-		var viewModel = new ArticleViewModel(SettingsService);
-		Assert.Equal(FontFamily.Serif, viewModel.FontFamily);
-		Assert.Equal(FontSize.Small, viewModel.FontSize);
-		SettingsService.ContentFontFamily = FontFamily.Monospace;
-		Assert.Equal(FontFamily.Monospace, viewModel.FontFamily);
-		SettingsService.ContentFontSize = FontSize.Large;
-		Assert.Equal(FontSize.Large, viewModel.FontSize);
 	}
 }

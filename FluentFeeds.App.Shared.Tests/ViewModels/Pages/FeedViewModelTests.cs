@@ -301,7 +301,7 @@ public class FeedViewModelTests
 	{
 		var viewModel = new FeedViewModel(ModalService, FeedService, WebBrowserService, SettingsService);
 		var contentA = new ArticleItemContent(new RichText()) { IsReloadable = true };
-		var contentB = new ArticleItemContent(new RichText());
+		var contentB = new CommentItemContent();
 		var item = CreateDummyItem(
 			TimeSpan.FromMinutes(1), new ItemStorageMock(), new StaticItemContentLoader(contentA));
 		viewModel.SelectedItems = ImmutableArray.Create(item);
@@ -314,7 +314,7 @@ public class FeedViewModelTests
 		Assert.True(viewModel.IsItemSelected);
 		Assert.False(viewModel.IsLoadingContent);
 		Assert.True(viewModel.IsReloadContentAvailable);
-		Assert.Equal(FeedNavigationRoute.Article(item, contentA), viewModel.CurrentRoute);
+		Assert.Equal(FeedNavigationRoute.ArticleItem(item, contentA), viewModel.CurrentRoute);
 		((Item)item).ContentLoader = new StaticItemContentLoader(contentB);
 		Assert.True(viewModel.ToggleReadCommand.CanExecute(null));
 		Assert.True(viewModel.DeleteCommand.CanExecute(null));
@@ -323,7 +323,7 @@ public class FeedViewModelTests
 		Assert.True(viewModel.IsItemSelected);
 		Assert.False(viewModel.IsLoadingContent);
 		Assert.False(viewModel.IsReloadContentAvailable);
-		Assert.Equal(FeedNavigationRoute.Article(item, contentB), viewModel.CurrentRoute);
+		Assert.Equal(FeedNavigationRoute.CommentItem(item, contentB), viewModel.CurrentRoute);
 	}
 
 	[Fact]
@@ -344,7 +344,7 @@ public class FeedViewModelTests
 		Assert.True(viewModel.IsItemSelected);
 		Assert.True(viewModel.IsLoadingContent);
 		Assert.False(viewModel.IsReloadContentAvailable);
-		Assert.Equal(FeedNavigationRoute.Article(item, contentA), viewModel.CurrentRoute);
+		Assert.Equal(FeedNavigationRoute.ArticleItem(item, contentA), viewModel.CurrentRoute);
 		contentLoader.CompleteLoad(contentB);
 		Assert.True(viewModel.ToggleReadCommand.CanExecute(null));
 		Assert.True(viewModel.DeleteCommand.CanExecute(null));
@@ -353,7 +353,7 @@ public class FeedViewModelTests
 		Assert.True(viewModel.IsItemSelected);
 		Assert.False(viewModel.IsLoadingContent);
 		Assert.True(viewModel.IsReloadContentAvailable);
-		Assert.Equal(FeedNavigationRoute.Article(item, contentB), viewModel.CurrentRoute);
+		Assert.Equal(FeedNavigationRoute.ArticleItem(item, contentB), viewModel.CurrentRoute);
 	}
 
 	[Fact]
@@ -390,7 +390,7 @@ public class FeedViewModelTests
 		viewModel.SelectedItems = ImmutableArray.Create(item);
 		viewModel.ReloadContentCommand.Execute(null);
 		contentLoader.CompleteLoad(contentB);
-		Assert.Equal(FeedNavigationRoute.Article(item, contentB), viewModel.CurrentRoute);
+		Assert.Equal(FeedNavigationRoute.ArticleItem(item, contentB), viewModel.CurrentRoute);
 	}
 
 	[Fact]

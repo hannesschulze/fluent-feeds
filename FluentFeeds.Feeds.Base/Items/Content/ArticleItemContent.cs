@@ -23,7 +23,7 @@ public sealed class ArticleItemContent : ItemContent
 	/// <summary>
 	/// Body of the article.
 	/// </summary>
-	public RichText Body { get; }
+	public RichText Body { get; init; }
 	
 	public override ItemContentType Type => ItemContentType.Article;
 	

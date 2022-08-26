@@ -9,7 +9,7 @@ using FluentFeeds.App.Shared.Services;
 using FluentFeeds.App.Shared.ViewModels.Modals;
 using Microsoft.Toolkit.Mvvm.Input;
 
-namespace FluentFeeds.App.Shared.ViewModels.Items.Navigation;
+namespace FluentFeeds.App.Shared.ViewModels.ListItems.Navigation;
 
 /// <summary>
 /// Navigation item representing a feed.

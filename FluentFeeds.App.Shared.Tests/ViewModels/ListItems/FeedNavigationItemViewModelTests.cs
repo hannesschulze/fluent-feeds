@@ -7,13 +7,13 @@ using FluentFeeds.App.Shared.Models.Feeds;
 using FluentFeeds.App.Shared.Models.Feeds.Loaders;
 using FluentFeeds.App.Shared.Models.Navigation;
 using FluentFeeds.App.Shared.Tests.Mock;
-using FluentFeeds.App.Shared.ViewModels.Items.Navigation;
+using FluentFeeds.App.Shared.ViewModels.ListItems.Navigation;
 using FluentFeeds.Common;
 using FluentFeeds.Feeds.Base.Feeds;
 using FluentFeeds.Feeds.Base.Feeds.Content;
 using Xunit;
 
-namespace FluentFeeds.App.Shared.Tests.ViewModels.Items;
+namespace FluentFeeds.App.Shared.Tests.ViewModels.ListItems;
 
 public class FeedNavigationItemViewModelTests
 {

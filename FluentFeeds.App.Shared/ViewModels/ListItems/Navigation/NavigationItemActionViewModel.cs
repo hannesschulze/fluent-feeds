@@ -2,7 +2,7 @@ using System.Windows.Input;
 using FluentFeeds.Common;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 
-namespace FluentFeeds.App.Shared.ViewModels.Items.Navigation;
+namespace FluentFeeds.App.Shared.ViewModels.ListItems.Navigation;
 
 /// <summary>
 /// An action which can be executed on a navigation item.

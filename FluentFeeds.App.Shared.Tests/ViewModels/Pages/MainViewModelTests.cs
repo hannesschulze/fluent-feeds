@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using FluentFeeds.App.Shared.Models.Feeds.Loaders;
 using FluentFeeds.App.Shared.Models.Navigation;
 using FluentFeeds.App.Shared.Tests.Mock;
-using FluentFeeds.App.Shared.ViewModels.Items.Navigation;
+using FluentFeeds.App.Shared.ViewModels.ListItems.Navigation;
 using FluentFeeds.App.Shared.ViewModels.Pages;
 using FluentFeeds.Common;
 using FluentFeeds.Feeds.Base.Feeds;

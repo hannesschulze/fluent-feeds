@@ -1,7 +1,7 @@
 ﻿using FluentFeeds.App.Shared.Models.Feeds;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 
-namespace FluentFeeds.App.Shared.ViewModels.Items.GroupSelection;
+namespace FluentFeeds.App.Shared.ViewModels.ListItems.GroupSelection;
 
 /// <summary>
 /// <para>View model for an item in a group selection menu.</para>

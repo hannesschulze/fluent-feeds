@@ -1,8 +1,8 @@
-﻿using FluentFeeds.App.Shared.ViewModels.Items.GroupSelection;
+﻿using FluentFeeds.App.Shared.ViewModels.ListItems.GroupSelection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
-namespace FluentFeeds.App.WinUI.Views.Items.GroupSelection;
+namespace FluentFeeds.App.WinUI.Views.ListItems.GroupSelection;
 
 /// <summary>
 /// Custom combobox subclass updating the combobox item "IsEnabled" state according to the view model.

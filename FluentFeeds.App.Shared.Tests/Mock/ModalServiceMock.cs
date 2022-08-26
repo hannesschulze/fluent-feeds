@@ -1,6 +1,6 @@
 ﻿using System;
 using FluentFeeds.App.Shared.Services;
-using FluentFeeds.App.Shared.ViewModels.Items.Navigation;
+using FluentFeeds.App.Shared.ViewModels.ListItems.Navigation;
 using FluentFeeds.App.Shared.ViewModels.Modals;
 
 namespace FluentFeeds.App.Shared.Tests.Mock;

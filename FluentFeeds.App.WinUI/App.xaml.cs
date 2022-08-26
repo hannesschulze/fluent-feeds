@@ -28,7 +28,8 @@ public partial class App : Application
 				.AddTransient<MainViewModel>()
 				.AddTransient<FeedViewModel>()
 				.AddTransient<SelectionViewModel>()
-				.AddTransient<ArticleViewModel>()
+				.AddTransient<ArticleItemViewModel>()
+				.AddTransient<CommentItemViewModel>()
 				.AddTransient<SettingsViewModel>()
 				.BuildServiceProvider());
 

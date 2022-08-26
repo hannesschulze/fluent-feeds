@@ -44,14 +44,14 @@
 						Style="{StaticResource CaptionTextBlockStyle}"
 						TextTrimming="CharacterEllipsis"
 						Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-						Text="{Binding DisplayAuthor}" />
+						Text="{x:Bind DisplayAuthor, Mode=OneWay}" />
 
 					<TextBlock
 						Grid.Column="1"
 						Grid.Row="0"
 						Style="{StaticResource CaptionTextBlockStyle}"
 						Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-						Text="{Binding PublishedTimestamp, Converter={StaticResource TimestampToStringConverter}}" />
+						Text="{x:Bind PublishedTimestamp, Converter={StaticResource TimestampToStringConverter}, Mode=OneWay}" />
 				</Grid>
 
 				<Grid>
@@ -66,7 +66,7 @@
 						Fill="{ThemeResource AccentFillColorDefaultBrush}"
 						Margin="0,0,8,0"
 						VerticalAlignment="Center"
-						Visibility="{Binding IsRead, Converter={StaticResource InvertedBoolToVisibilityConverter}}" />
+						Visibility="{x:Bind IsRead, Converter={StaticResource InvertedBoolToVisibilityConverter}, Mode=OneWay}" />
 
 					<TextBlock
 						Grid.Column="1"
@@ -74,14 +74,14 @@
 						MaxLines="2"
 						TextWrapping="WrapWholeWords"
 						TextTrimming="WordEllipsis"
-						Text="{Binding Title}" />
+						Text="{x:Bind Title, Mode=OneWay}" />
 				</Grid>
 
 				<TextBlock
 					MaxLines="2"
 					TextWrapping="WrapWholeWords"
 					TextTrimming="WordEllipsis"
-					Text="{Binding DisplaySummary}" />
+					Text="{x:Bind DisplaySummary, Mode=OneWay}" />
 			</StackPanel>
 		</DataTemplate>
 

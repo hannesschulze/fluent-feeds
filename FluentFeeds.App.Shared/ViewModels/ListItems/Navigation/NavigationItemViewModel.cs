@@ -4,7 +4,7 @@ using FluentFeeds.App.Shared.Models.Navigation;
 using FluentFeeds.Common;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 
-namespace FluentFeeds.App.Shared.ViewModels.Items.Navigation;
+namespace FluentFeeds.App.Shared.ViewModels.ListItems.Navigation;
 
 /// <summary>
 /// A navigation item on the main page.

@@ -5,7 +5,7 @@
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:vm="using:FluentFeeds.App.Shared.ViewModels.Pages"
-	xmlns:views="using:FluentFeeds.App.WinUI.Views.Items.Navigation"
+	xmlns:items="using:FluentFeeds.App.WinUI.Views.ListItems.Navigation"
 	d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
 	mc:Ignorable="d">
 	
@@ -19,12 +19,12 @@
 		<CornerRadius x:Key="ErrorBarCornerRadius">8,0,0,8</CornerRadius>
 		
 		<DataTemplate
-			xmlns:vm="using:FluentFeeds.App.Shared.ViewModels.Items.Navigation"
+			xmlns:vm="using:FluentFeeds.App.Shared.ViewModels.ListItems.Navigation"
 			x:DataType="vm:NavigationItemViewModel"
 			x:Key="NavigationItemTemplate">
-					
-			<views:NavigationItemView DataContext="{x:Bind}" />
-					
+
+			<items:NavigationItemView DataContext="{x:Bind}" />
+
 		</DataTemplate>
 	</Page.Resources>
 
