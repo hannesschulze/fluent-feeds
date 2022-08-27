@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.AppLifecycle;
+using WinRT.Interop;
 
 namespace FluentFeeds.App.WinUI;
 
@@ -54,11 +55,11 @@ public partial class App : Application
 
 	private void HandleAppInstanceActivated(object? sender, AppActivationArguments e)
 	{
-		// Called when another instance activates the main app instance.
-		var window = _window;
-		if (window != null)
+		if (_window != null)
 		{
-			window.DispatcherQueue.TryEnqueue(() => window.Activate());
+			var hWnd = (Windows.Win32.Foundation.HWND)WindowNative.GetWindowHandle(_window);
+			Windows.Win32.PInvoke.ShowWindow(hWnd, Windows.Win32.UI.WindowsAndMessaging.SHOW_WINDOW_CMD.SW_RESTORE);
+			Windows.Win32.PInvoke.SetForegroundWindow(hWnd);
 		}
 	}
 
