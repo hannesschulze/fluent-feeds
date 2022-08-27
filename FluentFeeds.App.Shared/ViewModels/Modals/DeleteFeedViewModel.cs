@@ -54,8 +54,9 @@ public sealed class DeleteFeedViewModel : ObservableObject
 		{
 			await _storage.DeleteFeedAsync(_feed.Identifier);
 		}
-		catch (Exception)
+		catch (Exception e)
 		{
+			Console.Error.WriteLine($"Unable to delete feed: {e}");
 			_modalService.Show(
 				new ErrorViewModel(
 					LocalizedStrings.DeleteFeedErrorTitle,

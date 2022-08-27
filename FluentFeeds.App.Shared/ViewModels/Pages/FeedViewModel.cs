@@ -392,8 +392,9 @@ public sealed class FeedViewModel : ObservableObject
 		{
 			content = await contentTask;
 		}
-		catch (Exception)
+		catch (Exception e)
 		{
+			Console.Error.WriteLine($"Unable to load item content: {e}");
 			if (_loadItemContentToken == token)
 			{
 				_modalService.Show(new ErrorViewModel(
@@ -543,8 +544,9 @@ public sealed class FeedViewModel : ObservableObject
 			{
 				await _feed.Loader.SynchronizeAsync();
 			}
-			catch (Exception)
+			catch (Exception e)
 			{
+				Console.Error.WriteLine($"Unable to sync feed: {e}");
 				if (_syncToken == token)
 				{
 					_modalService.Show(
