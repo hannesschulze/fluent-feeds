@@ -34,12 +34,17 @@ Fluent Feeds depends on the following projects:
 
  * **[.NET](https://dotnet.microsoft.com/en-us/)** which provides the platform the app is implemented on.
  * **[WinUI 3](https://microsoft.github.io/microsoft-ui-xaml/)** which is used to implement the UI.
+ * **[CsWin32](https://github.com/microsoft/CsWin32)** which is used to generate bindings for the Win32 methods used by
+   the app.
  * **[MVVM Toolkit](https://github.com/CommunityToolkit/dotnet)** which is used to implement the MVVM architecture.
  * **[EF Core](https://github.com/dotnet/efcore)** which is used to interact with the local database.
  * **[SQLite](https://sqlite.org/index.html)** which is used for the local database.
  * **[AngleSharp](https://anglesharp.github.io/)** which is used for parsing HTML content and transforming it into
    Fluent Feed's rich text object model.
  * **[xUnit](https://xunit.net/)** which is used as the test framework for all unit tests.
+ * **[Fluent System Icons](https://github.com/microsoft/fluentui-system-icons)** which is the icon set used by the app.
+ * **[Next.js](https://nextjs.org)** which is used for the project website.
+ * **[jpmonette/feed](https://github.com/jpmonette/feed)** which is used to generate the feed for the project website.
 
 ## License
 
