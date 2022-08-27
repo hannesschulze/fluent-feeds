@@ -370,11 +370,11 @@ public class FeedViewModelTests
 		Assert.Equal("An error occurred while trying to load the selected item's content.", errorArgs.ViewModel.Message);
 		Assert.True(viewModel.ToggleReadCommand.CanExecute(null));
 		Assert.True(viewModel.DeleteCommand.CanExecute(null));
-		Assert.False(viewModel.ReloadContentCommand.CanExecute(null));
+		Assert.True(viewModel.ReloadContentCommand.CanExecute(null));
 		Assert.True(viewModel.OpenBrowserCommand.CanExecute(null));
 		Assert.True(viewModel.IsItemSelected);
 		Assert.False(viewModel.IsLoadingContent);
-		Assert.False(viewModel.IsReloadContentAvailable);
+		Assert.True(viewModel.IsReloadContentAvailable);
 		Assert.Equal(FeedNavigationRoute.Selection(0), viewModel.CurrentRoute);
 	}
 

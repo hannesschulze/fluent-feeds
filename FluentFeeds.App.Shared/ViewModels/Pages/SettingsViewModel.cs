@@ -45,6 +45,11 @@ public sealed class SettingsViewModel : ObservableObject
 	public string AppearanceHeading => LocalizedStrings.SettingsAppearanceHeading;
 
 	/// <summary>
+	/// Heading for the "feed providers" section.
+	/// </summary>
+	public string FeedProvidersHeading => LocalizedStrings.SettingsFeedProvidersHeading;
+
+	/// <summary>
 	/// Heading for the "about this app" section.
 	/// </summary>
 	public string AboutHeading => LocalizedStrings.SettingsAboutHeading;
@@ -55,14 +60,30 @@ public sealed class SettingsViewModel : ObservableObject
 	public Symbol ThemeSymbol => Symbol.ColorPalette;
 
 	/// <summary>
+	/// Symbol for the <see cref="IsHackerNewsEnabled"/> setting.
+	/// </summary>
+	public Symbol HackerNewsSymbol => Symbol.HackerNews;
+
+	/// <summary>
 	/// Label for the <see cref="SelectedTheme"/> menu.
 	/// </summary>	
 	public string ThemeLabel => LocalizedStrings.SettingsThemeLabel;
+
+	/// <summary>
+	/// Label for the <see cref="IsHackerNewsEnabled"/> setting.
+	/// </summary>
+	public string HackerNewsLabel => LocalizedStrings.SettingsHackerNewsLabel;
 	
 	/// <summary>
 	/// Description for the <see cref="SelectedTheme"/> menu.
 	/// </summary>	
 	public string ThemeDescription => LocalizedStrings.SettingsThemeDescription;
+
+	/// <summary>
+	/// Description for the <see cref="IsHackerNewsEnabled"/> setting.
+	/// </summary>
+	public string HackerNewsDescription =>
+		String.Format(LocalizedStrings.SettingsHackerNewsDescription, Constants.AppName);
 
 	/// <summary>
 	/// Menu label for <see cref="Theme.Light"/>.
@@ -103,12 +124,24 @@ public sealed class SettingsViewModel : ObservableObject
 		set => _settingsService.AppTheme = value;
 	}
 
+	/// <summary>
+	/// Flag indicating if the Hacker News feed is currently enabled.
+	/// </summary>
+	public bool IsHackerNewsEnabled
+	{
+		get => _settingsService.IsHackerNewsEnabled;
+		set => _settingsService.IsHackerNewsEnabled = value;
+	}
+
 	private void HandlePropertyChanged(object? sender, PropertyChangedEventArgs e)
 	{
 		switch (e.PropertyName)
 		{
 			case nameof(ISettingsService.AppTheme):
 				OnPropertyChanged(nameof(SelectedTheme));
+				break;
+			case nameof(ISettingsService.IsHackerNewsEnabled):
+				OnPropertyChanged(nameof(IsHackerNewsEnabled));
 				break;
 		}
 	}

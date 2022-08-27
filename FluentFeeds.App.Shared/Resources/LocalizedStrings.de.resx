@@ -200,4 +200,13 @@
 	<data name="OpenGitHubIssuesLabel" xml:space="preserve">
 		<value>GitHub-Issues</value>
 	</data>
+	<data name="SettingsFeedProvidersHeading" xml:space="preserve">
+		<value>Feed-Provider</value>
+	</data>
+	<data name="SettingsHackerNewsLabel" xml:space="preserve">
+		<value>Hacker-News-Integration aktivieren (experimentell)</value>
+	</data>
+	<data name="SettingsHackerNewsDescription" xml:space="preserve">
+		<value>Wenn diese Option aktiviert ist, lädt {0} die populärsten Hacker-News-Stories mithilfe der offiziellen API herunter.</value>
+	</data>
 </root>

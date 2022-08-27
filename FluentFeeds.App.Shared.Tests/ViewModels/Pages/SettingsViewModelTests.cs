@@ -24,6 +24,17 @@ public class SettingsViewModelTests
 	}
 
 	[Fact]
+	public void UpdateHackerNews()
+	{
+		var viewModel = new SettingsViewModel(SettingsService, WebBrowserService);
+		Assert.False(viewModel.IsHackerNewsEnabled);
+		SettingsService.IsHackerNewsEnabled = true;
+		Assert.True(viewModel.IsHackerNewsEnabled);
+		viewModel.IsHackerNewsEnabled = false;
+		Assert.False(SettingsService.IsHackerNewsEnabled);
+	}
+
+	[Fact]
 	public void Commands_OpenProjectWebsite()
 	{
 		var viewModel = new SettingsViewModel(SettingsService, WebBrowserService);

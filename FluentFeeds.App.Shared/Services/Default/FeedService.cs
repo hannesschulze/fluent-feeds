@@ -1,7 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentFeeds.App.Shared.Models.Database;
@@ -12,6 +12,8 @@ using FluentFeeds.App.Shared.Resources;
 using FluentFeeds.Common;
 using FluentFeeds.Feeds.Base;
 using FluentFeeds.Feeds.Base.Feeds.Content;
+using FluentFeeds.Feeds.HackerNews;
+using FluentFeeds.Feeds.Syndication;
 
 namespace FluentFeeds.App.Shared.Services.Default;
 
@@ -19,10 +21,12 @@ public sealed class FeedService : IFeedService
 {
 	private const int MaxItemContentCacheSize = 8;
 	
-	public FeedService(IDatabaseService databaseService, IPluginService pluginService)
+	public FeedService(IDatabaseService databaseService, ISettingsService settingsService)
 	{
 		_databaseService = databaseService;
-		_pluginService = pluginService;
+		_settingsService = settingsService;
+		_settingsService.PropertyChanged += HandleSettingsChanged;
+		_isHackerNewsFeedVisible = _settingsService.IsHackerNewsEnabled;
 		_itemContentCache = new ItemContentCache(MaxItemContentCacheSize);
 		_initialize = new Lazy<Task>(InitializeAsyncCore);
 
@@ -46,44 +50,81 @@ public sealed class FeedService : IFeedService
 	
 	public Task InitializeAsync() => _initialize.Value;
 
-	private async Task<List<IFeedView>> LoadFeedProvidersAsync(
-		AppDbContext database, IReadOnlyCollection<FeedProvider> providers)
+	private Task<IFeedView> InitializeFeedProviderAsync(AppDbContext database, FeedProvider provider)
 	{
-		var result = new List<IFeedView> { Capacity = providers.Count };
-		foreach (var provider in providers)
-		{
-			var storage = new FeedStorage(_databaseService, _itemContentCache, provider);
-			result.Add(await storage.InitializeAsync(database));
-		}
-		
-		return result;
+		var storage = new FeedStorage(_databaseService, _itemContentCache, provider);
+		return storage.InitializeAsync(database);
 	}
 
 	private async Task InitializeAsyncCore()
 	{
-		var providers = _pluginService.GetAvailableFeedProviders().ToList();
-		var feeds = await _databaseService.ExecuteAsync(
+		await _databaseService.ExecuteAsync(
 			async database =>
 			{
-				var result = await LoadFeedProvidersAsync(database, providers);
+				_syndicationFeed = await InitializeFeedProviderAsync(database, new SyndicationFeedProvider());
+				_hackerNewsFeed = await InitializeFeedProviderAsync(database, new HackerNewsFeedProvider());
 				await database.SaveChangesAsync();
-				return result;
 			});
 
-		foreach (var feed in feeds)
+		_providerFeeds.Add(_syndicationFeed!);
+		if (IsHackerNewsFeedVisible)
 		{
-			_providerFeeds.Add(feed);
+			_providerFeeds.Add(_hackerNewsFeed!);
 		}
-		_overviewFeedLoader.Loaders = feeds
+
+		UpdateOverviewFeed();
+		_isInitialized = true;
+	}
+
+	private bool IsHackerNewsFeedVisible
+	{
+		get => _isHackerNewsFeedVisible;
+		set
+		{
+			var oldValue = _isHackerNewsFeedVisible;
+			_isHackerNewsFeedVisible = value;
+			if (value != oldValue && _isInitialized)
+			{
+				if (value)
+				{
+					_providerFeeds.Add(_hackerNewsFeed!);
+				}
+				else
+				{
+					_providerFeeds.Remove(_hackerNewsFeed!);
+				}
+
+				UpdateOverviewFeed();
+			}
+		}
+	}
+
+	private void HandleSettingsChanged(object? sender, PropertyChangedEventArgs e)
+	{
+		switch (e.PropertyName)
+		{
+			case nameof(ISettingsService.IsHackerNewsEnabled):
+				IsHackerNewsFeedVisible = _settingsService.IsHackerNewsEnabled;
+				break;
+		}
+	}
+
+	private void UpdateOverviewFeed()
+	{
+		_overviewFeedLoader.Loaders = _providerFeeds
 			.Where(feed => !feed.IsExcludedFromGroup)
 			.Select(feed => feed.Loader)
 			.ToImmutableHashSet();
 	}
 
 	private readonly IDatabaseService _databaseService;
-	private readonly IPluginService _pluginService;
+	private readonly ISettingsService _settingsService;
 	private readonly ItemContentCache _itemContentCache;
 	private readonly Lazy<Task> _initialize;
 	private readonly ObservableCollection<IFeedView> _providerFeeds = new();
 	private readonly GroupFeedLoader _overviewFeedLoader = new(ImmutableHashSet<FeedLoader>.Empty);
+	private bool _isHackerNewsFeedVisible;
+	private IFeedView? _syndicationFeed;
+	private IFeedView? _hackerNewsFeed;
+	private bool _isInitialized;
 }
