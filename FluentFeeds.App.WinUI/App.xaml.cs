@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using FluentFeeds.App.Shared.Services;
 using FluentFeeds.App.Shared.Services.Default;

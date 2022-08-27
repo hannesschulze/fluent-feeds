@@ -13,8 +13,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		.github\workflows\ci.yml = .github\workflows\ci.yml
-		README.md = README.md
+		readme.md = readme.md
 		codecov.yml = codecov.yml
+		license.txt = license.txt
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentFeeds.Documents", "FluentFeeds.Documents\FluentFeeds.Documents.csproj", "{445BC747-4555-4E35-BA66-21FB6E051407}"
