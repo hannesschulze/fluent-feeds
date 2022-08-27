@@ -26,7 +26,7 @@ jobs:
 
   deploy:
     needs: build
-    if: github.ref == 'refs/heads/feature/43-prepare-release'
+    if: github.ref == 'refs/heads/release/43-prepare-release'
     permissions:
       pages: write
       id-token: write
