@@ -73,8 +73,9 @@ public sealed class MainViewModel : ObservableObject
 		{
 			await _feedService.InitializeAsync();
 		}
-		catch (Exception)
+		catch (Exception e)
 		{
+			Console.Error.WriteLine($"Unable to initialize feeds: {e}");
 			_modalService.Show(
 				new ErrorViewModel(
 					LocalizedStrings.InitializeDatabaseErrorTitle,
