@@ -20,12 +20,26 @@ can load these feeds and items.
 ## Supported feeds
 
 Right now, the app includes the following feed providers:
+
  * The **Syndication** feed provider which can load items from RSS or Atom feeds using the .NET
    `System.ServiceModel.Syndication` APIs.
  * The **Hacker News** feed provider which uses both the official API and the Algolia API to fetch stories and comments
    from Hacker News.
 
-Support for dynamically loading custom feed providers using a plugin system is also planned. 
+Support for dynamically loading custom feed providers using a plugin system is also planned.
+
+## Credits
+
+Fluent Feeds depends on the following projects:
+
+ * **[.NET](https://dotnet.microsoft.com/en-us/)** which provides the platform the app is implemented on.
+ * **[WinUI 3](https://microsoft.github.io/microsoft-ui-xaml/)** which is used to implement the UI.
+ * **[MVVM Toolkit](https://github.com/CommunityToolkit/dotnet)** which is used to implement the MVVM architecture.
+ * **[EF Core](https://github.com/dotnet/efcore)** which is used to interact with the local database.
+ * **[SQLite](https://sqlite.org/index.html)** which is used for the local database.
+ * **[AngleSharp](https://anglesharp.github.io/)** which is used for parsing HTML content and transforming it into
+   Fluent Feed's rich text object model.
+ * **[xUnit](https://xunit.net/)** which is used as the test framework for all unit tests.
 
 ## License
 
