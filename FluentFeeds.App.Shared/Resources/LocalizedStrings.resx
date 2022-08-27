@@ -207,4 +207,13 @@
 	<data name="OpenGitHubIssuesLabel" xml:space="preserve">
 		<value>GitHub Issues</value>
 	</data>
+	<data name="SettingsFeedProvidersHeading" xml:space="preserve">
+		<value>Feed providers</value>
+	</data>
+	<data name="SettingsHackerNewsLabel" xml:space="preserve">
+		<value>Enable Hacker News integration (experimental)</value>
+	</data>
+	<data name="SettingsHackerNewsDescription" xml:space="preserve">
+		<value>If enabled, {0} will load the most popular stories from Hacker News using the official API.</value>
+	</data>
 </root>

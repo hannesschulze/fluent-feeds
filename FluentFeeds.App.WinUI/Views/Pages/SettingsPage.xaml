@@ -20,6 +20,7 @@
 		<CornerRadius x:Key="ContentAreaCornerRadius">8,0,0,0</CornerRadius>
 
 		<x:Double x:Key="PanelSectionHeadingSpacing">8</x:Double>
+		<x:Double x:Key="PanelSectionSpacing">16</x:Double>
 
 		<x:Double x:Key="AboutPanelMinWidth">200</x:Double>
 		<x:Double x:Key="AboutPanelMaxWidth">350</x:Double>
@@ -27,8 +28,10 @@
 		<Thickness x:Key="AboutPanelButtonMargin">0,8</Thickness>
 
 		<x:Double x:Key="SettingsPanelOptionHeaderColumnSpacing">12</x:Double>
-		<x:Double x:Key="SettingsPanelOptionHeaderIconSize">16</x:Double>
 		<x:Double x:Key="SettingsPanelOptionContentSpacing">4</x:Double>
+		<x:Double x:Key="SettingsPanelOptionHeaderIconSize">16</x:Double>
+		<GridLength x:Key="SettingsPanelOptionHeaderIconGridLength">16</GridLength>
+		<Thickness x:Key="SettingsPanelOptionPadding">16,0</Thickness>
 		<Thickness x:Key="SettingsPanelOptionHeaderMargin">0,12</Thickness>
 		<Thickness x:Key="SettingsPanelOptionContentMargin">32,0,0,0</Thickness>
 	</Page.Resources>
@@ -92,28 +95,133 @@
 				Grid.ColumnSpan="2"
 				Grid.Row="1"
 				Orientation="Vertical"
-				Spacing="{StaticResource PanelSectionHeadingSpacing}"
+				Spacing="{StaticResource PanelSectionSpacing}"
 				Margin="{StaticResource ContentGridVerticalItemMargin}">
 
-				<TextBlock
-					Text="{x:Bind ViewModel.AppearanceHeading}"
-					Style="{ThemeResource BodyStrongTextBlockStyle}" />
+				<StackPanel Orientation="Vertical" Spacing="{StaticResource PanelSectionHeadingSpacing}">
+					<TextBlock
+						Text="{x:Bind ViewModel.AppearanceHeading}"
+						Style="{ThemeResource BodyStrongTextBlockStyle}" />
 
-				<Expander
-					IsExpanded="False"
-					ExpandDirection="Down"
-					HorizontalAlignment="Stretch"
-					HorizontalContentAlignment="Left">
+					<Expander
+						IsExpanded="False"
+						ExpandDirection="Down"
+						HorizontalAlignment="Stretch"
+						HorizontalContentAlignment="Left">
 
-					<Expander.Header>
+						<Expander.Header>
+							<Grid
+								HorizontalAlignment="Stretch"
+								ColumnSpacing="{StaticResource SettingsPanelOptionHeaderColumnSpacing}"
+								Margin="{StaticResource SettingsPanelOptionHeaderMargin}">
+
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="{StaticResource SettingsPanelOptionHeaderIconGridLength}" />
+									<ColumnDefinition Width="*" />
+								</Grid.ColumnDefinitions>
+
+								<Grid.RowDefinitions>
+									<RowDefinition Height="Auto" />
+									<RowDefinition Height="Auto" />
+								</Grid.RowDefinitions>
+
+								<Viewbox
+									Grid.Column="0"
+									Grid.Row="0"
+									Grid.RowSpan="2"
+									Height="{StaticResource SettingsPanelOptionHeaderIconSize}"
+									VerticalAlignment="Center"
+									HorizontalAlignment="Center"
+									Child="{x:Bind ViewModel.ThemeSymbol, Converter={StaticResource SymbolToIconElementConverter}}" />
+
+								<TextBlock
+									Grid.Column="1"
+									Grid.Row="0"
+									Text="{x:Bind ViewModel.ThemeLabel}"
+									Style="{ThemeResource BodyTextBlockStyle}" />
+
+								<TextBlock
+									Grid.Column="1"
+									Grid.Row="1"
+									Text="{x:Bind ViewModel.ThemeDescription}"
+									TextWrapping="WrapWholeWords"
+									Style="{ThemeResource CaptionTextBlockStyle}"
+									Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+							
+							</Grid>
+						</Expander.Header>
+
+						<Expander.Content>
+							<StackPanel
+								Orientation="Vertical"
+								Margin="{StaticResource SettingsPanelOptionContentMargin}"
+								Spacing="{StaticResource SettingsPanelOptionContentSpacing}">
+
+								<RadioButton
+									Content="{x:Bind ViewModel.ThemeLightLabel}"
+									GroupName="Themes"
+									IsChecked="{x:Bind IsThemeSelected(ViewModel.SelectedTheme, models:Theme.Light), Mode=OneWay}"
+									Command="{x:Bind SelectThemeCommand}">
+
+									<RadioButton.CommandParameter>
+										<models:Theme>Light</models:Theme>
+									</RadioButton.CommandParameter>
+
+								</RadioButton>
+
+								<RadioButton
+									Content="{x:Bind ViewModel.ThemeDarkLabel}"
+									GroupName="Themes"
+									IsChecked="{x:Bind IsThemeSelected(ViewModel.SelectedTheme, models:Theme.Dark), Mode=OneWay}"
+									Command="{x:Bind SelectThemeCommand}">
+
+									<RadioButton.CommandParameter>
+										<models:Theme>Dark</models:Theme>
+									</RadioButton.CommandParameter>
+
+								</RadioButton>
+
+								<RadioButton
+									Content="{x:Bind ViewModel.ThemeSystemDefaultLabel}"
+									GroupName="Themes"
+									IsChecked="{x:Bind IsThemeSelected(ViewModel.SelectedTheme, models:Theme.SystemDefault), Mode=OneWay}"
+									Command="{x:Bind SelectThemeCommand}">
+
+									<RadioButton.CommandParameter>
+										<models:Theme>SystemDefault</models:Theme>
+									</RadioButton.CommandParameter>
+
+								</RadioButton>
+
+							</StackPanel>
+						</Expander.Content>
+
+					</Expander>
+				</StackPanel>
+
+				<StackPanel Orientation="Vertical" Spacing="{StaticResource PanelSectionHeadingSpacing}">
+					<TextBlock
+						Text="{x:Bind ViewModel.FeedProvidersHeading}"
+						Style="{ThemeResource BodyStrongTextBlockStyle}" />
+
+					<Border
+						HorizontalAlignment="Stretch"
+						Background="{ThemeResource ExpanderHeaderBackground}"
+						BorderBrush="{ThemeResource ExpanderHeaderBorderBrush}"
+						BorderThickness="{ThemeResource ExpanderHeaderBorderThickness}"
+						CornerRadius="{ThemeResource ControlCornerRadius}"
+						MinHeight="{StaticResource ExpanderMinHeight}"
+						Padding="{StaticResource SettingsPanelOptionPadding}">
+						
 						<Grid
 							HorizontalAlignment="Stretch"
 							ColumnSpacing="{StaticResource SettingsPanelOptionHeaderColumnSpacing}"
 							Margin="{StaticResource SettingsPanelOptionHeaderMargin}">
-							
+
 							<Grid.ColumnDefinitions>
-								<ColumnDefinition Width="Auto" />
+								<ColumnDefinition Width="{StaticResource SettingsPanelOptionHeaderIconGridLength}" />
 								<ColumnDefinition Width="*" />
+								<ColumnDefinition Width="Auto" />
 							</Grid.ColumnDefinitions>
 
 							<Grid.RowDefinitions>
@@ -127,71 +235,46 @@
 								Grid.RowSpan="2"
 								Height="{StaticResource SettingsPanelOptionHeaderIconSize}"
 								VerticalAlignment="Center"
-								Child="{x:Bind ViewModel.ThemeSymbol, Converter={StaticResource SymbolToIconElementConverter}}" />
+								HorizontalAlignment="Center"
+								Child="{x:Bind ViewModel.HackerNewsSymbol, Converter={StaticResource SymbolToIconElementConverter}}" />
 
 							<TextBlock
 								Grid.Column="1"
 								Grid.Row="0"
-								Text="{x:Bind ViewModel.ThemeLabel}"
+								Text="{x:Bind ViewModel.HackerNewsLabel}"
 								Style="{ThemeResource BodyTextBlockStyle}" />
 
 							<TextBlock
 								Grid.Column="1"
 								Grid.Row="1"
-								Text="{x:Bind ViewModel.ThemeDescription}"
+								Text="{x:Bind ViewModel.HackerNewsDescription}"
 								TextWrapping="WrapWholeWords"
 								Style="{ThemeResource CaptionTextBlockStyle}"
 								Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-							
+
+							<ToggleSwitch
+								Grid.Column="2"
+								Grid.Row="0"
+								Grid.RowSpan="2"
+								HorizontalAlignment="Right"
+								VerticalAlignment="Center"
+								OnContent="{x:Null}"
+								OffContent="{x:Null}"
+								Margin="0,0,-12,0"
+								MinWidth="0"
+								IsOn="{x:Bind ViewModel.IsHackerNewsEnabled, Mode=TwoWay}">
+
+								<ToggleSwitch.Resources>
+									<x:Double x:Key="ToggleSwitchPreContentMargin">0</x:Double>
+									<x:Double x:Key="ToggleSwitchPostContentMargin">0</x:Double>
+								</ToggleSwitch.Resources>
+								
+							</ToggleSwitch>
+
 						</Grid>
-					</Expander.Header>
-
-					<Expander.Content>
-						<StackPanel
-							Orientation="Vertical"
-							Margin="{StaticResource SettingsPanelOptionContentMargin}"
-							Spacing="{StaticResource SettingsPanelOptionContentSpacing}">
-
-							<RadioButton
-								Content="{x:Bind ViewModel.ThemeLightLabel}"
-								GroupName="Themes"
-								IsChecked="{x:Bind IsThemeSelected(ViewModel.SelectedTheme, models:Theme.Light), Mode=OneWay}"
-								Command="{x:Bind SelectThemeCommand}">
-
-								<RadioButton.CommandParameter>
-									<models:Theme>Light</models:Theme>
-								</RadioButton.CommandParameter>
-
-							</RadioButton>
-
-							<RadioButton
-								Content="{x:Bind ViewModel.ThemeDarkLabel}"
-								GroupName="Themes"
-								IsChecked="{x:Bind IsThemeSelected(ViewModel.SelectedTheme, models:Theme.Dark), Mode=OneWay}"
-								Command="{x:Bind SelectThemeCommand}">
-
-								<RadioButton.CommandParameter>
-									<models:Theme>Dark</models:Theme>
-								</RadioButton.CommandParameter>
-
-							</RadioButton>
-
-							<RadioButton
-								Content="{x:Bind ViewModel.ThemeSystemDefaultLabel}"
-								GroupName="Themes"
-								IsChecked="{x:Bind IsThemeSelected(ViewModel.SelectedTheme, models:Theme.SystemDefault), Mode=OneWay}"
-								Command="{x:Bind SelectThemeCommand}">
-
-								<RadioButton.CommandParameter>
-									<models:Theme>SystemDefault</models:Theme>
-								</RadioButton.CommandParameter>
-
-							</RadioButton>
-
-						</StackPanel>
-					</Expander.Content>
-
-				</Expander>
+						
+					</Border>
+				</StackPanel>
 
 			</StackPanel>
 

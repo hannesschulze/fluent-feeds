@@ -22,4 +22,9 @@ public interface ISettingsService : INotifyPropertyChanged
 	/// The selected application theme.
 	/// </summary>
 	Theme AppTheme { get; set; }
+
+	/// <summary>
+	/// Allows the user to enable/disable Hacker News integration.
+	/// </summary>
+	bool IsHackerNewsEnabled { get; set; }
 }

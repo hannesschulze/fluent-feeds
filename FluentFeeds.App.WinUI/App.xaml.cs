@@ -19,7 +19,6 @@ public partial class App : Application
 	{
 		Ioc.Default.ConfigureServices(
 			new ServiceCollection()
-				.AddSingleton<IPluginService, PluginService>()
 				.AddSingleton<IDatabaseService, DatabaseService>()
 				.AddSingleton<IFeedService, FeedService>()
 				.AddSingleton<ISettingsService, SettingsService>()

@@ -399,6 +399,7 @@ public sealed class FeedViewModel : ObservableObject
 				_modalService.Show(new ErrorViewModel(
 					LocalizedStrings.LoadContentErrorTitle, LocalizedStrings.LoadContentErrorMessage));
 				IsLoadingContent = false;
+				IsReloadContentAvailable = true;
 			}
 			return;
 		}

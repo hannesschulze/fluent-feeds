@@ -13,7 +13,8 @@ public class SettingsService : ObservableObject, ISettingsService
 	protected record SerializedSettings(
 		FontFamily ContentFontFamily,
 		FontSize ContentFontSize,
-		Theme AppTheme);
+		Theme AppTheme,
+		bool IsHackerNewsEnabled);
 
 	/// <summary>
 	/// Load initial settings (if any).
@@ -23,7 +24,8 @@ public class SettingsService : ObservableObject, ISettingsService
 		_serialized = serializedSettings ?? new SerializedSettings(
 			ContentFontFamily: FontFamily.SansSerif,
 			ContentFontSize: FontSize.Normal,
-			AppTheme: Theme.SystemDefault);
+			AppTheme: Theme.SystemDefault,
+			IsHackerNewsEnabled: false);
 	}
 
 	public SettingsService() : this(Load())
@@ -46,6 +48,12 @@ public class SettingsService : ObservableObject, ISettingsService
 	{
 		get => _serialized.AppTheme;
 		set => Update(_serialized with { AppTheme = value });
+	}
+
+	public bool IsHackerNewsEnabled
+	{
+		get => _serialized.IsHackerNewsEnabled;
+		set => Update(_serialized with { IsHackerNewsEnabled = value });
 	}
 
 	private void Update(SerializedSettings updated, [CallerMemberName] string? updatedPropertyName = null)
