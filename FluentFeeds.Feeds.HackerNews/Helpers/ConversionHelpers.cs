@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentFeeds.Documents;
 using FluentFeeds.Documents.Blocks;
@@ -187,7 +188,8 @@ public static class ConversionHelpers
 	/// <summary>
 	/// Load and convert a comment response into a standard comment using the official API.
 	/// </summary>
-	public static async ValueTask<Comment?> ConvertItemCommentAsync(IDownloader downloader, ItemResponse item)
+	public static async ValueTask<Comment?> ConvertItemCommentAsync(
+		IDownloader downloader, ItemResponse item, CancellationToken cancellation = default)
 	{
 		if (item.Type != "comment" || item.By == null)
 			return null;
@@ -197,8 +199,8 @@ public static class ConversionHelpers
 		{
 			foreach (var child in item.Kids.Value)
 			{
-				var comment = await downloader.DownloadItemAsync(child);
-				var converted = await ConvertItemCommentAsync(downloader, comment);
+				var comment = await downloader.DownloadItemAsync(child, cancellation);
+				var converted = await ConvertItemCommentAsync(downloader, comment, cancellation);
 				if (converted != null)
 				{
 					children.Add(converted);

@@ -38,7 +38,7 @@
 							<Grid
 								x:Name="ExpandCollapseChevron"
 								Grid.Column="0"
-								Padding="16,9,4,9"
+								Padding="16,13,4,13"
 								Width="Auto"
 								Opacity="{TemplateBinding GlyphOpacity}"
 								Background="Transparent">
@@ -84,7 +84,7 @@
 			x:DataType="vm:CommentHeaderViewModel">
 
 			<TreeViewItem Style="{StaticResource HeaderItemStyle}">
-				<StackPanel Orientation="Vertical" Spacing="8" Margin="16,16,16,12">
+				<StackPanel Orientation="Vertical" Spacing="8" Margin="16,16,16,8">
 					<TextBlock
 						Text="{x:Bind Title, Mode=OneWay}"
 						Style="{StaticResource TitleTextBlockStyle}"
@@ -111,7 +111,7 @@
 				Style="{StaticResource CommentItemStyle}"
 				IsExpanded="True">
 
-				<StackPanel Orientation="Vertical" Margin="0,4" Spacing="2">
+				<StackPanel Orientation="Vertical" Margin="0,8" Spacing="2">
 					<TextBlock
 						Text="{x:Bind CommentInfo, Mode=OneWay}"
 						Style="{ThemeResource CaptionTextBlockStyle}"

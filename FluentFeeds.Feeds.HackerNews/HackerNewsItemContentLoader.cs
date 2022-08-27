@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,19 +30,23 @@ public sealed class HackerNewsItemContentLoader : IItemContentLoader
 	/// </summary>
 	public long Identifier { get; }
 	
-	public Task<ItemContent> LoadAsync(bool reload = false, CancellationToken cancellation = default)
+	public async Task<ItemContent> LoadAsync(bool reload = false, CancellationToken cancellation = default)
 	{
-		if (_currentRequest == null || reload)
+		if (_cachedResult != null && !reload)
 		{
-			_currentRequest = LoadAsyncCore();
+			return _cachedResult;
 		}
 
-		return _currentRequest;
+		var result = await Task.Run(() => LoadAsyncCore(cancellation), cancellation);
+		_cachedResult = result;
+		return result;
 	}
 
-	private async ValueTask<ItemContent> LoadFastAsync()
+	/// <summary>
+	/// Try to load the item content in a single request using the Algolia API.
+	/// </summary>
+	private static async ValueTask<ItemContent> LoadFastAsync(ItemCommentsResponse response)
 	{
-		var response = await Downloader.DownloadItemCommentsAsync(Identifier);
 		var topLevelComments = response.Children ?? ImmutableArray<ItemCommentsResponse>.Empty;
 
 		var comments = ImmutableArray.CreateBuilder<Comment>(topLevelComments.Length);
@@ -59,16 +62,19 @@ public sealed class HackerNewsItemContentLoader : IItemContentLoader
 		return new CommentItemContent { Comments = comments.ToImmutable(), IsReloadable = true };
 	}
 
-	private async ValueTask<ItemContent> LoadSlowAsync()
+	/// <summary>
+	/// Fallback: Load the comments one by one using the official Hacker News API.
+	/// </summary>
+	private async ValueTask<ItemContent> LoadSlowAsync(
+		ItemResponse response, CancellationToken cancellation = default)
 	{
-		var mainResponse = await Downloader.DownloadItemAsync(Identifier);
-		var commentIdentifiers = mainResponse.Kids ?? ImmutableArray<long>.Empty;
+		var commentIdentifiers = response.Kids ?? ImmutableArray<long>.Empty;
 
 		var comments = ImmutableArray.CreateBuilder<Comment>(commentIdentifiers.Length);
 		foreach (var identifier in commentIdentifiers)
 		{
-			var comment = await Downloader.DownloadItemAsync(identifier);
-			var converted = await ConversionHelpers.ConvertItemCommentAsync(Downloader, comment);
+			var comment = await Downloader.DownloadItemAsync(identifier, cancellation);
+			var converted = await ConversionHelpers.ConvertItemCommentAsync(Downloader, comment, cancellation);
 			if (converted != null)
 			{
 				comments.Add(converted);
@@ -78,19 +84,23 @@ public sealed class HackerNewsItemContentLoader : IItemContentLoader
 		return new CommentItemContent { Comments = comments.ToImmutable(), IsReloadable = true };
 	}
 
-	private async Task<ItemContent> LoadAsyncCore()
+	private async Task<ItemContent> LoadAsyncCore(CancellationToken cancellation = default)
 	{
+		ItemCommentsResponse commentsResponse;
 		try
 		{
 			// Try to use the Algolia API
-			return await LoadFastAsync();
+			commentsResponse = await Downloader.DownloadItemCommentsAsync(Identifier, cancellation);
 		}
-		catch (Exception e)
+		catch (Exception)
 		{
 			// Fall back to the official Hacker News API
-			return await LoadSlowAsync();
+			var itemResponse = await Downloader.DownloadItemAsync(Identifier, cancellation);
+			return await LoadSlowAsync(itemResponse, cancellation);
 		}
+
+		return await LoadFastAsync(commentsResponse);
 	}
 
-	private Task<ItemContent>? _currentRequest;
+	private ItemContent? _cachedResult;
 }
