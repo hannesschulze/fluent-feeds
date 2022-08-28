@@ -10,7 +10,6 @@
 		<PublishProfile>win10-$(Platform).pubxml</PublishProfile>
 		<UseWinUI>true</UseWinUI>
 		<EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
-		<PlatformTarget>AnyCPU</PlatformTarget>
 		<Nullable>enable</Nullable>
 		<AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
 		<GenerateAppInstallerFile>False</GenerateAppInstallerFile>
