@@ -1,8 +1,7 @@
 # Based on: https://github.com/andrewleader/WindowsAppSDKGallery/blob/main/.github/workflows/dotnet-desktop.yml
 
 name: Create Release
-on:
-  workflow_dispatch:
+on: push
 jobs:
   build:
     runs-on: windows-latest
