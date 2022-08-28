@@ -45,3 +45,9 @@
   margin-top: 1rem;
   margin-bottom: 0;
 }
+
+@media (max-width: 600px) {
+  .posts ul {
+    grid-template-columns: 1fr;
+  }
+}

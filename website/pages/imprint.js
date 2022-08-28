@@ -11,7 +11,7 @@ export default function PrivacyPolicy() {
       </Head>
 
       <section className={commonStyles.section}>
-        <h1>Imprint/Impressum</h1>
+        <h1>Imprint/<wbr />Impressum</h1>
         
         <p>
           <strong>Angaben nach &sect; 5 TMG</strong><br />
