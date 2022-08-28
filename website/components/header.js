@@ -33,11 +33,11 @@ export default function Header() {
           
           <nav className={styles.nav}>
             <ul className={styles.navLocal}>
-              <li className={router.pathname == '/' ? styles.itemActive : ''}>
-                <Link href='/' onClick={handleItemClicked}>Home</Link>
+              <li className={router.pathname == '/' ? styles.itemActive : ''} onClick={handleItemClicked}>
+                <Link href='/'>Home</Link>
               </li>
-              <li className={router.pathname.startsWith('/blog') ? styles.itemActive : ''}>
-                <Link href='/blog' onClick={handleItemClicked}>Blog</Link>
+              <li className={router.pathname.startsWith('/blog') ? styles.itemActive : ''} onClick={handleItemClicked}>
+                <Link href='/blog'>Blog</Link>
               </li>
             </ul>
             <ul className={styles.navExternal}>
