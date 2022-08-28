@@ -29,8 +29,10 @@ export async function getAllPosts() {
   const posts = await Promise.all(slugs.map(getPost));
   return posts
     .sort((lhs, rhs) => {
-      if (lhs.timestamp != rhs.timestamp) {
-        return lhs.timestamp < rhs.timestamp ? 1 : -1;
+      const lhsTimestamp = new Date(lhs.publishedTimestamp);
+      const rhsTimestamp = new Date(rhs.publishedTimestamp);
+      if (lhsTimestamp != rhsTimestamp) {
+        return lhsTimestamp < rhsTimestamp ? 1 : -1;
       } else {
         return 0;
       }

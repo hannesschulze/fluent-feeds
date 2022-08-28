@@ -1,0 +1,47 @@
+.hero {
+  text-align: center;
+}
+
+.posts ul {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 1.5rem;
+}
+
+.posts li {
+  background: var(--tertiary-bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 0.25rem;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.posts li a {
+  color: var(--primary-fg-color);
+  padding: 2rem 1.5rem;
+  display: block;
+  text-decoration: none;
+}
+
+.posts li a .title {
+  color: var(--primary-accent-bg-color);
+  margin: 0;
+}
+
+.posts li a:hover .title {
+  color: var(--primary-accent-bg-color);
+  text-decoration: underline;
+}
+
+.posts li a .info {
+  color: var(--secondary-fg-color);
+}
+
+.posts li a .summary {
+  margin-top: 1rem;
+  margin-bottom: 0;
+}

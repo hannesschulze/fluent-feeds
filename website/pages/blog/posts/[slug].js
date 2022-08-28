@@ -1,6 +1,8 @@
 import Layout from '../../../components/layout';
+import Date from '../../../components/date';
 import Head from 'next/head';
 import commonStyles from '../../../styles/common.module.css';
+import styles from './post.module.css';
 import { getAllPostSlugs, getPost } from '../../../lib/posts';
 
 export default function Post({ post }) {
@@ -11,9 +13,9 @@ export default function Post({ post }) {
       </Head>
 
       <section className={commonStyles.section}>
-        <h1>{post.title}</h1>
-        <small>posted by {post.author} on {post.timestamp}</small>
-        <div dangerouslySetInnerHTML={{ __html: post.content }} />
+        <h1 className={styles.title}>{post.title}</h1>
+        <small className={styles.info}>posted by {post.author} on <Date dateString={post.publishedTimestamp} /></small>
+        <div className={styles.content} dangerouslySetInnerHTML={{ __html: post.content }} />
       </section>
     </Layout>
   );

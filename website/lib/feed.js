@@ -2,8 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import convert from 'xml-js';
 
-// Based on: https://sreetamdas.com/blog/rss-for-nextjs
-
 const feedsDirectory = path.join(process.cwd(), 'public/blog/feeds');
 const blogTitle = 'Fluent Feeds Blog';
 const blogDescription = 'A blog about the Fluent Feeds app.';
@@ -56,8 +54,9 @@ export async function generateFeeds(posts) {
         _text: blogCopyright
       },
       entry: posts.map(post => {
-        const postUrl = `${blogUrl}/posts/${post.slug}`;
-        const postTimestamp = new Date(post.timestamp);
+        const url = `${blogUrl}/posts/${post.slug}`;
+        const publishedTimestamp = new Date(post.publishedTimestamp);
+        const modifiedTimestamp = post.modifiedTimestamp ? new Date(post.modifiedTimestamp) : publishedTimestamp;
         return {
           title: {
             _cdata: post.title
@@ -66,17 +65,17 @@ export async function generateFeeds(posts) {
             _attributes: {
               rel: 'alternate',
               type: 'text/html',
-              href: postUrl
+              href: url
             }
           },
           id: {
-            _text: postUrl
+            _text: url
           },
           published: {
-            _text: postTimestamp.toISOString()
+            _text: publishedTimestamp.toISOString()
           },
           updated: {
-            _text: postTimestamp.toISOString()
+            _text: modifiedTimestamp.toISOString()
           },
           author: {
             name: {
@@ -92,7 +91,7 @@ export async function generateFeeds(posts) {
           content: {
             _attributes: {
               type: 'html',
-              'xml:base': postUrl,
+              'xml:base': url,
               'xml:lang': 'en'
             },
             _cdata: post.content

@@ -26,7 +26,8 @@
   --secondary-bg-color: rgb(16, 16, 16);
   --secondary-fg-color: rgba(240, 240, 240, 0.5);
   --secondary-accent-bg-color: rgb(163, 178, 236, 0.75);
-  --border-color: rgba(0, 0, 0, 0.1);
+  --tertiary-bg-color: rgb(44, 44, 44);
+  --border-color: rgba(255, 255, 255, 0.1);
 }
 
 html,

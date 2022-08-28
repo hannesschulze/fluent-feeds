@@ -1,7 +1,9 @@
 import Layout from '../../components/layout';
+import Date from '../../components/date';
 import Head from 'next/head';
 import Link from 'next/link';
 import commonStyles from '../../styles/common.module.css';
+import styles from './index.module.css';
 import { getAllPosts } from '../../lib/posts';
 import { generateFeeds } from '../../lib/feed';
 
@@ -12,19 +14,20 @@ export default function Blog({ posts }) {
         <title>Blog | Fluent Feeds</title>
       </Head>
 
-      <section className={commonStyles.section}>
+      <section className={`${styles.hero} ${commonStyles.section}`}>
         <h1>Blog</h1>
+        <h2 className='tagline'>News about the app.</h2>
       </section>
 
-      <section className={commonStyles.section}>
+      <section className={`${styles.posts} ${commonStyles.section}`}>
         <ul>
           {posts.map(post => (
             <li key={post.slug}>
               <Link href={`/blog/posts/${post.slug}`}>
                 <a>
-                  <h2>{post.title}</h2>
-                  <small>posted by {post.author} on {post.timestamp}</small>
-                  <p>{post.summary}</p>
+                  <h2 className={styles.title}>{post.title}</h2>
+                  <small className={styles.info}>posted by {post.author} on <Date dateString={post.publishedTimestamp} /></small>
+                  <p className={styles.summary}>{post.summary}</p>
                 </a>
               </Link>
             </li>
