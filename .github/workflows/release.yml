@@ -20,13 +20,14 @@ jobs:
           $certificate_path = Join-Path -Path $env:Project_Directory -ChildPath FluentFeeds.App.WinUI_TemporaryKey.pfx
           [IO.File]::WriteAllBytes("$certificate_path", $pfx_cert_byte)
       - name: Restore the application
-        run: msbuild $env:Project_Directory /p:AppxBundlePlatforms="$env:Appx_Bundle_Platforms" /p:Configuration=$env:Configuration /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:PackageCertificateKeyFile=FluentFeeds.App.WinUI_TemporaryKey.pfx /p:AppxPackageDir="$env:Appx_Package_Dir" /p:GenerateAppxPackageOnBuild=true
+        run: msbuild $env:Solution_Name /t:Restore /p:Configuration=Release
+      - name: Create the app package
+        run: msbuild $env:Project_Directory /p:AppxBundlePlatforms="$env:Appx_Bundle_Platforms" /p:Configuration=Release /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:PackageCertificateKeyFile=FluentFeeds.App.WinUI_TemporaryKey.pfx /p:AppxPackageDir="$env:Appx_Package_Dir" /p:GenerateAppxPackageOnBuild=true
         env:
           Appx_Bundle: Never
           Appx_Bundle_Platforms: x64
           Appx_Package_Build_Mode: SideloadOnly
           Appx_Package_Dir: Packages\
-          Configuration: ${{ matrix.configuration }}
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
