@@ -1,0 +1,94 @@
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fluent-feeds/fonts/Inter-Medium.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url('/fluent-feeds/fonts/Inter-Black.woff2') format('woff2');
+}
+
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --primary-bg-color: rgb(32, 32, 32);
+  --primary-fg-color: rgb(240, 240, 240);
+  --primary-accent-bg-color: rgb(163, 178, 236);
+  --primary-accent-fg-color: rgb(32, 32, 32);
+  --secondary-bg-color: rgb(16, 16, 16);
+  --secondary-fg-color: rgba(240, 240, 240, 0.5);
+  --secondary-accent-bg-color: rgb(163, 178, 236, 0.75);
+  --tertiary-bg-color: rgb(44, 44, 44);
+  --border-color: rgba(255, 255, 255, 0.1);
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  line-height: 1.5rem;
+  background: var(--primary-bg-color);
+  color: var(--primary-fg-color);
+}
+
+.breaking {
+  overflow-wrap: break-word;
+}
+
+a {
+  color: var(--primary-accent-bg-color);
+  text-decoration: none;
+}
+
+a:hover,
+a:focus,
+a:active {
+  text-decoration: underline;
+}
+
+h1 {
+  font-size: 3rem;
+  font-weight: 900;
+  line-height: 3.5rem;
+  margin: 0;
+  padding: 0;
+}
+
+h2 {
+  font-size: 2rem;
+  font-weight: 900;
+  line-height: 2.5rem;
+  margin: 1.5rem 0;
+  padding: 0;
+}
+
+h2.tagline {
+  font-size: 1.5rem;
+  font-weight: 500;
+  line-height: 2rem;
+}
+
+p {
+  margin: 1.5rem 0;
+  padding: 0;
+}
+
+@media (max-width: 600px) {
+  h1 {
+    font-size: 2.5rem;
+    line-height: 3rem;
+  }
+}

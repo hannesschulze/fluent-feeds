@@ -8,7 +8,7 @@
 	<Identity
 		Name="7a796eff-f223-4100-afd7-d6d5cbd0c49b"
 		Publisher="CN=Hannes Schulze"
-		Version="1.0.0.0" />
+		Version="0.1.0.0" />
 
 	<Properties>
 		<DisplayName>Fluent Feeds</DisplayName>

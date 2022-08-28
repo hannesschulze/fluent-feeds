@@ -1,0 +1,13 @@
+.container {
+  max-width: 60rem;
+  padding: 0 1.25rem;
+  margin: 0 auto;
+}
+
+.section {
+  margin: 8rem 0;
+}
+
+.hero {
+  text-align: center;
+}

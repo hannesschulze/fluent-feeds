@@ -1,0 +1,60 @@
+/* Footer */
+
+.footer {
+  margin-bottom: 4rem;
+}
+
+.footerContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+/* Copyright */
+
+.copyright {
+  flex-grow: 1;
+  color: var(--secondary-fg-color);
+}
+
+/* Navigation */
+
+.nav {
+  font-weight: 500;
+}
+
+.nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav li {
+  display: inline-block;
+  margin-left: 1.5rem;
+}
+
+.nav li a {
+  opacity: 0.5;
+  transition: opacity 0.1s;
+}
+
+.nav li a:hover {
+  opacity: 1;
+}
+
+/* Responsive design */
+
+@media (max-width: 600px) {
+  .footerContainer {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .nav li {
+    display: block;
+    margin-top: 1.5rem;
+    margin-left: 0;
+  }
+}

@@ -17,6 +17,9 @@ public sealed class SyndicationFeedProvider : FeedProvider
 {
 	private record FeedDescription(Uri Url);
 
+	private const string BlogFeedUrl = "https://hannesschulze.github.io/fluent-feeds/blog/feeds/atom.xml";
+	private const string BlogFeedName = "Fluent Feeds Blog";
+
 	public SyndicationFeedProvider()
 		: base(new FeedProviderMetadata(
 			Identifier: Guid.Parse("8d468d92-4b69-41e3-8fac-28c99fc923a2"),
@@ -28,7 +31,13 @@ public sealed class SyndicationFeedProvider : FeedProvider
 
 	public override GroupFeedDescriptor CreateInitialTree()
 	{
-		return new GroupFeedDescriptor(name: LocalizedStrings.GroupName, symbol: Symbol.Feed);
+		var blogFeedUrl = new Uri(BlogFeedUrl);
+		return new GroupFeedDescriptor(name: LocalizedStrings.GroupName, symbol: Symbol.Feed,
+			new CachedFeedDescriptor(new SyndicationFeedContentLoader(new FeedDownloader(blogFeedUrl), blogFeedUrl))
+			{
+				Name = BlogFeedName,
+				Symbol = Symbol.Web
+			});
 	}
 
 	public override Task<IFeedContentLoader> LoadFeedAsync(string serialized)

@@ -1,0 +1,43 @@
+# Based on: https://docs.microsoft.com/en-us/windows/apps/package-and-deploy/ci-for-winui3?pivots=winui3-packaged-csharp
+
+name: Release
+on:
+  push:
+    tags:
+      - 'v*'
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      Solution_Name: FluentFeeds
+      Project_Name: FluentFeeds.App.WinUI
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: 6.0.x
+      - uses: microsoft/setup-msbuild@v1.1
+      - name: Decode the pfx
+        run: |
+          $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.BASE64_ENCODED_PFX }}")
+          $certificate_path = Join-Path -Path $env:Project_Name -ChildPath FluentFeeds.App.WinUI_TemporaryKey.pfx
+          [IO.File]::WriteAllBytes("$certificate_path", $pfx_cert_byte)
+      - name: Restore the application
+        run: msbuild $env:Project_Name /t:Restore /p:Configuration=Release
+      - name: Create the app package
+        run: msbuild $env:Project_Name /p:Configuration=Release /p:Platform=x64 /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:PackageCertificateKeyFile=FluentFeeds.App.WinUI_TemporaryKey.pfx /p:AppxPackageDir="$env:Appx_Package_Dir" /p:GenerateAppxPackageOnBuild=true
+        env:
+          Appx_Bundle: Never
+          Appx_Package_Build_Mode: SideloadOnly
+          Appx_Package_Dir: Packages\
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: true
+          prerelease: false
+          name: Release ${{ github.ref }}
+          tag_name: ${{ github.ref }}
+          body: 'Fluent Feeds is not yet available on the Microsoft Store. You can either compile it from source or install the package below. Note that you will need to trust the package certificate before you can install it. For instructions, see: https://docs.microsoft.com/en-us/dotnet/maui/windows/deployment/overview#installing-the-app'
+          files: |
+            FluentFeeds.App.WinUI/Packages/**/FluentFeeds.App.WinUI*.msix
+          fail_on_unmatched_files: true
