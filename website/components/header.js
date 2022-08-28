@@ -14,6 +14,7 @@ export default function Header() {
   const [isToggled, setToggled] = useState(false);
   const handleScrolled = () => setScrolled(window.scrollY >= 50);
   const handleToggleClicked = () => setToggled(!isToggled);
+  const handleItemClicked = () => setToggled(false);
 
   useEffect(() => {
     window.addEventListener('scroll', handleScrolled);
@@ -33,10 +34,10 @@ export default function Header() {
           <nav className={styles.nav}>
             <ul className={styles.navLocal}>
               <li className={router.pathname == '/' ? styles.itemActive : ''}>
-                <Link href='/'>Home</Link>
+                <Link href='/' onClick={handleItemClicked}>Home</Link>
               </li>
               <li className={router.pathname.startsWith('/blog') ? styles.itemActive : ''}>
-                <Link href='/blog'>Blog</Link>
+                <Link href='/blog' onClick={handleItemClicked}>Blog</Link>
               </li>
             </ul>
             <ul className={styles.navExternal}>
