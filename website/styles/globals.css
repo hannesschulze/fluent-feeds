@@ -1,3 +1,19 @@
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fluent-feeds/fonts/Inter-Medium.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url('/fluent-feeds/fonts/Inter-Black.woff2') format('woff2');
+}
+
 * {
   box-sizing: border-box;
 }
@@ -25,6 +41,10 @@ body {
   line-height: 1.5rem;
   background: var(--primary-bg-color);
   color: var(--primary-fg-color);
+}
+
+.breaking {
+  overflow-wrap: break-word;
 }
 
 a {
@@ -63,4 +83,11 @@ h2.tagline {
 p {
   margin: 1.5rem 0;
   padding: 0;
+}
+
+@media (max-width: 600px) {
+  h1 {
+    font-size: 2.5rem;
+    line-height: 3rem;
+  }
 }

@@ -20,17 +20,17 @@ export default function Home() {
         <img src='/fluent-feeds/screenshots/main.png' />
       </section>
 
-      <div className={`${styles.features} ${commonStyles.section}`}>
-        <section className={styles.featureModular}>
+      <section className={`${styles.features} ${commonStyles.section}`}>
+        <div className={styles.featureModular}>
           <img src='/fluent-feeds/screenshots/modular.png' />
           <h2>Modular</h2>
           <p>
             Fluent Feeds is designed around generic &ldquo;feed providers&rdquo;. This makes it easy to implement new
             feed sources that integrate into the app without modifying the structure of the app itself.
           </p>
-        </section>
+        </div>
 
-        <section className={styles.featureNative}>
+        <div className={styles.featureNative}>
           <img src='/fluent-feeds/screenshots/native.png' />
           <h2>Native</h2>
           <p>
@@ -38,16 +38,16 @@ export default function Home() {
             of <a href='https://microsoft.github.io/microsoft-ui-xaml/'>WinUI 3</a> to deliver a fast and modern UI
             that fits into the rest of your system.
           </p>
-        </section>
+        </div>
 
-        <section className={styles.featureOpenSource}>
+        <div className={styles.featureOpenSource}>
           <h2>Open Source</h2>
           <p>
             The source code is released on GitHub under the MIT license. Anyone can submit pull requests or issues with
             bug reports or feature requests.
           </p>
-        </section>
-      </div>
+        </div>
+      </section>
     </Layout>
   )
 }
