@@ -1,6 +1,6 @@
 import Layout from '../components/layout';
-import Section from '../components/section';
 import Head from 'next/head';
+import commonStyles from '../styles/common.module.css';
 
 export default function PrivacyPolicy() {
   return (
@@ -9,9 +9,9 @@ export default function PrivacyPolicy() {
         <title>Privacy Policy | Fluent Feeds</title>
       </Head>
 
-      <Section>
+      <section className={commonStyles.section}>
         <h1>Privacy Policy</h1>
-      </Section>
+      </section>
     </Layout>
   )
 }

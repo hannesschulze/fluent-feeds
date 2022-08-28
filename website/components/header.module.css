@@ -83,13 +83,13 @@
   content: '';
   position: absolute;
   left: 50%;
-  bottom: -9px;
+  bottom: -7px;
   width: 0;
   height: 3px;
   transform: translate(-50%, 0);
   border-radius: 1.5px;
   opacity: 0;
-  background: var(--accent-bg-color);
+  background: var(--primary-accent-bg-color);
   transition: width 0.1s;
 }
 

@@ -1,6 +1,6 @@
 import Layout from '../../components/layout';
-import Section from '../../components/section';
 import Head from 'next/head';
+import commonStyles from '../../styles/common.module.css';
 
 export default function Blog() {
   return (
@@ -9,9 +9,9 @@ export default function Blog() {
         <title>Blog | Fluent Feeds</title>
       </Head>
 
-      <Section>
+      <section className={commonStyles.section}>
         <h1>Blog</h1>
-      </Section>
+      </section>
     </Layout>
   )
 }

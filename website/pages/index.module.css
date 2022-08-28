@@ -1,0 +1,57 @@
+.hero {
+  text-align: center;
+}
+
+.hero img {
+  width: 42rem;
+  max-width: 100%;
+  display: block;
+  margin: 0 auto;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+}
+
+.hero .buttons {
+  margin: 3rem 0;
+}
+
+.features {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    'modular native'
+    'opensource opensource';
+    text-align: center;
+  gap: 3rem;
+}
+
+.features img {
+  width: 21rem;
+  max-width: 100%;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.15);
+  display: block;
+  margin: 0 auto;
+}
+
+.featureModular {
+  grid-area: modular;
+}
+
+.featureNative {
+  grid-area: native;
+}
+
+.featureOpenSource {
+  grid-area: opensource;
+}
+
+@media (max-width: 600px) {
+  .features {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+      'modular'
+      'native'
+      'opensource';
+  }
+}

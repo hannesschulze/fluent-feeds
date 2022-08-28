@@ -1,13 +1,12 @@
 import Link from 'next/link';
-import Section from './section';
 import commonStyles from '../styles/common.module.css';
 import styles from './footer.module.css';
 
 export default function Footer() {
   return (
-    <footer className={styles.footer}>
-      <Section>
-        <div className={commonStyles.container}>
+    <footer>
+      <div className={commonStyles.section}>
+        <div className={`${commonStyles.container} ${styles.footer}`}>
           <span className={styles.copyright}>
             &copy; 2022, the Fluent Feeds developers
           </span>
@@ -22,7 +21,7 @@ export default function Footer() {
             </ul>
           </nav>
         </div>
-      </Section>
+      </div>
     </footer>
   );
 }

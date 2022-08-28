@@ -23,7 +23,7 @@ export default function Header() {
   return (
     <>
       <Head>
-        <link rel='icon' href='/favicon.ico' />
+        <link rel='icon' href='/fluent-feeds/favicon.ico' />
       </Head>
 
       <header className={`${styles.header} ${isScrolled ? styles.headerScrolled : ''} ${isToggled ? styles.headerToggled : ''}`}>
