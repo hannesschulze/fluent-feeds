@@ -17,12 +17,12 @@ export default function Home() {
         <div className={styles.buttons}>
           <Button href='https://github.com/hannesschulze/fluent-feeds/releases'>Download</Button>
         </div>
-        <img src='/fluent-feeds/screenshots/main.png' />
+        <img src='/fluent-feeds/screenshots/main.png' alt='Screenshot of the app' />
       </section>
 
       <section className={`${styles.features} ${commonStyles.section}`}>
         <div className={styles.featureModular}>
-          <img src='/fluent-feeds/screenshots/modular.png' />
+          <img src='/fluent-feeds/screenshots/modular.png' alt='Screenshot of a Hacker News item' />
           <h2>Modular</h2>
           <p>
             Fluent Feeds is designed around generic &ldquo;feed providers&rdquo;. This makes it easy to implement new
@@ -31,7 +31,7 @@ export default function Home() {
         </div>
 
         <div className={styles.featureNative}>
-          <img src='/fluent-feeds/screenshots/native.png' />
+          <img src='/fluent-feeds/screenshots/native.png' alt='Screenshot of the app settings' />
           <h2>Native</h2>
           <p>
             Fluent Feeds is a native Windows application that leverages the power

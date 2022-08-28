@@ -19,7 +19,7 @@ export default function Blog({ posts }) {
       <section className={commonStyles.section}>
         <ul>
           {posts.map(post => (
-            <li>
+            <li key={post.slug}>
               <Link href={`/blog/posts/${post.slug}`}>
                 <a>
                   <h2>{post.title}</h2>
