@@ -8,7 +8,7 @@ export default function Date({ dateString }) {
   useEffect(() => {
     setMounted(true);
     return () => setMounted(false);
-  });
+  }, []);
 
   return (
     <time dateTime={dateString}>{formatted}</time>
