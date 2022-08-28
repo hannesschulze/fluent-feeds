@@ -1,4 +1,4 @@
-# Based on: https://github.com/andrewleader/WindowsAppSDKGallery/blob/main/.github/workflows/dotnet-desktop.yml
+# Based on: https://docs.microsoft.com/en-us/windows/apps/package-and-deploy/ci-for-winui3?pivots=winui3-packaged-csharp
 
 name: Release
 on: push
@@ -7,7 +7,7 @@ jobs:
     runs-on: windows-latest
     env:
       Solution_Name: FluentFeeds
-      Project_Directory: FluentFeeds.App.WinUI
+      Project_Name: FluentFeeds.App.WinUI
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-dotnet@v2
@@ -17,15 +17,14 @@ jobs:
       - name: Decode the pfx
         run: |
           $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.BASE64_ENCODED_PFX }}")
-          $certificate_path = Join-Path -Path $env:Project_Directory -ChildPath FluentFeeds.App.WinUI_TemporaryKey.pfx
+          $certificate_path = Join-Path -Path $env:Project_Name -ChildPath FluentFeeds.App.WinUI_TemporaryKey.pfx
           [IO.File]::WriteAllBytes("$certificate_path", $pfx_cert_byte)
       - name: Restore the application
-        run: msbuild $env:Project_Directory /t:Restore /p:Configuration=Release
+        run: msbuild $env:Project_Name /t:Restore /p:Configuration=Release
       - name: Create the app package
-        run: msbuild $env:Project_Directory /p:AppxBundlePlatforms="$env:Appx_Bundle_Platforms" /p:Configuration=Release /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:PackageCertificateKeyFile=FluentFeeds.App.WinUI_TemporaryKey.pfx /p:AppxPackageDir="$env:Appx_Package_Dir" /p:GenerateAppxPackageOnBuild=true
+        run: msbuild $env:Project_Name /p:Configuration=Release /p:Platform=x64 /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:PackageCertificateKeyFile=FluentFeeds.App.WinUI_TemporaryKey.pfx /p:AppxPackageDir="$env:Appx_Package_Dir" /p:GenerateAppxPackageOnBuild=true
         env:
           Appx_Bundle: Never
-          Appx_Bundle_Platforms: x64
           Appx_Package_Build_Mode: SideloadOnly
           Appx_Package_Dir: Packages\
       - name: Upload build artifacts
