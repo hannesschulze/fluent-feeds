@@ -1,7 +1,10 @@
 # Based on: https://docs.microsoft.com/en-us/windows/apps/package-and-deploy/ci-for-winui3?pivots=winui3-packaged-csharp
 
 name: Release
-on: push
+on:
+  push:
+    tags:
+	  - 'v*'
 jobs:
   build:
     runs-on: windows-latest
@@ -27,8 +30,14 @@ jobs:
           Appx_Bundle: Never
           Appx_Package_Build_Mode: SideloadOnly
           Appx_Package_Dir: Packages\
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
         with:
-          name: MSIX Package
-          path: FluentFeeds.App.WinUI/Packages/**/FluentFeeds.App.WinUI*.msix
+          draft: true
+          prerelease: false
+          name: Release ${{ github.ref }}
+          tag_name: ${{ github.ref }}
+          body: 'Fluent Feeds is not yet available on the Microsoft Store. You can either compile it from source or install the package below. Note that you will need to trust the package certificate before you can install it. For instructions, see: https://docs.microsoft.com/en-us/dotnet/maui/windows/deployment/overview#installing-the-app'
+          files: |
+            FluentFeeds.App.WinUI/Packages/**/FluentFeeds.App.WinUI*.msix
+          fail_on_unmatched_files: true
