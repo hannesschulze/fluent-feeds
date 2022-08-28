@@ -44,7 +44,6 @@ Fluent Feeds depends on the following projects:
  * **[xUnit](https://xunit.net/)** which is used as the test framework for all unit tests.
  * **[Fluent System Icons](https://github.com/microsoft/fluentui-system-icons)** which is the icon set used by the app.
  * **[Next.js](https://nextjs.org)** which is used for the project website.
- * **[jpmonette/feed](https://github.com/jpmonette/feed)** which is used to generate the feed for the project website.
 
 ## License
 

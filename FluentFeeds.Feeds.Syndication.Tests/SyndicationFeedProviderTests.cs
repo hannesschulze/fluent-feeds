@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentFeeds.Common;
+using FluentFeeds.Feeds.Base.Feeds;
 using FluentFeeds.Feeds.Syndication.Download;
 using FluentFeeds.Feeds.Syndication.Tests.Mock;
 using Xunit;
@@ -26,7 +27,17 @@ public class SyndicationFeedProviderTests
 		Assert.Equal("RSS/Atom feeds", root.Name);
 		Assert.True(root.IsUserCustomizable);
 		Assert.False(root.IsExcludedFromGroup);
-		Assert.Empty(root.Children);
+		Assert.Collection(
+			root.Children,
+			child =>
+			{
+				var descriptor = Assert.IsType<CachedFeedDescriptor>(child);
+				Assert.Equal("Fluent Feeds Blog", descriptor.Name);
+				Assert.Equal(Symbol.Web, descriptor.Symbol);
+				var feed = Assert.IsType<SyndicationFeedContentLoader>(descriptor.ContentLoader);
+				var downloader = Assert.IsType<FeedDownloader>(feed.Downloader);
+				Assert.Equal(feed.Url, downloader.Url);
+			});
 	}
 
 	[Fact]
