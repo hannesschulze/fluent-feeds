@@ -4,7 +4,7 @@ import styles from './header.module.css'
 import commonStyles from './../styles/common.module.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
-import { faBars } from '@fortawesome/free-solid-svg-icons';
+import { faBars, faRss } from '@fortawesome/free-solid-svg-icons';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 
@@ -40,6 +40,11 @@ export default function Header() {
               </li>
             </ul>
             <ul className={styles.navExternal}>
+              <li>
+                <a href='/fluent-feeds/blog/feeds/atom.xml'>
+                  <FontAwesomeIcon icon={faRss} />
+                </a>
+              </li>
               <li>
                 <a href='https://github.com/hannesschulze/fluent-feeds'>
                   <FontAwesomeIcon icon={faGithub} />
