@@ -5,30 +5,30 @@ on:
   workflow_dispatch:
 jobs:
   build:
-	runs-on: windows-latest
-	env:
-	  Solution_Name: FluentFeeds
-	  Project_Directory: FluentFeeds.App.WinUI
-	steps:
-	  - uses: actions/checkout@v3
-	  - uses: actions/setup-dotnet@v2
-	    with:
-		  dotnet-version: 6.0.x
-	  - uses: microsoft/setup-msbuild@v1.1
-	  - name: Decode the pfx
-	    run: |
-		  $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.BASE64_ENCODED_PFX }}")
-		  $certificate_path = Join-Path -Path $env:Project_Directory -ChildPath FluentFeeds.App.WinUI_TemporaryKey.pfx
-		  [IO.File]::WriteAllBytes("$certificate_path", $pfx_cert_byte)
-	  - name: Restore the application
-	    run: msbuild $env:Solution_Name /p:AppxBundlePlatforms="$env:Appx_Bundle_Platforms" /p:Configuration=$env:Configuration /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:PackageCertificateKeyFile=FluentFeeds.App.WinUI_TemporaryKey.pfx /p:AppxPackageDir="$env:Appx_Package_Dir" /p:GenerateAppxPackageOnBuild=true
+    runs-on: windows-latest
+    env:
+      Solution_Name: FluentFeeds
+      Project_Directory: FluentFeeds.App.WinUI
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: 6.0.x
+      - uses: microsoft/setup-msbuild@v1.1
+      - name: Decode the pfx
+        run: |
+          $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.BASE64_ENCODED_PFX }}")
+          $certificate_path = Join-Path -Path $env:Project_Directory -ChildPath FluentFeeds.App.WinUI_TemporaryKey.pfx
+          [IO.File]::WriteAllBytes("$certificate_path", $pfx_cert_byte)
+      - name: Restore the application
+        run: msbuild $env:Solution_Name /p:AppxBundlePlatforms="$env:Appx_Bundle_Platforms" /p:Configuration=$env:Configuration /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:PackageCertificateKeyFile=FluentFeeds.App.WinUI_TemporaryKey.pfx /p:AppxPackageDir="$env:Appx_Package_Dir" /p:GenerateAppxPackageOnBuild=true
         env:
           Appx_Bundle: Never
           Appx_Bundle_Platforms: x64
           Appx_Package_Build_Mode: SideloadOnly
           Appx_Package_Dir: Packages\
           Configuration: ${{ matrix.configuration }}
-	  - name: Upload build artifacts
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
           name: MSIX Package
