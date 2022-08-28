@@ -1,6 +1,10 @@
 /* Footer */
 
 .footer {
+  margin-bottom: 4rem;
+}
+
+.footerContainer {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -42,7 +46,7 @@
 /* Responsive design */
 
 @media (max-width: 600px) {
-  .footer {
+  .footerContainer {
     flex-direction: column;
     align-items: stretch;
     text-align: center;
