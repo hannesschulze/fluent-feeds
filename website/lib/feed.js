@@ -1,25 +1,19 @@
 import fs from 'fs';
 import path from 'path';
 import convert from 'xml-js';
-import { Feed } from 'feed';
 
 // Based on: https://sreetamdas.com/blog/rss-for-nextjs
 
 const feedsDirectory = path.join(process.cwd(), 'public/blog/feeds');
-const feedTitle = 'Fluent Feeds Blog';
-const feedDescription = 'A blog about the Fluent Feeds app.';
-const feedCopyright = '© 2022, the Fluent Feeds developers'
-const baseUrl = 'https://hannesschulze.github.io/fluent-feeds';
-const blogUrl = `${baseUrl}/blog`;
-const feedsUrl = `${blogUrl}/feeds`;
-const feedNames = {
-  rss2: 'main.xml',
-  json: 'main.json',
-  atom: 'atom.xml'
-};
+const blogTitle = 'Fluent Feeds Blog';
+const blogDescription = 'A blog about the Fluent Feeds app.';
+const blogCopyright = '© 2022, the Fluent Feeds developers'
+const blogUrl = 'https://hannesschulze.github.io/fluent-feeds/blog';
+const blogFeedName = 'atom.xml';
+const blogFeedUrl = `${blogUrl}/feeds/${blogFeedName}`;
 
-function generateAtomFeed(posts) {
-  return convert.js2xml({
+export async function generateFeeds(posts) {
+  const atom = convert.js2xml({
     _declaration: {
       _attributes: {
         version: '1.0',
@@ -31,10 +25,10 @@ function generateAtomFeed(posts) {
         xmlns: 'http://www.w3.org/2005/Atom'
       },
       title: {
-        _text: feedTitle
+        _text: blogTitle
       },
       subtitle: {
-        _text: feedDescription
+        _text: blogDescription
       },
       link: [
         {
@@ -48,7 +42,7 @@ function generateAtomFeed(posts) {
           _attributes: {
             rel: 'self',
             type: 'application/atom+xml',
-            href: `${feedsUrl}/${feedNames.atom}`
+            href: blogFeedUrl
           }
         }
       ],
@@ -59,7 +53,7 @@ function generateAtomFeed(posts) {
         _text: new Date().toISOString()
       },
       rights: {
-        _text: feedCopyright
+        _text: blogCopyright
       },
       entry: posts.map(post => {
         const postUrl = `${blogUrl}/posts/${post.slug}`;
@@ -111,41 +105,7 @@ function generateAtomFeed(posts) {
     ignoreComment: true,
     spaces: 2
   });
-}
-
-export async function generateFeeds(posts) {
-  const feed = new Feed({
-    title: feedTitle,
-    description: feedDescription,
-    id: blogUrl,
-    link: blogUrl,
-    language: 'en-US',
-    favicon: `${baseUrl}/favicon.ico`,
-    updated: new Date(),
-    copyright: feedCopyright,
-    feedLinks: {
-      rss2: `${feedsUrl}/${feedNames.rss2}`,
-      json: `${feedsUrl}/${feedNames.json}`,
-      atom: `${feedsUrl}/${feedNames.atom}`
-    },
-    author: { name: 'Fluent Feeds' }
-  });
-
-  posts.forEach(post => {
-    const url = `${blogUrl}/posts/${post.slug}`;
-    feed.addItem({
-      title: post.title,
-      id: url,
-      link: url,
-      description: post.summary,
-      content: post.content,
-      author: [{ name: post.author }],
-      date: new Date(post.timestamp)
-    });
-  });
 
   await fs.promises.mkdir(feedsDirectory, { recursive: true });
-  await fs.promises.writeFile(path.join(feedsDirectory, feedNames.rss2), feed.rss2());
-  await fs.promises.writeFile(path.join(feedsDirectory, feedNames.json), feed.json1());
-  await fs.promises.writeFile(path.join(feedsDirectory, feedNames.atom), generateAtomFeed(posts));
+  await fs.promises.writeFile(path.join(feedsDirectory, blogFeedName), atom);
 }

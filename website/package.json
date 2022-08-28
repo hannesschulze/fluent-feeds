@@ -13,7 +13,6 @@
     "@fortawesome/free-brands-svg-icons": "^6.1.2",
     "@fortawesome/free-solid-svg-icons": "^6.1.2",
     "@fortawesome/react-fontawesome": "^0.2.0",
-    "feed": "^4.2.2",
     "gray-matter": "^4.0.3",
     "next": "12.2.5",
     "react": "18.2.0",
