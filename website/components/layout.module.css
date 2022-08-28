@@ -1,0 +1,4 @@
+.main {
+  /* Add offset to account for header */
+  margin-top: 4rem;
+}

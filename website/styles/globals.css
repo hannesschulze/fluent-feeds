@@ -1,26 +1,36 @@
-html,
-body {
-  padding: 0;
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
 * {
   box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
-  body {
-    color: white;
-    background: black;
-  }
+:root {
+  --primary-bg-color: rgb(32, 32, 32);
+  --primary-fg-color: rgb(240, 240, 240);
+  --secondary-bg-color: rgb(16, 16, 16);
+  --secondary-fg-color: rgba(240, 240, 240, 0.5);
+  --accent-bg-color: rgb(163, 178, 236);
+  --accent-fg-color: rgb(32, 32, 32);
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  background: var(--primary-bg-color);
+  color: var(--primary-fg-color);
+}
+
+a {
+  color: var(--accent-bg-color);
+  text-decoration: none;
+}
+
+a:hover,
+a:focus,
+a:active {
+  text-decoration: underline;
 }
